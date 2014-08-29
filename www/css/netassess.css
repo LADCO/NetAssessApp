@@ -1,0 +1,152 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	
+	margin: 0px;
+	padding-top: 50px;
+	padding-bottom: 50px;
+	font-family: Arial, sans-serif;
+
+}
+
+.na-header {
+	position: absolute;
+	background-color: white;
+	color: #6F6F6F;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 50px;
+	line-height: 50px;
+	box-shadow: 0 2px 2px -2px rgba(0,0,0,0.4);
+}
+
+.na-header ul {
+	list-style: none;
+	vertical-align: middle;
+	margin: 0px;
+	padding: 0px;
+
+}
+
+.na-header ul li {
+	float: left;
+}
+
+li.na-trigger{
+	text-align: center;
+	box-shadow: 1px 0 3px -2px rgba(0,0,0,0.4);
+	font-size: 25px;
+}
+
+li.na-trigger a{
+	display: block;
+	cursor: pointer;
+	width: 50px;
+}
+
+li.na-trigger a:hover{
+	color: #444;
+}
+
+.na-header li:not(:first-child) {
+	padding: 0 20px;
+	}
+
+span.na-main-title {
+	font-weight: bold;
+	font-size: 20px;
+}
+
+span.na-sub-title {
+	font-weight: normal;
+	font-size: 14px;
+	padding-left: 10px;
+	color: #AAA;
+}
+
+.na-sidebar {
+	position: absolute;
+	padding-top: 49px;
+	left: 0px;
+	top: 0px;
+	width: 300px;
+	background-color: white;
+	box-shadow: 2px 2px 2px -2px rgba(0,0,0,0.4);
+	overflow: hidden;
+}
+
+.na-open {
+	height: 100%;
+	transition: height 500ms;
+	-webkit-transition: height 500ms;
+	-moz-transition: height 500ms;
+	-o-transition: height 500ms;
+}
+
+.na-closed {
+	height: 0px;
+	transition: height 300ms;
+	-webkit-transition: height 300ms;
+	-moz-transition: height 300ms;
+	-o-transition: height 300ms;
+}
+
+.na-sidebar-group-heading {
+	width: 100%;
+	height: 40px;
+	line-height: 40px;
+	background-color: #F3F3F3;
+	background-image: radial-gradient(0, rgba(0,0,0,0.15), rgba(0,0,0,0));
+	border-top: 1px solid #CCC;
+	border-bottom: 1px solid #CCC;
+}
+
+.na-sidebar-group-heading a {
+	display: block;
+	font-size: 17px;
+	color: #6F6F6F;
+	vertical-align: middle;
+	height: 100%;
+	width: 100%;
+	padding-left: 5px;
+	cursor: pointer;
+}
+
+.na-sidebar-group-content {
+	display: block;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.na-sidebar-group-content > * {
+	padding-left: 5px;
+}
+
+.na-sidebar-group-open {
+	max-height: 1080px;
+	transition: max-height 500ms;
+	-webkit-transition: max-height 500ms;
+	-moz-transition: max-height 500ms;
+	-o-transition: max-height 500ms;
+}
+
+.na-sidebar-group-closed {
+	max-height: 0px;
+	transition: max-height 500ms;
+	-webkit-transition: max-height 500ms;
+	-moz-transition: max-height 500ms;
+	-o-transition: max-height 500ms;
+}
+
+#map {
+
+	position: absolute;
+	top: 50px;
+	left: 0px;
+	width: 100%;
+	
+}
+

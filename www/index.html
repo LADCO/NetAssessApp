@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+		<title>NetAssess</title>
+		<meta name="description" content="A web application for assessing the US continuous air pollutant monitoring network" />
+		<meta name="keywords" content="" />
+		<meta name="author" content="Eric Bailey et al" />
+		<link rel="stylesheet" type="text/css" href="css/netassess.css" />
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+	</head>
+	
+	<body>
+
+		<div id = "map"></div>
+		
+		<div id = "sidebar" class = "na-sidebar na-closed">
+			<div class = "na-inner-sidebar">
+				<div class = "na-sidebar-group">
+					<div class = "na-sidebar-group-heading">
+						<a><i class = "fa fa-fw fa-rocket"></i> Area Served</a>
+					</div>
+					<div class = "na-sidebar-group-content na-sidebar-group-open">
+						<p>This is where content will go.</p>
+						<select>
+							<option>POP2010</option>
+							<option>POP2012</option>
+						</select>
+					</div>
+				</div>
+				<div class = "na-sidebar-group">
+					<div class = "na-sidebar-group-heading">
+						<a><i class = "fa fa-fw fa-paw"></i> Correlation Matrix</a>
+					</div>
+					<div class = "na-sidebar-group-content na-sidebar-group-closed">
+						<p>This is where content will go.</p>
+						<select>
+							<option>POP2010</option>
+							<option>POP2012</option>
+						</select>
+					</div>
+				</div>
+				<div class = "na-sidebar-group">
+					<div class = "na-sidebar-group-heading">
+						<a><i class = "fa fa-fw fa-birthday-cake"></i> New Sites</a>
+					</div>
+					<div class = "na-sidebar-group-content na-sidebar-group-closed">
+						<p>This is where content will go.</p>
+						<select>
+							<option>POP2010</option>
+							<option>POP2012</option>
+						</select>
+					</div>
+				</div>
+				<div class = "na-sidebar-group">
+					<div class = "na-sidebar-group-heading">
+						<a><i class = "fa fa-fw fa-futbol-o"></i> Remove Bias</a>
+					</div>
+					<div class = "na-sidebar-group-content na-sidebar-group-closed">
+						<p>This is where content will go.</p>
+						<select>
+							<option>POP2010</option>
+							<option>POP2012</option>
+						</select>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	
+		<div id = "header" class = "na-header">
+			<ul>
+				<li class = "na-trigger">
+					<a><i class = "fa fa-fw fa-bars"></i></a>
+				</li>
+				<li class = "na-title">
+					<span class = "na-main-title">NetAssess</span>
+					<span class = "na-sub-title">Ambient Air Monitoring Network Assessment Tool</span>
+				</li>
+			</ul>
+		</div>
+
+		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+		<script>
+
+					function getColor(d) {
+			
+				return d > 750 ? "#800026":
+					   d > 90 ? "#E31A1C":
+					   d > 20 ? "#FD8D3C":
+									"#FED976";
+			
+			}
+		
+			function style(feature) {
+				return {
+					fillColor: getColor(feature.properties.POP12_SQMI), 
+					weight: 1, 
+					color: "#AAA",
+					opacity: 1
+				}
+			}
+			function highlightFeature(e) {
+				var layer = e.target;
+
+				layer.setStyle({
+					weight: 5,
+					color: '#888',
+					dashArray: '',
+				});
+
+				if (!L.Browser.ie && !L.Browser.opera) {
+					layer.bringToFront();
+				}
+			}
+			
+			function resetHighlight(e) {
+				voronoi.resetStyle(e.target);
+			}
+			
+			function onEachFeature(feature, layer) {
+				layer.on({
+					mouseover: highlightFeature,
+					mouseout: resetHighlight
+				});
+			}
+			$(".na-trigger a").on("click", function(e) {
+				$("#sidebar").toggleClass("na-open").toggleClass("na-closed");
+			})
+		
+			$(".na-sidebar-group-heading a").on("click", function(e) {
+				$(this).parent().siblings(".na-sidebar-group-content").toggleClass("na-sidebar-group-open").toggleClass("na-sidebar-group-closed");
+			})
+		
+			// Define bounds and center of continental us
+			var us = {bounds: L.latLngBounds([20, -150], [55, -50]),
+					  center: L.latLng([39.8333, -98.5833])
+					 }
+
+			function mapResize(el) {
+				document.getElementById(el).style.height = (window.innerHeight - 50) + "px"
+				document.getElementById(el).style.width = window.innerWidth + "px"
+			};
+
+			$(window).resize(function () { 
+				mapResize("map")
+			});
+
+			mapResize("map");
+
+			var map = L.map('map', {center: us.center, zoom: 5, maxBounds: us.bounds, 
+									maxZoom: 12, minZoom: 3, zoomControl: false})
+
+			L.tileLayer('https://api.tiles.mapbox.com/v3/ebailey78.jb4c37ik/{z}/{x}/{y}.png?access_key=pk.eyJ1IjoiZWJhaWxleTc4IiwiYSI6IlRCUjVXa1EifQ.llYulUSSs0-rRSeqHPyPbQ', {
+				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+				id: 'examples.map-i86knfo3'
+			}).addTo(map);
+						var voronoi;
+			$.ajax({
+				dataType: "json",
+				url: "data/areatest.geojson",
+				success: function(data) {
+					voronoi = L.geoJson(data, {
+						style: style,
+						onEachFeature: onEachFeature
+					}).addTo(map);
+				}
+				}).error(function() {});
+
+		</script>
+	</body>
+</html>
