@@ -11,13 +11,14 @@
 		<link rel="stylesheet" type="text/css" href="css/netassess.css" />
 		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/toggle.css" rel="stylesheet" type = "text/css" />
 
 	</head>
 	
 	<body>
 
 		<div id = "map"></div>
-		
+	
 		<div id = "sidebar" class = "na-sidebar na-closed">
 			<div class = "na-inner-sidebar">
 				<div class = "na-sidebar-group">
@@ -113,29 +114,43 @@
 
 			</div>
 		</div>
-	
-		<div id = "header" class = "na-header">
-			<ul>
-				<li class = "na-trigger">
-					<a><i class = "fa fa-fw fa-bars"></i></a>
-				</li>
-				<li class = "na-title">
-					<span class = "na-main-title">NetAssess</span>
-					<span class = "na-sub-title">Ambient Air Monitoring Network Assessment Tool</span>
-				</li>
-        <li class = "na-search">
-          <div class = "na-search">
-            <input type = "text" placeholder = "Search Features" id = "search" class = "na-search"></input>
-            <i class = "fa fa-fw fa-search na-search"></i>
-          </div>
-        </li>
-			</ul>
-		</div>
-
+  
+    <header>
+    
+      <div class = "na-trigger">
+        <a><i class = "fa fa-fw fa-bars"></i></a>
+      </div>
+      <span class = "na-main-title">NetAssess</span>
+			<span class = "na-sub-title">Ambient Air Monitoring Network Assessment Tool</span>
+      <span class = "right-items">
+        <span class = "na-button-group">
+          <span class = "na-button na-active">2011</span><span class = "na-button na-active">2012</span><span class = "na-button na-active">2013</span>
+        </span>
+        <span>
+          <div class="onoffswitch">
+            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+            <label class="onoffswitch-label" for="myonoffswitch">
+              <span class="onoffswitch-inner"></span>
+              <span class="onoffswitch-switch"></span>
+            </label>
+          </div> 
+        </span>
+        <span class = "na-button"><i class = "fa fa-fw fa-search-minus"></i></span>
+        <span>
+          <span class = "na-button"><i class = "fa fa-search-plus fa-fw"></i></span><input type = "text" class = "na-header-element na-search" value = "" placeholder = "Zoom to Feature"></input>
+        </span>
+      </span>
+      
+    </header>
+  
 		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
 		<script>
+
+      $(".na-button-group .na-button").on("click", function(e) {
+        $(this).toggleClass("na-active");
+      })
 
       var myIcon = L.divIcon({className: 'map-icon'});
 
@@ -145,7 +160,6 @@
 					   d > 90 ? "#E31A1C":
 					   d > 20 ? "#FD8D3C":
 									"#FED976";
-			
 			}
 		
 			function style(feature) {
@@ -212,7 +226,8 @@
 				id: 'examples.map-i86knfo3'
 			}).addTo(map);
 						var voronoi;
-			$.ajax({
+/**/
+      $.ajax({
 				dataType: "json",
 				url: "data/areatest.geojson",
 				success: function(data) {
@@ -222,12 +237,16 @@
 					}).addTo(map);
 				}
 				}).error(function() {});
+
       $.ajax({
         dataType: "json",
         url: "data/monitors.geojson",
         success: function(data) {
           monitors = L.geoJson(data, {
-            pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: myIcon}).addTo(map);}
+            pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: myIcon}).addTo(map);},
+            onEachFeature: function(feature, layer) {
+              layer.bindPopup(feature.properties["o3.MONITOR_ID"]);
+            }
           }).addTo(map);          
         }
       })
