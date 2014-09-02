@@ -1,3 +1,15 @@
+.map-icon {
+  
+  width: 5px;
+  height: 5px;
+  background-color: rgb(192, 0, 0);
+  border: solid 1px black;
+  border-radius: 10px;
+  box-shadow: 3px 3px 1px 1px rgba(128, 128, 128, 0.5);
+  opacity: 0.67;
+  
+}
+
 * {
 	box-sizing: border-box;
 }
@@ -139,6 +151,25 @@ span.na-sub-title {
 	-webkit-transition: max-height 500ms;
 	-moz-transition: max-height 500ms;
 	-o-transition: max-height 500ms;
+}
+
+div.na-search {
+  height: 30px;
+}
+
+input.na-search {
+  margin-right: 0px;
+}
+
+li.na-search {
+  float: right !important;
+  height: 100%;
+}
+
+i.na-search {
+  border: solid 1px #333;
+  padding: 4px;
+  margin-left: 0px;
 }
 
 #map {

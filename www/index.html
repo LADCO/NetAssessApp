@@ -27,8 +27,50 @@
 					<div class = "na-sidebar-group-content na-sidebar-group-open">
 						<p>This is where content will go.</p>
 						<select>
-							<option>POP2010</option>
-							<option>POP2012</option>
+              <option value='POP2010'>2010 Population</option>
+              <option value='POP10_SQMI'>2010 Population Density</option>
+              <option value='POP2012'>2012 Population</option>
+              <option value='POP12_SQMI'>2012 Population Density</option>
+              <option value='WHITE'>White Population</option>
+              <option value='BLACK'>Black Population</option>
+              <option value='AMERI_ES'>American Eskimo Population</option>
+              <option value='ASIAN'>Asian Population</option>
+              <option value='HAWN_PI'>Hawaiian/Pacific Islander Population</option>
+              <option value='HISPANIC'>Hispanic Population</option>
+              <option value='OTHER'>"Other" Population</option>
+              <option value='MULT_RACE'>Multi-Race Population</option>
+              <option value='MALES'>Male Population</option>
+              <option value='FEMALES'>Female Population</option>
+              <option value='AGE_UNDER5'>Population Under Age 5</option>
+              <option value='AGE_5_9'>Population Age 5 to 9</option>
+              <option value='AGE_10_14'>Population Age 10 to 14</option>
+              <option value='AGE_15_19'>Population Age 15 to 19</option>
+              <option value='AGE_20_24'>Population Age 20 to 24</option>
+              <option value='AGE_25_34'>Population Age 25 to 34</option>
+              <option value='AGE_35_44'>Population Age 35 to 44</option>
+              <option value='AGE_45_54'>Population Age 45 to 54</option>
+              <option value='AGE_55_64'>Population Age 55 to 64</option>
+              <option value='AGE_65_74'>Population Age 65 to 74</option>
+              <option value='AGE_75_84'>Population Age 75 to 84</option>
+              <option value='AGE_85_UP'>Population Age 85 and Above</option>
+              <option value='MED_AGE'>Median Age</option>
+              <option value='MED_AGE_M'>Median Age - Males</option>
+              <option value='MED_AGE_F'>Median Age - Females</option>
+              <option value='HOUSEHOLDS'>Number of Households</option>
+              <option value='AVE_HH_SZ'>Average Household Size</option>
+              <option value='HSEHLD_1_M'>Single Male Households</option>
+              <option value='HSEHLD_1_F'>Single Female Households</option>
+              <option value='MARHH_CHD'>Married Households with Children</option>
+              <option value='MARHH_NO_C'>Married Households without Children</option>
+              <option value='MHH_CHILD'>Male Household with Children</option>
+              <option value='FHH_CHILD'>Female Household without Children</option>
+              <option value='FAMILIES'>Number of Families</option>
+              <option value='AVE_FAM_SZ'>Average Family Size</option>
+              <option value='HSE_UNITS'>Housing Units</option>
+              <option value='VACANT'>Vacant Housing</option>
+              <option value='OWNER_OCC'>Owner-Occupied Housing</option>
+              <option value='RENTER_OCC'>Renter-Occupied Housing</option>
+              <option value='SQMI'>Square Miles</option>
 						</select>
 					</div>
 				</div>
@@ -81,6 +123,12 @@
 					<span class = "na-main-title">NetAssess</span>
 					<span class = "na-sub-title">Ambient Air Monitoring Network Assessment Tool</span>
 				</li>
+        <li class = "na-search">
+          <div class = "na-search">
+            <input type = "text" placeholder = "Search Features" id = "search" class = "na-search"></input>
+            <i class = "fa fa-fw fa-search na-search"></i>
+          </div>
+        </li>
 			</ul>
 		</div>
 
@@ -89,7 +137,9 @@
 
 		<script>
 
-					function getColor(d) {
+      var myIcon = L.divIcon({className: 'map-icon'});
+
+			function getColor(d) {
 			
 				return d > 750 ? "#800026":
 					   d > 90 ? "#E31A1C":
@@ -172,6 +222,15 @@
 					}).addTo(map);
 				}
 				}).error(function() {});
+      $.ajax({
+        dataType: "json",
+        url: "data/monitors.geojson",
+        success: function(data) {
+          monitors = L.geoJson(data, {
+            pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: myIcon}).addTo(map);}
+          }).addTo(map);          
+        }
+      })
 
 		</script>
 	</body>
