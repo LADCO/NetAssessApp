@@ -12,7 +12,6 @@
 		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="css/toggle.css" rel="stylesheet" type = "text/css" />
-
 	</head>
 	
 	<body>
@@ -145,6 +144,7 @@
   
 		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
 
 		<script>
 
@@ -221,11 +221,10 @@
 			var map = L.map('map', {center: us.center, zoom: 5, maxBounds: us.bounds, 
 									maxZoom: 12, minZoom: 3, zoomControl: false})
 
-			L.tileLayer('https://api.tiles.mapbox.com/v3/ebailey78.jb4c37ik/{z}/{x}/{y}.png?access_key=pk.eyJ1IjoiZWJhaWxleTc4IiwiYSI6IlRCUjVXa1EifQ.llYulUSSs0-rRSeqHPyPbQ', {
-				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-				id: 'examples.map-i86knfo3'
-			}).addTo(map);
-						var voronoi;
+      L.esri.basemapLayer("Gray").addTo(map);
+      L.esri.basemapLayer("GrayLabels").addTo(map);
+      
+			var voronoi;
 /**/
       $.ajax({
 				dataType: "json",
