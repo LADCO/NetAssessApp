@@ -134,9 +134,9 @@
             </label>
           </div> 
         </span>
-        <span class = "na-button"><i class = "fa fa-fw fa-search-minus"></i></span>
+        <span class = "na-button" id = "na-zoom-out"><i class = "fa fa-fw fa-search-minus"></i></span>
         <span>
-          <span class = "na-button"><i class = "fa fa-search-plus fa-fw"></i></span><input type = "text" class = "na-header-element na-search" value = "" placeholder = "Zoom to Feature"></input>
+          <span class = "na-button" id = "na-zoom-in"><i class = "fa fa-search-plus fa-fw"></i></span><input type = "text" class = "na-header-element na-search" id = "na-search-input" value = "" placeholder = "Zoom to Feature"></input>
         </span>
       </span>
       
@@ -145,11 +145,28 @@
 		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
-
+    <script src="scripts/statebounds.js"></script>
 		<script>
 
       $(".na-button-group .na-button").on("click", function(e) {
         $(this).toggleClass("na-active");
+      })
+
+      $("#na-search-input").on("keypress", function(e) {
+        var key = e.which;
+        if(key == 13) {
+          var ss = this.value.toLowerCase();
+          if(ss != "") {
+            var ci = state_bounds.map(function(i) {return i.state}).indexOf(ss);
+            if(ci != -1) {
+              var bounds = state_bounds[ci];
+              
+              map.fitBounds([[bounds.south, bounds.west], [bounds.north, bounds.east]]);
+              map.setZoom(map.getZoom() + 1);
+            
+            }
+          }
+        }
       })
 
       var myIcon = L.divIcon({className: 'map-icon'});
@@ -197,7 +214,11 @@
 			$(".na-trigger a").on("click", function(e) {
 				$("#sidebar").toggleClass("na-open").toggleClass("na-closed");
 			})
-		
+
+      $("#na-zoom-out").on("click", function(e) {
+        map.fitBounds(us.bounds);
+      })
+
 			$(".na-sidebar-group-heading a").on("click", function(e) {
 				$(this).parent().siblings(".na-sidebar-group-content").toggleClass("na-sidebar-group-open").toggleClass("na-sidebar-group-closed");
 			})
