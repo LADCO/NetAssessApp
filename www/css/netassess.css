@@ -58,6 +58,8 @@ header {
   font-size: 12px;
   color: #2C3E50;
   border-right: solid 1px #2C3E50;
+  font-weight: bold;
+
 }
 
 .right-items .na-button-group .na-button:first-child {
@@ -65,8 +67,8 @@ header {
 }
 
 .right-items .na-button-group .na-button.na-active {
-  font-weight: bold;
-  background: #DDD;
+  background: rgba(255, 255, 255, 0.5);
+  font-weight: normal;
 }
 
 div.na-trigger{
