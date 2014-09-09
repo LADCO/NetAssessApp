@@ -11,7 +11,11 @@
 		<link rel="stylesheet" type="text/css" href="css/netassess.css" />
 		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/toggle.css" rel="stylesheet" type = "text/css" />
+    <link href="css/toggle.css" rel="stylesheet" type="text/css" />
+    <link href="css/leaflet-areaselect.css" rel="stylesheet" type="text/css" />
+    <link href="css/area_of_interest.css" rel="stylesheet" type="text/css" />
+    <link href="css/sidebar.css" rel="stylesheet" type="text/css" />
+    
 	</head>
 	
 	<body>
@@ -20,60 +24,66 @@
 	
 		<div id = "sidebar" class = "na-sidebar na-closed">
 			<div class = "na-inner-sidebar">
+      
 				<div class = "na-sidebar-group">
+        
 					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-rocket"></i> Area Served</a>
+						<a><i class = "fa fa-fw fa-map-marker"></i>Area of Interest</a>
 					</div>
+          
 					<div class = "na-sidebar-group-content na-sidebar-group-open">
-						<p>This is where content will go.</p>
-						<select>
-              <option value='POP2010'>2010 Population</option>
-              <option value='POP10_SQMI'>2010 Population Density</option>
-              <option value='POP2012'>2012 Population</option>
-              <option value='POP12_SQMI'>2012 Population Density</option>
-              <option value='WHITE'>White Population</option>
-              <option value='BLACK'>Black Population</option>
-              <option value='AMERI_ES'>American Eskimo Population</option>
-              <option value='ASIAN'>Asian Population</option>
-              <option value='HAWN_PI'>Hawaiian/Pacific Islander Population</option>
-              <option value='HISPANIC'>Hispanic Population</option>
-              <option value='OTHER'>"Other" Population</option>
-              <option value='MULT_RACE'>Multi-Race Population</option>
-              <option value='MALES'>Male Population</option>
-              <option value='FEMALES'>Female Population</option>
-              <option value='AGE_UNDER5'>Population Under Age 5</option>
-              <option value='AGE_5_9'>Population Age 5 to 9</option>
-              <option value='AGE_10_14'>Population Age 10 to 14</option>
-              <option value='AGE_15_19'>Population Age 15 to 19</option>
-              <option value='AGE_20_24'>Population Age 20 to 24</option>
-              <option value='AGE_25_34'>Population Age 25 to 34</option>
-              <option value='AGE_35_44'>Population Age 35 to 44</option>
-              <option value='AGE_45_54'>Population Age 45 to 54</option>
-              <option value='AGE_55_64'>Population Age 55 to 64</option>
-              <option value='AGE_65_74'>Population Age 65 to 74</option>
-              <option value='AGE_75_84'>Population Age 75 to 84</option>
-              <option value='AGE_85_UP'>Population Age 85 and Above</option>
-              <option value='MED_AGE'>Median Age</option>
-              <option value='MED_AGE_M'>Median Age - Males</option>
-              <option value='MED_AGE_F'>Median Age - Females</option>
-              <option value='HOUSEHOLDS'>Number of Households</option>
-              <option value='AVE_HH_SZ'>Average Household Size</option>
-              <option value='HSEHLD_1_M'>Single Male Households</option>
-              <option value='HSEHLD_1_F'>Single Female Households</option>
-              <option value='MARHH_CHD'>Married Households with Children</option>
-              <option value='MARHH_NO_C'>Married Households without Children</option>
-              <option value='MHH_CHILD'>Male Household with Children</option>
-              <option value='FHH_CHILD'>Female Household without Children</option>
-              <option value='FAMILIES'>Number of Families</option>
-              <option value='AVE_FAM_SZ'>Average Family Size</option>
-              <option value='HSE_UNITS'>Housing Units</option>
-              <option value='VACANT'>Vacant Housing</option>
-              <option value='OWNER_OCC'>Owner-Occupied Housing</option>
-              <option value='RENTER_OCC'>Renter-Occupied Housing</option>
-              <option value='SQMI'>Square Miles</option>
-						</select>
-					</div>
+            <p class = "explain">Begin by selecting the monitors you are interested in assessing:</p>
+            <div id = "loc-bb-div">
+              <p class = 'title'><strong>Option 1</strong> - Select a bounding box</p>
+              <div>
+                <div id = "loc-bb-inputs">
+                  <div class = "bb-div"><input id = "bb-north" type = "text"></div>
+                  <div class = "bb-div"><input id = "bb-west" type = "text"><span class = "bb-icon"></span><input id = "bb-east" type = "text"></div>
+                  <div class = "bb-div"><input id = "bb-south" type = "text"></div>
+                </div>
+                <div id = "loc-bb-mapselect">
+                  <button id = "bb-select" onclick = "selectArea()"><i class = "fa fa-2x fa-fw fa-crop"></i><br/>Select</button>
+                </div>              
+              </div>
+            </div>
+            
+            <div id = "loc-gs-div">
+              <p class = "title"><strong>Option 2</strong> - Select a geographic region</p>
+              <select>
+                <option></option>
+                <optgroup label = "EPA Regions">
+                  <option>Region 1</option>
+                  <option>Region 2</option>
+                  <option>Region 3</option>
+                  <option>Region 4</option>
+                  <option>Region 5</option>
+                  <option>Region 6</option>
+                  <option>Region 7</option>
+                  <option>Region 8</option>
+                  <option>Region 9</option>
+                  <option>Region 10</option>
+                </optgroup>
+                <optgroup label = "States">
+                  <option>Alabama</option>
+                  <option>Arkansas</option>
+                  <option>Colorado</option>
+                  <option>California</option>
+                  <option>Indiana</option>
+                  <option>Illinois</option>
+                  <option>Minnesota</option>
+                  <option>Michigan</option>
+                  <option>Ohio</option>
+                  <option>Wisconsin</option>
+                  <option>District of Columbia</option>
+                </optgroup>
+              </select>
+            </div>
+          
+          </div>
+          
 				</div>
+        
+        
 				<div class = "na-sidebar-group">
 					<div class = "na-sidebar-group-heading">
 						<a><i class = "fa fa-fw fa-paw"></i> Correlation Matrix</a>
@@ -146,8 +156,13 @@
 		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
     <script src="scripts/statebounds.js"></script>
-		<script>
+    <script src="scripts/leaflet-areaselect.js"></script>
+    <script src = "scripts/map.js"></script>
+    <script src = "scripts/area_of_interest.js"></script>
 
+    <script>
+
+/*
       $(".na-button-group .na-button").on("click", function(e) {
         $(this).toggleClass("na-active");
       })
@@ -168,49 +183,7 @@
           }
         }
       })
-
-      var myIcon = L.divIcon({className: 'map-icon'});
-
-			function getColor(d) {
-			
-				return d > 750 ? "#800026":
-					   d > 90 ? "#E31A1C":
-					   d > 20 ? "#FD8D3C":
-									"#FED976";
-			}
-		
-			function style(feature) {
-				return {
-					fillColor: getColor(feature.properties.POP12_SQMI), 
-					weight: 1, 
-					color: "#AAA",
-					opacity: 1
-				}
-			}
-			function highlightFeature(e) {
-				var layer = e.target;
-
-				layer.setStyle({
-					weight: 5,
-					color: '#888',
-					dashArray: '',
-				});
-
-				if (!L.Browser.ie && !L.Browser.opera) {
-					layer.bringToFront();
-				}
-			}
-			
-			function resetHighlight(e) {
-				voronoi.resetStyle(e.target);
-			}
-			
-			function onEachFeature(feature, layer) {
-				layer.on({
-					mouseover: highlightFeature,
-					mouseout: resetHighlight
-				});
-			}
+/**/
 			$(".na-trigger a").on("click", function(e) {
 				$("#sidebar").toggleClass("na-open").toggleClass("na-closed");
 			})
@@ -223,54 +196,6 @@
 				$(this).parent().siblings(".na-sidebar-group-content").toggleClass("na-sidebar-group-open").toggleClass("na-sidebar-group-closed");
 			})
 		
-			// Define bounds and center of continental us
-			var us = {bounds: L.latLngBounds([20, -150], [55, -50]),
-					  center: L.latLng([39.8333, -98.5833])
-					 }
-
-			function mapResize(el) {
-				document.getElementById(el).style.height = (window.innerHeight - 50) + "px"
-				document.getElementById(el).style.width = window.innerWidth + "px"
-			};
-
-			$(window).resize(function () { 
-				mapResize("map")
-			});
-
-			mapResize("map");
-
-			var map = L.map('map', {center: us.center, zoom: 5, maxBounds: us.bounds, 
-									maxZoom: 12, minZoom: 3, zoomControl: false})
-
-      L.esri.basemapLayer("Gray").addTo(map);
-      L.esri.basemapLayer("GrayLabels").addTo(map);
-      
-			var voronoi;
-/**/
-      $.ajax({
-				dataType: "json",
-				url: "data/areatest.geojson",
-				success: function(data) {
-					voronoi = L.geoJson(data, {
-						style: style,
-						onEachFeature: onEachFeature
-					}).addTo(map);
-				}
-				}).error(function() {});
-
-      $.ajax({
-        dataType: "json",
-        url: "data/monitors.geojson",
-        success: function(data) {
-          monitors = L.geoJson(data, {
-            pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: myIcon}).addTo(map);},
-            onEachFeature: function(feature, layer) {
-              layer.bindPopup(feature.properties["o3.MONITOR_ID"]);
-            }
-          }).addTo(map);          
-        }
-      })
-
 		</script>
 	</body>
 </html>
