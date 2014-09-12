@@ -1,201 +1,68 @@
-<!DOCTYPE html>
-<html lang="en" class="no-js">
+<!doctype html>
+
+<html>
+
 	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-		<title>NetAssess</title>
-		<meta name="description" content="A web application for assessing the US continuous air pollutant monitoring network" />
-		<meta name="keywords" content="" />
-		<meta name="author" content="Eric Bailey et al" />
-		<link rel="stylesheet" type="text/css" href="css/netassess.css" />
-		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/toggle.css" rel="stylesheet" type="text/css" />
-    <link href="css/leaflet-areaselect.css" rel="stylesheet" type="text/css" />
-    <link href="css/area_of_interest.css" rel="stylesheet" type="text/css" />
-    <link href="css/sidebar.css" rel="stylesheet" type="text/css" />
-    
-	</head>
+
+		<meta charset="UTF-8">
 	
+		<title>NetAssess</title>
+
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700|Roboto+Condensed:400,700' rel='stylesheet' type='text/css'>
+		
+		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.contextmenu.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.draw.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/L.Control.Sidebar.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/font-awesome.min.css" />
+		
+		<link type = "text/css" rel = "stylesheet" href = "css/MarkerCluster.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/MarkerCluster.Default.css" />
+
+		<link type = "text/css" rel = "stylesheet" href = "css/netassess.css" />
+
+	</head>
+
 	<body>
 
-		<div id = "map"></div>
-	
-		<div id = "sidebar" class = "na-sidebar na-closed">
-			<div class = "na-inner-sidebar">
-      
-				<div class = "na-sidebar-group">
-        
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-map-marker"></i>Area of Interest</a>
-					</div>
-          
-					<div class = "na-sidebar-group-content na-sidebar-group-open">
-            <p class = "explain">Begin by selecting the monitors you are interested in assessing:</p>
-            <div id = "loc-bb-div">
-              <p class = 'title'><strong>Option 1</strong> - Select a bounding box</p>
-              <div>
-                <div id = "loc-bb-inputs">
-                  <div class = "bb-div"><input id = "bb-north" type = "text"></div>
-                  <div class = "bb-div"><input id = "bb-west" type = "text"><span class = "bb-icon"></span><input id = "bb-east" type = "text"></div>
-                  <div class = "bb-div"><input id = "bb-south" type = "text"></div>
-                </div>
-                <div id = "loc-bb-mapselect">
-                  <button id = "bb-select" onclick = "selectArea()"><i class = "fa fa-2x fa-fw fa-crop"></i><br/>Select</button>
-                </div>              
-              </div>
-            </div>
-            
-            <div id = "loc-gs-div">
-              <p class = "title"><strong>Option 2</strong> - Select a geographic region</p>
-              <select>
-                <option></option>
-                <optgroup label = "EPA Regions">
-                  <option>Region 1</option>
-                  <option>Region 2</option>
-                  <option>Region 3</option>
-                  <option>Region 4</option>
-                  <option>Region 5</option>
-                  <option>Region 6</option>
-                  <option>Region 7</option>
-                  <option>Region 8</option>
-                  <option>Region 9</option>
-                  <option>Region 10</option>
-                </optgroup>
-                <optgroup label = "States">
-                  <option>Alabama</option>
-                  <option>Arkansas</option>
-                  <option>Colorado</option>
-                  <option>California</option>
-                  <option>Indiana</option>
-                  <option>Illinois</option>
-                  <option>Minnesota</option>
-                  <option>Michigan</option>
-                  <option>Ohio</option>
-                  <option>Wisconsin</option>
-                  <option>District of Columbia</option>
-                </optgroup>
-              </select>
-            </div>
-          
-          </div>
-          
-				</div>
-        
-        
-				<div class = "na-sidebar-group">
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-paw"></i> Correlation Matrix</a>
-					</div>
-					<div class = "na-sidebar-group-content na-sidebar-group-closed">
-						<p>This is where content will go.</p>
-						<select>
-							<option>POP2010</option>
-							<option>POP2012</option>
-						</select>
-					</div>
-				</div>
-				<div class = "na-sidebar-group">
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-birthday-cake"></i> New Sites</a>
-					</div>
-					<div class = "na-sidebar-group-content na-sidebar-group-closed">
-						<p>This is where content will go.</p>
-						<select>
-							<option>POP2010</option>
-							<option>POP2012</option>
-						</select>
-					</div>
-				</div>
-				<div class = "na-sidebar-group">
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-futbol-o"></i> Remove Bias</a>
-					</div>
-					<div class = "na-sidebar-group-content na-sidebar-group-closed">
-						<p>This is where content will go.</p>
-						<select>
-							<option>POP2010</option>
-							<option>POP2012</option>
-						</select>
-					</div>
-				</div>
-
-			</div>
+		<div id = "header">
+			<span>NetAssess</span>
+			<span>Ambient Air Monitoring Network Assessment Tool</span>
 		</div>
-  
-    <header>
-    
-      <div class = "na-trigger">
-        <a><i class = "fa fa-fw fa-bars"></i></a>
-      </div>
-      <span class = "na-main-title">NetAssess</span>
-			<span class = "na-sub-title">Ambient Air Monitoring Network Assessment Tool</span>
-      <span class = "right-items">
-        <span class = "na-button-group">
-          <span class = "na-button na-active">2011</span><span class = "na-button na-active">2012</span><span class = "na-button na-active">2013</span>
-        </span>
-        <span>
-          <div class="onoffswitch">
-            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
-            <label class="onoffswitch-label" for="myonoffswitch">
-              <span class="onoffswitch-inner"></span>
-              <span class="onoffswitch-switch"></span>
-            </label>
-          </div> 
-        </span>
-        <span class = "na-button" id = "na-zoom-out"><i class = "fa fa-fw fa-search-minus"></i></span>
-        <span>
-          <span class = "na-button" id = "na-zoom-in"><i class = "fa fa-search-plus fa-fw"></i></span><input type = "text" class = "na-header-element na-search" id = "na-search-input" value = "" placeholder = "Zoom to Feature"></input>
-        </span>
-      </span>
-      
-    </header>
-  
-		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
-    <script src="scripts/statebounds.js"></script>
-    <script src="scripts/leaflet-areaselect.js"></script>
-    <script src = "scripts/map.js"></script>
-    <script src = "scripts/area_of_interest.js"></script>
-
-    <script>
-
-/*
-      $(".na-button-group .na-button").on("click", function(e) {
-        $(this).toggleClass("na-active");
-      })
-
-      $("#na-search-input").on("keypress", function(e) {
-        var key = e.which;
-        if(key == 13) {
-          var ss = this.value.toLowerCase();
-          if(ss != "") {
-            var ci = state_bounds.map(function(i) {return i.state}).indexOf(ss);
-            if(ci != -1) {
-              var bounds = state_bounds[ci];
-              
-              map.fitBounds([[bounds.south, bounds.west], [bounds.north, bounds.east]]);
-//              map.setZoom(map.getZoom() + 1);
-            
-            }
-          }
-        }
-      })
-/**/
-			$(".na-trigger a").on("click", function(e) {
-				$("#sidebar").toggleClass("na-open").toggleClass("na-closed");
-			})
-
-      $("#na-zoom-out").on("click", function(e) {
-        map.fitBounds(us.bounds);
-      })
-
-			$(".na-sidebar-group-heading a").on("click", function(e) {
-				$(this).parent().siblings(".na-sidebar-group-content").toggleClass("na-sidebar-group-open").toggleClass("na-sidebar-group-closed");
-			})
+	
+		<div id = "map"></div>
 		
-		</script>
+		<div id = "loc-sb" class = "sidebar">
+			<h1><i class="fa fa-crosshairs  fa-fw"></i> Area of Interest</h1>
+			<p>Use these tools to select an area of interest in which to perform an assessment. You have two options to select an area.</p>
+		</div>
+
+		<div id = "tools-sb" class = "sidebar">
+			<h1><i class="fa fa-cogs  fa-fw"></i> Tools</h1>
+		</div>
+		
+		<div id = "help-sb" class = "sidebar">
+			<h1><i class="fa fa-question  fa-fw"></i> Help</h1>
+		</div>
+		
+		<div id = "about-sb" class = "sidebar">
+			<h1><i class="fa fa-info  fa-fw"></i> About</h1>
+		</div>
+		
+		<script src = "js/jquery-1.11.1.min.js"></script>
+		<script src = "js/leaflet.js"></script>
+		<script src = "js/esri-leaflet.js"></script>
+		<script src = "js/leaflet.draw.js"></script>
+		<script src = "js/leaflet.contextmenu.js"></script>
+		<script src = "js/L.Control.Sidebar.js"></script>
+		<script src = "js/easy-button.js"></script>
+		<script src = "js/leaflet.markercluster.js"></script>
+		
+		<script src = "js/testCreate.js"></script>
+		
+		<script src = "js/netassess-support.js"></script>
+		<script src = "js/netassess.js"></script>
+
 	</body>
+
 </html>
