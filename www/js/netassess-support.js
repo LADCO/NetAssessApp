@@ -93,6 +93,9 @@ function displayGeometry(type, code) {
 	if(type == "State") {
 		var url = "http://tigerweb.geo.census.gov/arcgis/rest/services/State_County/MapServer/14/"
 		var w = "STATE=" + code;
+	} else if(type == "CSA") {
+		var url = "http://tigerweb.geo.census.gov/arcgis/rest/services/CBSA/MapServer/5/";
+		var w = "CSA=" + code;
 	}
 	aoi.clearLayers();
 	var gj = L.esri.featureLayer(url, {where: w}).addTo(aoi);
