@@ -12,7 +12,7 @@ var us = {bounds: L.latLngBounds([24.4, -124.8], [49.4, -66.9]), center: L.latLn
 // Create the map object
 var map = L.map('map', {
 	contextmenu: true,
-	contextmenuWidth: 140,
+	contextmenuWidth: 160,
 	contextmenuItems: [{
         text: 'Show coordinates',
         callback: function() {alert("Hello")}
@@ -49,10 +49,9 @@ basemaps["Gray"].addTo(map);
 
 var o3mon = L.geoJson(null, {
 	pointToLayer: function(feature, latlon) {
-		return new L.marker(latlon, 
-			{contextmenu: true, 
-			 contextmenuItems: [{text: 'Toggle Selected', callback: toggleMarker, context: this}], 
-			 icon: o3Icon});
+    var mark = new L.marker(latlon, {contextmenu: true, icon: o3Icon})
+    mark.options.contextmenuItems = [{text: "Toggle Selected", iconCls: 'fa fa-fw fa-context fa-crosshairs', callback: toggleMarker, context: mark}];
+		return mark;
 		},
 	onEachFeature: monitorEach
 });
@@ -108,8 +107,8 @@ var poly = drawControl = new L.Control.Draw({
 				color: '#bada55'
 			}
 		},
-		rectangle: false,
-		circle: false,
+		rectangle: true,
+		circle: true,
 		marker: false
 	},
 });

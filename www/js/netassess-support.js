@@ -27,8 +27,12 @@ function setAOI(e) {
 		map.fitBounds(e.layer.getBounds());
 	})
 	
-	o3mon.eachLayer(checkPIP, e.layer);
-	pm25mon.eachLayer(checkPIP, e.layer);
+  if(e.layerType == "polygon") {
+  	o3mon.eachLayer(checkPIP, e.layer);
+  	pm25mon.eachLayer(checkPIP, e.layer);
+  } else {
+    alert("circle")
+  }
 
 }
 
