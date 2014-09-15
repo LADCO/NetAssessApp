@@ -10,14 +10,13 @@
 
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700|Roboto+Condensed:400,700' rel='stylesheet' type='text/css'>
 		
+		<link type = "text/css" rel = "stylesheet" href = "shared/shiny.css" />
+		
 		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.contextmenu.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.draw.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/L.Control.Sidebar.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/font-awesome.min.css" />
-		
-		<link type = "text/css" rel = "stylesheet" href = "css/MarkerCluster.css" />
-		<link type = "text/css" rel = "stylesheet" href = "css/MarkerCluster.Default.css" />
 
 		<link type = "text/css" rel = "stylesheet" href = "css/netassess.css" />
 
@@ -34,7 +33,34 @@
 		
 		<div id = "loc-sb" class = "sidebar">
 			<h1><i class="fa fa-crosshairs  fa-fw"></i> Area of Interest</h1>
-			<p>Use these tools to select an area of interest in which to perform an assessment. You have two options to select an area.</p>
+			<p>The first step in any assessment is to select your area of interest. There are two main ways of accomplishing this; by defining an area on the map with the drawing tools provided below, or by selecting a predefined area such as state, CSA, or CBSA.</p>
+			<p class = "header">Define your own</p>
+			<p>Use the buttons below to define your own area of interest:</p>
+			<div class = "na-draw-buttons">
+				<button id = "draw_polygon" class = "na-draw-button" title = "Define a Polygon"><img src = "images/glyphicons_096_vector_path_polygon.png" /></button>
+				<button id = "draw_circle" class = "na-draw-button" title = "Define a Circle"><img src = "images/glyphicons_095_vector_path_circle.png" /></button>
+				<button id = "draw_rectangle" class = "na-draw-button" title = "Define a Rectangle"><img src = "images/glyphicons_094_vector_path_square.png" /></button>
+			</div>
+			<p class = "header">Select predefined area</p>
+			<p>Select an area type with the radio buttons, then select a specific area from the dropdown menu:</p>
+			<div class = "na-select-area">
+				<div id="areaSelect" class="control-group shiny-input-radiogroup">
+				  <label class="control-label" for="areaSelect"><strong>Area Type:</strong></label>
+				  <label class="radio inline">
+					<input type="radio" name="areaSelect" id="areaSelect1" value="State" checked="checked"/>
+					<span>State</span>
+				  </label>
+				  <label class="radio inline">
+					<input type="radio" name="areaSelect" id="areaSelect2" value="CBSA"/>
+					<span>CBSA</span>
+				  </label>
+				  <label class="radio inline">
+					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA"/>
+					<span>CSA</span>
+				  </label>
+				</div> 
+				<select id = "areaSelectSelect"></select>
+			</div>
 		</div>
 
 		<div id = "tools-sb" class = "sidebar">
@@ -50,15 +76,13 @@
 		</div>
 		
 		<script src = "js/jquery-1.11.1.min.js"></script>
+		<script src = "shared/shiny.js"></script>
 		<script src = "js/leaflet.js"></script>
 		<script src = "js/esri-leaflet.js"></script>
 		<script src = "js/leaflet.draw.js"></script>
 		<script src = "js/leaflet.contextmenu.js"></script>
 		<script src = "js/L.Control.Sidebar.js"></script>
 		<script src = "js/easy-button.js"></script>
-		<script src = "js/leaflet.markercluster.js"></script>
-		
-		<script src = "js/testCreate.js"></script>
 		
 		<script src = "js/netassess-support.js"></script>
 		<script src = "js/netassess.js"></script>

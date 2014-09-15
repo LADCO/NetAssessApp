@@ -1,6 +1,6 @@
 L.Control.EasyButtons = L.Control.extend({
     options: {
-        position: 'topleft',
+        position: 'topright',
         title: '',
         intentedIcon: 'fa-circle-o'
     },

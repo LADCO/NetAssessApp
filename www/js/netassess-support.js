@@ -20,6 +20,20 @@ function toggleSidebars(sb) {
 }
 
 function setAOI(e) {
+
+	
+	function checkPolygon(x) {
+
+		if(pip(x._latlng, this)) {
+			$(x._icon).addClass("selected");
+			x.feature.properties.selected = true;
+		} else {
+			$(x._icon).removeClass("selected");
+			x.feature.properties.selected = false;
+		}
+
+	}
+
 	aoi.clearLayers();
 	aoi.addLayer(e.layer);
 	
@@ -27,26 +41,20 @@ function setAOI(e) {
 		map.fitBounds(e.layer.getBounds());
 	})
 	
-  if(e.layerType == "polygon") {
-  	o3mon.eachLayer(checkPIP, e.layer);
-  	pm25mon.eachLayer(checkPIP, e.layer);
-  } else {
-    alert("circle")
-  }
-
-}
-
-function checkPIP(x) {
-
-	if(pip(x._latlng, this)) {
-		$(x._icon).addClass("selected");
-		x.feature.properties.selected = true;
+	if(e.layerType == "polygon") {
+		o3mon.eachLayer(checkPolygon, e.layer);
+		pm25mon.eachLayer(checkPolygon, e.layer);
+	} else if(e.layerType == "rectangle") {
+		alert("rectangle")
+	} else if(e.layerType == "circle") {
+		alert("circle")
 	} else {
-		$(x._icon).removeClass("selected");
-		x.feature.properties.selected = false;
+		alert("Unknown Input")
 	}
 
 }
+
+
 
 function monitorEach(feature, layer) {
 		layer.on("add", function(e) {
@@ -72,6 +80,23 @@ function pip(point, polygon) {
 	}	
 	
 	return inside;
+}
+
+$("#areaSelectSelect").on("change", function(e) {
+	var type = $("#areaSelect input[checked='checked']").attr("value");
+	var code = this.value;
+	displayGeometry(type, code);
+})
+
+function displayGeometry(type, code) {
+
+	if(type == "State") {
+		var url = "http://tigerweb.geo.census.gov/arcgis/rest/services/State_County/MapServer/14/"
+		var w = "STATE=" + code;
+	}
+	aoi.clearLayers();
+	var gj = L.esri.featureLayer(url, {where: w}).addTo(aoi);
+
 }
 
 // Functions for styling map elements

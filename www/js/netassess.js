@@ -11,24 +11,8 @@ var us = {bounds: L.latLngBounds([24.4, -124.8], [49.4, -66.9]), center: L.latLn
 
 // Create the map object
 var map = L.map('map', {
-	contextmenu: true,
-	contextmenuWidth: 160,
-	contextmenuItems: [{
-        text: 'Show coordinates',
-        callback: function() {alert("Hello")}
-    }, {
-        text: 'Center map here',
-        callback: function() {alert("This isn't")}
-    }, '-', {
-        text: 'Zoom in',
-        iconCls: 'fa fa-fw fa-context fa-search-plus',
-        callback: function() {alert("Working")}
-    }, {
-        text: 'Zoom out',
-        iconCls: 'fa fa-fw fa-context fa-search-minus',
-        callback: function() {alert("Yet")}
-    }],
 	drawControl: false, 
+	zoomControl: false,
 	maxZoom: 12, 
 	minZoom: 3
 	}).fitBounds(us.bounds);
@@ -43,7 +27,6 @@ var basemaps = {
 
 // Sets the initial basemap to "Gray"
 basemaps["Gray"].addTo(map);
-
 
 // Add Feature Layers to Map
 
@@ -88,31 +71,15 @@ $.ajax({
 })
 
 // Adds the control to allow user to select visible layers
-L.control.layers(basemaps, {"O3 Monitors": o3mon, "PM2.5 Monitors": pm25mon}, {position: 'topright'}).addTo(map);
+L.control.layers(basemaps, {"O3 Monitors": o3mon, "PM2.5 Monitors": pm25mon}, {position: 'topleft'}).addTo(map);
 
-// Add Area of Interest Polygon Drawer
-L.drawLocal.draw.toolbar.buttons.polygon = 'Select your area of interest';
-var poly = drawControl = new L.Control.Draw({
-	position: 'topleft',
-	draw: {
-		polyline: false,
-		polygon: {
-			allowIntersection: false,
-			showArea: false,
-			drawError: {
-				color: '#b00b00',
-				timeout: 1000
-			},
-			shapeOptions: {
-				color: '#bada55'
-			}
-		},
-		rectangle: true,
-		circle: true,
-		marker: false
-	},
-});
-map.addControl(poly);
+// Creates the drawing functions for area selection and then binds them to the appropriate buttons.
+var draw_polygon = new L.Draw.Polygon(map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#bada55'}});
+var draw_rectangle = new L.Draw.Rectangle(map, {shapeOptions: {color: '#bada55'}});
+var draw_circle = new L.Draw.Circle(map, {shapeOptions: {color: '#bada55'}});
+$("#draw_polygon").on('click', function() {draw_polygon.enable()});
+$("#draw_rectangle").on('click', function() {draw_rectangle.enable()});
+$("#draw_circle").on('click', function() {draw_circle.enable()});
 
 var aoi = new L.FeatureGroup();
 map.addLayer(aoi);
@@ -120,8 +87,6 @@ map.addLayer(aoi);
 map.on('draw:created', setAOI)
 
 // Adds buttons for controlling tools
-L.dropdown("fa-circle", function() {alert("Hello")}, "Testing");
-L.easyButton("fa-arrows-alt", function() {map.fitBounds(us.bounds)}, "Zoom to Full Extent");
 L.easyButton("fa-crosshairs", function() {toggleSidebars("loc");}, "Select Area of Interest");
 L.easyButton("fa-cogs", function() {toggleSidebars("tools");}, "Tools");
 L.easyButton("fa-question", function() {toggleSidebars("help");}, "Help");
