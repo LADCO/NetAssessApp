@@ -1,49 +1,64 @@
 library(shiny)
+library(maptools)
 
-tab = read.csv("data/states.csv", stringsAsFactors = FALSE)
-states = tab$code
-names(states) <- tab$name
-tab = read.csv("data/csa.csv", stringsAsFactors = FALSE)
-csa = tab$code
-names(csa) <- tab$name
-tab = read.csv("data/cbsa.csv", stringsAsFactors = FALSE)
-cbsa = tab$code
-names(cbsa) <- tab$name
+load("data/states.rda")
+states.list <- as.character(states$GEOID)
+names(states.list) <- as.character(states$NAME)
+states.list <- states.list[order(names(states.list))]
+
+load("data/cbsa.rda")
+cbsa.list <- as.character(cbsa$GEOID)
+names(cbsa.list) <- as.character(cbsa$NAME)
+cbsa.list <- cbsa.list[order(names(cbsa.list))]
+
+load("data/csa.rda")
+csa.list <- as.character(csa$GEOID)
+names(csa.list) <- as.character(csa$NAME)
+csa.list <- csa.list[order(names(csa.list))]
 
 shinyServer(function(input, output, session, clientData) {
 
+  # Observer to update predefined area select input based on Area Type
   observe({
-    if(input$areaSelect=="State") {
-      choices = states
-    } else if(input$areaSelect == "CBSA") {
-      choices = cbsa
-    } else if(input$areaSelect == "CSA") {
-      choices = csa
-    } else {
-      choices = c("")
+
+    if(!is.null(input$areaSelect)) {
+      
+      if(input$areaSelect=="State") {
+        choices = states.list
+      } else if(input$areaSelect == "CBSA") {
+        choices = cbsa.list
+      } else if(input$areaSelect == "CSA") {
+        choices = csa.list
+      } else {
+        choices = c("")
+      }
+      
+      updateSelectInput(session, "areaSelectSelect", choices = choices)
+      
     }
-    
-    updateSelectInput(session, "areaSelectSelect", choices = choices)
     
   })
   
   observe({
     
-    print(input$areaSelectSelect)
-    
-    isolate({
+    if(!is.null(input$areaSelectSelect)) {
       
-      if(input$areaSelect=="State") {
-#        geo <- RCurl::getURI("http://tigerweb.geo.census.gov/arcgis/rest/services/State_County/MapServer/2/query?where=STATE%3D18&f=pjson")
-      } else if(input$areaSelect=="CBSA") {
-        
-      } else if(input$areaSelect=="CSA") {
-        
-      }
+      type <- isolate(input$areaSelect)
       
-    })
+      src <- switch(type, State = states, CBSA = cbsa, CSA = csa)
+      
+      poly <- src[src$GEOID == input$areaSelectSelect, ]
+      
+      coords <- lapply(seq(length(poly@polygons[[1]]@Polygons)), function(i) {
+        x <- poly@polygons[[1]]@Polygons[[i]]@coords[, c(2,1)]
+      })
+      
+      session$sendCustomMessage(type="displayArea", list(properties = list(name = poly$NAME[1], type = tolower(type), id = as.character(as.integer(input$areaSelectSelect))), coords = coords))
+      
+    }
     
   })
+
 
 })
 

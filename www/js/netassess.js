@@ -56,7 +56,7 @@ $.ajax({
 
 $.ajax({
 	dataType: "json",
-	url: "data/pm25.geojson",
+	url: "data/pm25mon.geojson",
 	success: function(data) {
 		pm25mon.addData(data);
 	}

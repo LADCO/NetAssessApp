@@ -82,26 +82,6 @@ function pip(point, polygon) {
 	return inside;
 }
 
-$("#areaSelectSelect").on("change", function(e) {
-	var type = $("#areaSelect input[checked='checked']").attr("value");
-	var code = this.value;
-	displayGeometry(type, code);
-})
-
-function displayGeometry(type, code) {
-
-	if(type == "State") {
-		var url = "http://tigerweb.geo.census.gov/arcgis/rest/services/State_County/MapServer/14/"
-		var w = "STATE=" + code;
-	} else if(type == "CSA") {
-		var url = "http://tigerweb.geo.census.gov/arcgis/rest/services/CBSA/MapServer/5/";
-		var w = "CSA=" + code;
-	}
-	aoi.clearLayers();
-	var gj = L.esri.featureLayer(url, {where: w}).addTo(aoi);
-
-}
-
 // Functions for styling map elements
 var o3Icon = L.divIcon({className: 'map-icon o3-icon'});
 var pmIcon = L.divIcon({className: 'map-icon pm-icon'});
