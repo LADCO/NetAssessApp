@@ -5,7 +5,7 @@ library(XML)
 
 # This function downloads a zipped folder from the AQS website, unzips it,
 # and saves the .csv file
-downloadAQS <- function(duration, pollutant.code, year, 
+downloadAQS <- function(duration, pollutant.code, year,  
                          destination.directory = "."){
   
 #   duration <- "daily"
@@ -17,7 +17,7 @@ downloadAQS <- function(duration, pollutant.code, year,
                      "_", pollutant.code, "_", year, ".zip")
   temp <- tempfile(fileext = ".zip")
   download.file(url = file.url, temp)
-  fl.name <- paste0(duration, "_", pollutant, "_", year, ".csv")
+  fl.name <- paste0(duration, "_", pollutant.code, "_", year, ".csv")
   print(fl.name)
   unzip(temp, fl.name, exdir = destination.directory)
   file.remove(temp)
@@ -30,7 +30,7 @@ downloadAQS <- function(duration, pollutant.code, year,
 csvToRda <- function(duration, pollutant.code, year, csv.directory, 
                      destination.directory){
   
-#   duration <- "daily"
+#   duration <- "daily"                                   
 #   pollutant.code <- "44201"
 #   year <- "2013"
 #   csv.directory <- "C:/R repositories/NetAssessApp/data/"
@@ -39,8 +39,8 @@ csvToRda <- function(duration, pollutant.code, year, csv.directory,
   csv.file <- paste0(csv.directory, duration, "_", pollutant.code, "_", year,
                      ".csv")
   csv.df <- read.csv(csv.file, stringsAsFactors = F)
-  rda.file <- paste0(destination.directory, duration, "_", pollutant.code, "_", year,
-                     ".rda")
+  rda.file <- paste0(destination.directory, duration, "_", pollutant.code, "_", 
+                     year, ".rda")
   save(csv.df, file = rda.file)
   file.remove(csv.file)
 }
@@ -53,4 +53,6 @@ years <- as.character(2009:2011)
 
 downloads.df <- expand.grid(pollutants, years, stringsAsFactors = F)
 
-lapply(downloads.df[, 1], downloadAQS, )
+mapply(downloadAQS, pollutant.code = downloads.df[, 1],  year = downloads.df[, 2], 
+       MoreArgs = list(duration = "daily", 
+                       destination.directory = "C:/R repositories/NetAssessApp/data/"))
