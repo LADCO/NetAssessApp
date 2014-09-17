@@ -34,6 +34,18 @@ function setAOI(e) {
 
 	}
 
+  function checkCircle(x) {
+  
+    if(this._latlng.distanceTo(x._latlng) <= this._mRadius) {
+  		$(x._icon).addClass("selected");
+			x.feature.properties.selected = true;      
+    } else {
+  		$(x._icon).removeClass("selected");
+			x.feature.properties.selected = false;
+    }
+  
+  }
+
 	aoi.clearLayers();
 	aoi.addLayer(e.layer);
 	
@@ -45,9 +57,11 @@ function setAOI(e) {
 		o3mon.eachLayer(checkPolygon, e.layer);
 		pm25mon.eachLayer(checkPolygon, e.layer);
 	} else if(e.layerType == "rectangle") {
-		alert("rectangle")
+  	o3mon.eachLayer(checkPolygon, e.layer);
+		pm25mon.eachLayer(checkPolygon, e.layer);
 	} else if(e.layerType == "circle") {
-		alert("circle")
+    o3mon.eachLayer(checkCircle, e.layer);
+		pm25mon.eachLayer(checkCircle, e.layer);
 	} else {
 		alert("Unknown Input")
 	}

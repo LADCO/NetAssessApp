@@ -5,10 +5,15 @@
 	<head>
 
 		<meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script type="application/shiny-singletons"></script>
 	
 		<title>NetAssess</title>
 
-		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700|Roboto+Condensed:400,700' rel='stylesheet' type='text/css'>
+    <script src="shared/jquery.js" type="text/javascript"></script>
+    <script src="shared/shiny.js" type="text/javascript"></script>
+    
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700|Roboto+Condensed:400,700' rel='stylesheet' type='text/css'>
 		
 		<link type = "text/css" rel = "stylesheet" href = "shared/shiny.css" />
 		
@@ -51,16 +56,16 @@
 					<span>State</span>
 				  </label>
 				  <label class="radio inline">
-					<input type="radio" name="areaSelect" id="areaSelect2" value="CBSA"/>
+					<input type="radio" name="areaSelect" id="areaSelect2" value="CBSA" />
 					<span>CBSA</span>
 				  </label>
 				  <label class="radio inline">
-					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA"/>
+					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA" />
 					<span>CSA</span>
 				  </label>
 				</div> 
-				<select id = "areaSelectSelect"></select>
-			</div>
+          <select id="areaSelectSelect"></select>
+        </div>
 		</div>
 
 		<div id = "tools-sb" class = "sidebar">
@@ -75,8 +80,6 @@
 			<h1><i class="fa fa-info  fa-fw"></i> About</h1>
 		</div>
 		
-		<script src = "js/jquery-1.11.1.min.js"></script>
-		<script src = "shared/shiny.js"></script>
 		<script src = "js/netassess-shiny.js"></script>
 		<script src = "js/leaflet.js"></script>
 		<script src = "js/esri-leaflet.js"></script>
