@@ -98,7 +98,7 @@ function pip(point, polygon) {
 
 // Functions for styling map elements
 var o3Icon = L.divIcon({className: 'map-icon o3-icon'});
-var pmIcon = L.divIcon({className: 'map-icon pm-icon'});
+var pm25Icon = L.divIcon({className: 'map-icon pm-icon'});
 
 function toggleMarker(a) {
 	if(this.feature.properties.selected) {

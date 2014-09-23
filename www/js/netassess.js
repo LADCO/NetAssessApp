@@ -31,44 +31,38 @@ basemaps["Gray"].addTo(map);
 // Add Feature Layers to Map
 
 var o3mon = L.geoJson(null, {
-	pointToLayer: function(feature, latlon) {
-    var mark = new L.marker(latlon, {contextmenu: true, icon: o3Icon})
-    mark.options.contextmenuItems = [{text: "Toggle Selected", iconCls: 'fa fa-fw fa-context fa-crosshairs', callback: toggleMarker, context: mark}];
-		return mark;
-		},
-	onEachFeature: monitorEach
+  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});},
+  onEachFeature: monitorEach
 });
-
 var pm25mon = L.geoJson(null, {
-	pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: pmIcon});},
-	onEachFeature: monitorEach
+  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: pm25Icon});},
+  onEachFeature: monitorEach
 });
-
 var o3served = L.geoJson();
 
 $.ajax({
   dataType: "json",
-	url: "data/areatest.geojson",
-	success: function(data) {
-		o3served.addData(data);
-	}
-	}).error(function() {alert("Error")});
+  url: "data/areatest.geojson",
+  success: function(data) {
+    o3served.addData(data);
+  }
+}).error(function() {alert("o3served Error")});
 
 $.ajax({
-	dataType: "json",
-	url: "data/pm25mon.geojson",
-	success: function(data) {
-		pm25mon.addData(data);
-	}
-})
-	
+  dataType: "json",
+  url: "data/pm25mon.geojson",
+  success: function(data) {
+    pm25mon.addData(data);
+  }
+}).error(function() {alert("pm25mon Error")});
+
 $.ajax({
   dataType: "json",
   url: "data/o3mon.geojson",
   success: function(data) {
- 	o3mon.addData(data);
+    o3mon.addData(data);
   }
-})
+}).error(function() {alert("o3mon Error")});
 
 // Adds the control to allow user to select visible layers
 L.control.layers(basemaps, {"O3 Monitors": o3mon, "PM2.5 Monitors": pm25mon}, {position: 'topleft'}).addTo(map);

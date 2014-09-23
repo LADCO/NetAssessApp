@@ -1,3 +1,12 @@
+Shiny.addCustomMessageHandler("addOverlay", 
+  function(data) {
+    if(data.type == "points") {
+      var x = 5
+    }
+    
+  }
+);
+
 Shiny.addCustomMessageHandler("displayArea",
   function(data) {
 	if(data.coords.length == 1) {
@@ -16,7 +25,7 @@ Shiny.addCustomMessageHandler("displayArea",
 
 function checkAttributes(layer) {
 
-	if(layer.feature.properties[this.type + "_id"] == this.id) {
+	if(layer.feature.properties[this.type + "_CODE"] == this.id) {
 		$(layer._icon).addClass("selected");
 		layer.feature.properties.selected = true;
 	} else {
