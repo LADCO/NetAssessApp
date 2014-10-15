@@ -30,6 +30,11 @@ basemaps["Gray"].addTo(map);
 
 // Add Feature Layers to Map
 
+var sites = L.geoJson(null, {
+  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});}
+});
+
+/*
 var o3mon = L.geoJson(null, {
   pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});},
   onEachFeature: monitorEach
@@ -47,10 +52,21 @@ $.ajax({
     o3served.addData(data);
   }
 }).error(function() {alert("o3served Error")});
-
+*/
 $.ajax({
   dataType: "json",
-  url: "data/pm25mon.geojson",
+  url: "data/sites.geojson",
+  success: function(data) {
+    sites.addData(data);
+  }
+}).error(function(a) {
+  alert("sites Error")
+});
+
+/*
+$.ajax({
+  dataType: "json",
+  url: "data/sites.geojson",
   success: function(data) {
     pm25mon.addData(data);
   }
@@ -63,9 +79,9 @@ $.ajax({
     o3mon.addData(data);
   }
 }).error(function() {alert("o3mon Error")});
-
+*/
 // Adds the control to allow user to select visible layers
-L.control.layers(basemaps, {"O3 Monitors": o3mon, "PM2.5 Monitors": pm25mon}, {position: 'topleft'}).addTo(map);
+L.control.layers(basemaps, {"Sites": sites}, {position: 'topleft'}).addTo(map);
 
 // Creates the drawing functions for area selection and then binds them to the appropriate buttons.
 var draw_polygon = new L.Draw.Polygon(map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#bada55'}});

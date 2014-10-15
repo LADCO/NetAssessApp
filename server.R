@@ -30,7 +30,7 @@ shinyServer(function(input, output, session) {
       
       type <- toupper(isolate(input$areaSelect))
       
-      src <- switch(type, STATE = "states", CBSA = "cbsa", CSA = "csa")
+      src <- switch(type, STATE = "states", CBSA = "cbsas", CSA = "csas")
 
       q <- paste0("SELECT GEOMETRY FROM ", src, " WHERE CODE = '", input$areaSelectSelect, "'")
 

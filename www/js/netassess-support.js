@@ -54,14 +54,14 @@ function setAOI(e) {
 	})
 	
 	if(e.layerType == "polygon") {
-		o3mon.eachLayer(checkPolygon, e.layer);
-		pm25mon.eachLayer(checkPolygon, e.layer);
+		sites.eachLayer(checkPolygon, e.layer);
+		//pm25mon.eachLayer(checkPolygon, e.layer);
 	} else if(e.layerType == "rectangle") {
-  	o3mon.eachLayer(checkPolygon, e.layer);
-		pm25mon.eachLayer(checkPolygon, e.layer);
+  	sites.eachLayer(checkPolygon, e.layer);
+		//pm25mon.eachLayer(checkPolygon, e.layer);
 	} else if(e.layerType == "circle") {
-    o3mon.eachLayer(checkCircle, e.layer);
-		pm25mon.eachLayer(checkCircle, e.layer);
+    sites.eachLayer(checkCircle, e.layer);
+		//pm25mon.eachLayer(checkCircle, e.layer);
 	} else {
 		alert("Unknown Input")
 	}
