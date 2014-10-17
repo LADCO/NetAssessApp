@@ -1,12 +1,19 @@
 library(RSQLite)
 library(sp)
 library(deldir)
+library(rgeos)
+
+source("R/voronoi.R")
+load("data/tracts.rda")
+load("data/usborder.rda")
 
 db <- dbConnect(SQLite(), dbname = "data/netassess.sqlite")
 
-states <- unique(dbGetQuery(db, "SELECT State_Code, State_Name FROM states"))
-state.list <- states$State_Code
-names(state.list) <- states$State_Name
+aSapp <- c(42401, 44201, 88101, 88502)
+
+states <- unique(dbGetQuery(db, "SELECT CODE, NAME FROM states"))
+state.list <- states$CODE
+names(state.list) <- states$NAME
 
 cbsa <- dbGetQuery(db, "SELECT CODE, NAME FROM cbsas")
 cbsa.list <- cbsa$CODE
@@ -16,69 +23,92 @@ csa <- dbGetQuery(db, "SELECT CODE, NAME FROM csas")
 csa.list <- csa$CODE
 names(csa.list) <- csa$NAME
 
+params <- dbGetQuery(db, "SELECT Parameter_Code, Parameter_Desc, Count FROM params")
+params.list <- params$Parameter_Code
+names(params.list) <- paste(params$Parameter_Code, params$Parameter_Desc, sep = " - ")
+params.list <- c("None" = -1, params.list)
 
-
-mons <- dbGetQuery(db, "SELECT monitors.Parameter, monitors.POC, monitors.Key,
-                                monitors.Date_Sampling_Began, sites.State_Code, 
-                                sites.County_Code, sites.Site_ID, 
-                                sites.Latitude, sites.Longitude, 
-                                sites.Street_Address 
-                         FROM monitors 
-                         JOIN sites ON monitors.Site_Key = sites.Key")
-
-s <- split(mons, paste(mons$Longitude, mons$Latitude))
-
-sites <- lapply(s, function(df) {
+createSites <- function() {
   
-  site_id <- unique(sprintf("%02i-%03i-%04i", df$State_Code, df$County_Code, df$Site_ID))
-  geometry <- paste0("[", df$Longitude[1], ", ", df$Latitude[1], "]")
-  monitors <- apply(df, 1, function(r) {
-    paste0('{"Key": ', r[['Key']], ', "Parameter": ', r[['Parameter']], ', "POC": ', r[['POC']], ', "Start_Date": "', r[['Date_Sampling_Began']], '"}')
+  jsonArray <- function(a, quote = FALSE) {
+    if(quote) {
+      op <- paste0('["', paste0(a, collapse = '", "'), '"]')
+    } else {
+      op <- paste0("[", paste0(a, collapse = ", "), "]")      
+    }
+    return(op)
+  }
+  
+  jsonObject <- function(o) {
+    
+    n <- paste0('"', names(o), '"')
+    p <- sapply(o, function(x) {
+      if((substr(x, 1, 1) == "[" & substr(x, nchar(x), nchar(x)) == "]") |
+         (substr(x, 1, 1) == "{" & substr(x, nchar(x), nchar(x)) == "}")) {
+        op <- x
+      } else {
+        op <- paste0('"', x, '"')
+      }
+      return(op)
+    })
+    paste0("{", paste(n, p, sep = ": ", collapse = ", "), "}")
+    
+  }
+  
+  mons <- dbGetQuery(db, "SELECT * FROM sites")
+  latlng <- paste(mons$Latitude, mons$Longitude, sep = "_")
+  dup <- duplicated(latlng)
+  s <- mons[!dup, ]
+  d <- mons[dup, ]
+  sites <- sapply(seq(nrow(s)), function(r) {
+    
+    alt <- d$Latitude == s$Latitude[r] & d$Longitude == s$Longitude[r]
+    key <- s$Key[r]
+    site_id <- sprintf("%02i-%03i-%04i", s$State_Code[r], s$County_Code[r], s$Site_ID[r])
+    if(sum(alt) > 0) {
+      key <- c(key, d$Key[alt])
+      site_id <- c(site_id, sprintf("%02i-%03i-%04i", d$State_Code[alt], d$County_Code[alt], d$Site_ID[alt]))
+      s$Count[r] <- s$Count[r] + sum(d$Count[alt])
+      s$Crit_Count[r] <- s$Crit_Count[r] + sum(d$Crit_Count[alt])
+      s$HAP_Count[r] <- s$HAP_Count[r] + sum(d$HAP_Count[alt])
+      s$Met_Count[r] <- s$Met_Count[r] + sum(d$Met_Count[alt])
+    }
+    key <- jsonArray(key)
+    site_id <- jsonArray(site_id, TRUE)
+
+    properties <- c(key = key, site_id = site_id, as.list(s[r, c("State_Code", "County_Code", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count")]))
+    properties$Street_Address <- gsub("'", "&#039;", properties$Street_Address, fixed = TRUE)
+    properties$Street_Address <- gsub('"', "&quot;", properties$Street_Address, fixed = TRUE)
+    properties <- jsonObject(properties)
+    geometry <- jsonObject(list(type = "Point", coordinates = jsonArray(c(s$Longitude[r], s$Latitude[r]))))
+
+    return(jsonObject(list(type = "Feature", geometry = geometry, properties = properties)))
+    
   })
-  monitors <- paste0("[", paste0(monitors, collapse = ", "), "]")
-  site <- paste0('{"type": "Feature", "geometry": {"type": "Point", "coordinates": ', geometry, '}, "properties": {"monitors": ', monitors, '}}')
-  return(site)
   
-})
+  write(jsonObject(list(type = "FeatureCollection", features = jsonArray(sites))), file = "www/data/sites.geojson")
 
-sites <- paste('{"type": "FeatureCollection", "features": [', paste(sites, collapse = ', '), ']}')
+}
 
-write(sites, file = "www/data/sites.geojson")
+createSites()
+
+areaPolygons<- function(spPoly, proj4string = NULL) {
+  if(class(spPoly)[[1]] != "SpatialPolygonsDataFrame" & class(spPoly)[[1]] != "SpatialPolygons") {
+    stop("spPoly must be a SpatialPolygonsDataFrame or a SpatialPolygons object.")
+  }
+  require(sp)
+  require(rgdal)
+  if(!is.null(proj4string)) {
+    if(class(proj4string)[[1]] != "CRS") {
+      stop("The proj4string must be of class CRS")
+    }
+    spP <- spTransform(spPoly, CRS = proj4string)
+  }
+  else {
+    spP <- spPoly
+  }
+  areas <- unlist(lapply(spP@polygons, function(x) a <- x@area))
+  return(round(areas * 3.86101e-7, 1))
+}
 
 
-
-
-
-# names(sites) <- NULL
-# 
-# writeGeoJSONPoint <- function(df, digits = 4) {
-#   
-#   f <- paste0(apply(df, 1, function(r) {
-#     y <- paste0('{"type": "Feature", "geometry": {"type": "Point", "coordinates": [', round(as.numeric(r['LONGITUDE']), digits), ', ', round(as.numeric(r['LATITUDE']), digits), ']},')
-#     props <- r[!names(r) %in% c("LATITUDE", "LONGITUDE")]
-#     if(length(props) > 0) {
-#       props <- paste(paste0('"', names(props), '"'), paste0('"', props, '"'), sep = ": ", collapse = ", ")
-#     } else {
-#       props <- ""
-#     }
-#     y <- paste0(y, ' "properties": {', props, '}}')
-#   }), collapse = ", ")
-#   
-#   paste('{"type": "FeatureCollection", "features": [', f, ']}')
-#   
-# }
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# o3mon <- dbGetQuery(db, "SELECT DISTINCT monitors.LOCATION_ID, sites.STATE_CODE, sites.CBSA_CODE, sites.CSA_CODE, sites.LATITUDE, sites.LONGITUDE FROM monitors JOIN sites ON monitors.LOCATION_ID = sites.LOCATION_ID WHERE monitors.PARAMETER_CODE = '44201'")
-# o3del <- deldir(as.numeric(o3mon$LONGITUDE), as.numeric(o3mon$LATITUDE))
-# o3w <- tile.list(o3del)
-# write(writeGeoJSONPoint(o3mon), file = "www/data/o3mon.geojson")
-# 
-# pm25mon <- dbGetQuery(db, "SELECT DISTINCT monitors.LOCATION_ID, sites.STATE_CODE, sites.CBSA_CODE, sites.CSA_CODE,  sites.LATITUDE, sites.LONGITUDE FROM monitors JOIN sites ON monitors.LOCATION_ID = sites.LOCATION_ID WHERE monitors.PARAMETER_CODE = '88101'")
-# write(writeGeoJSONPoint(pm25mon), file = "www/data/pm25mon.geojson")

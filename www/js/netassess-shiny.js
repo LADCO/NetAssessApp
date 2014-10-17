@@ -1,3 +1,30 @@
+var mapBoundsBinding = new Shiny.InputBinding();
+$.extend(mapBoundsBinding, {
+  find: function(scope) {
+    return $(scope).find("#mapBounds")
+  },
+  getValue: function(el) {
+    return {bounds: map.getBounds(), zoom: map.getZoom()};
+  },
+  setValue: function(el, value) {
+    map.fitBounds(value);
+  },
+  subscribe: function(el, callback) {
+    map.on("moveend zoomend", function(e) {
+      callback();
+    })
+  },
+  getRatePolicy: function() {
+    return {policy: 'debounce', delay: 3000};
+  },
+  unsubscribe: function(el) {
+    $(el).off("viewreset");
+  }
+})
+Shiny.inputBindings.register(mapBoundsBinding);
+
+
+
 Shiny.addCustomMessageHandler("addOverlay", 
   function(data) {
     if(data.type == "points") {
@@ -22,6 +49,63 @@ Shiny.addCustomMessageHandler("displayArea",
 	
   }
 );
+
+Shiny.addCustomMessageHandler("showMonitors", 
+  function(data) {
+    if(!$.isArray(data)) {
+      data = [data];
+    }
+    for(var key in sites._layers) {
+      if(sites._layers.hasOwnProperty(key)) {
+        var el = sites._layers[key].feature;
+        var inc = false;
+        for(var i = 0; i < el.properties.key.length; i++) {
+          var val = el.properties.key[i]
+          if(data.indexOf(val) != -1) {
+            inc = true;
+          }
+        }
+        $($(sites._layers[key])[0]._icon).toggleClass("hidden", !inc)
+      }
+    }
+/*    var mons = allSites.features.filter(function(el) {
+      var inc = false;
+      for(var i = 0; i < el.properties.key.length; i++) {
+        var val = el.properties.key[i] 
+        if(data.indexOf(val) != -1) {
+          inc = true;
+        }
+      }
+      return inc;
+    })
+    sites.clearLayers()
+    areaServed.clearLayers()
+    sites.addData(mons)  */
+  }
+)
+
+Shiny.addCustomMessageHandler("showArea", 
+  function(data) {
+    
+    for(var i = 0; i < data.length; i++) {
+      if(data[i].length == 1) {
+        L.polygon(data[i][0]).addTo(areaServed)
+          .setStyle(areaSelectStyle)
+          .on("mouseover", highlightAreaServed)
+          .on("mouseout", unhighlightAreaServed)
+      } else {
+        L.multiPolygon([data[i]]).addTo(areaServed)
+          .setStyle(areaSelectStyle)
+          .on("mouseover", highlightAreaServed)
+          .on("mouseout", unhighlightAreaServed)
+      }
+    }
+
+  }
+)
+
+
+
 
 function checkAttributes(layer) {
 

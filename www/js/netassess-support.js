@@ -139,14 +139,53 @@ function highlightFeature(e) {
 	}
 }
 
-function resetHighlight(e) {
-	o3served.resetStyle(e.target);
+// Function to highlight areaServed polygons
+function highlightAreaServed(e) {
+  var layer = e.target;
+  
+  layer.setStyle({
+    weight: 5,
+    color: '#666',
+    dashArray: '',
+    fillOpacity: 0.7
+  });
+  
+  if(!L.Browser.id && !L.Browser.opera) {
+    layer.bringToFront();
+  }
+  
 }
 
-function onEachFeature(feature, layer) {
-	layer.on({
-		mouseover: highlightFeature,
-		mouseout: resetHighlight
-	});
+var areaSelectStyle = {
+    fillColor: '#666',
+    weight: 2,
+    opacity: 0.75,
+    color: 'white',
+    dashArray: '3',
+    fillOpacity: 0.4
+  }
+
+// Function to unhighlight areaServed polygons
+function unhighlightAreaServed(e) {
+  e.target.setStyle(areaSelectStyle);
 }
 
+function createSitePopup(feature, layer) {
+  
+  po = "<span class = 'popup-text'><h4 class = 'popup-header'>Site Information</h4>"
+  po = po + "<span class = 'popup-subheader'>Site ID(s)</span><br />"
+  for(si in feature.properties.site_id) {
+    po = po + feature.properties.site_id[si] + "<br />"
+  }
+  po = po + "<span class = 'popup-subheader'>Parameter Counts</span><br />"
+  po = po + "Total: " + feature.properties.Count + "<br />"
+  po = po + "Criteria: " + feature.properties.Crit_Count + "<br />"
+  po = po + "HAPS: " + feature.properties.HAP_Count + "<br />"
+  po = po + "Met: " + feature.properties.Met_Count + "<br />"
+  
+  
+  po = po + "</span>"
+  
+  layer.bindPopup(po, {minWidth: 150});
+  
+}

@@ -30,58 +30,67 @@ basemaps["Gray"].addTo(map);
 
 // Add Feature Layers to Map
 
-var sites = L.geoJson(null, {
-  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});}
-});
+var areaServed = L.featureGroup(null);
 
-/*
-var o3mon = L.geoJson(null, {
-  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});},
-  onEachFeature: monitorEach
-});
-var pm25mon = L.geoJson(null, {
-  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: pm25Icon});},
-  onEachFeature: monitorEach
-});
-var o3served = L.geoJson();
+var sites = null;
 
-$.ajax({
-  dataType: "json",
-  url: "data/areatest.geojson",
-  success: function(data) {
-    o3served.addData(data);
-  }
-}).error(function() {alert("o3served Error")});
-*/
 $.ajax({
   dataType: "json",
   url: "data/sites.geojson",
   success: function(data) {
-    sites.addData(data);
+    sites = L.geoJson(data, {
+      pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});},
+      onEachFeature: createSitePopup
+    });
+    
+    L.control.layers(basemaps, 
+                 {"Sites": sites, "Area Served": areaServed}, 
+                 {position: 'topleft'})
+                .addTo(map);
+
+    $("div.loading").addClass("hidden");
   }
 }).error(function(a) {
   alert("sites Error")
 });
 
 /*
+var sites = L.geoJson(null, {
+  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});}
+});
+
+var allSites = null;
+
 $.ajax({
   dataType: "json",
   url: "data/sites.geojson",
   success: function(data) {
-    pm25mon.addData(data);
+    allSites = data;
+    $("div.loading").addClass("hidden");
   }
-}).error(function() {alert("pm25mon Error")});
-
-$.ajax({
-  dataType: "json",
-  url: "data/o3mon.geojson",
-  success: function(data) {
-    o3mon.addData(data);
-  }
-}).error(function() {alert("o3mon Error")});
+}).error(function(a) {
+  alert("sites Error")
+});
 */
 // Adds the control to allow user to select visible layers
-L.control.layers(basemaps, {"Sites": sites}, {position: 'topleft'}).addTo(map);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Creates the drawing functions for area selection and then binds them to the appropriate buttons.
 var draw_polygon = new L.Draw.Polygon(map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#bada55'}});
@@ -97,6 +106,7 @@ map.addLayer(aoi);
 map.on('draw:created', setAOI)
 
 // Adds buttons for controlling tools
+L.easyButton("fa-search", function() {toggleSidebars("exp");}, "Network Explorer");
 L.easyButton("fa-crosshairs", function() {toggleSidebars("loc");}, "Select Area of Interest");
 L.easyButton("fa-cogs", function() {toggleSidebars("tools");}, "Tools");
 L.easyButton("fa-question", function() {toggleSidebars("help");}, "Help");
@@ -104,6 +114,7 @@ L.easyButton("fa-info", function() {toggleSidebars("about");}, "About");
 
 // Creates the sidebars
 var sidebars = {
+  exp:   L.control.sidebar('exp-sb', {position: 'right', autoPan: false}),
 	loc:   L.control.sidebar('loc-sb', {position: 'right', autoPan: false}),
 	tools: L.control.sidebar('tools-sb', {position: 'right', autoPan: false}),
 	help:  L.control.sidebar('help-sb', {position: 'right', autoPan: false}),

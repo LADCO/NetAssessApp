@@ -33,14 +33,18 @@
 			<span>NetAssess</span>
 			<span>Ambient Air Monitoring Network Assessment Tool</span>
 		</div>
-	
+	  <div id = "mapBounds"></div>
 		<div id = "map"></div>
-		
+		<div id = "exp-sb" class = "sidebar">
+  	  <h1><i class = "fa fa-search fa-fw"></i> Network Explorer</h1>
+      <p>From this panel you can explore the current ambient air monitoring network in the United States.</p>
+      <p class = "header">Select a Parameter</p>
+      <p>Selecting a parameter from below will display all currently active monitors for that parameter:</p>
+      <div><select id="expParam" style="max-width:100%;"></select></div>
+		</div>
 		<div id = "loc-sb" class = "sidebar">
 			<h1><i class="fa fa-crosshairs  fa-fw"></i> Area of Interest</h1>
       <p>The NetAssess app contains more information than can be displayed at one time. As such, certain decisions must be made before other tools within the app can be accessed. As the user, you must select a geographic area of interest and a set set of parameters. Use this tab to make those selections.</p>
-      <p class = "header">Select a Parameter</p>
-      <p>First you must select a parameter. Once you select a parameter</p>
 			<p class = "header">Select a geography</p>
 			<p>Use the buttons below to define your own area of interest:</p>
 			<div class = "na-draw-buttons">
@@ -68,8 +72,6 @@
 				</div> 
           <select id="areaSelectSelect" multiple = "multiple", size = "4"></select>
         </div>
-        <p class = "header">Parameters</p>
-        <p>Select the parameter(s) you wish to examine:</p>
         
 		</div>
 
@@ -85,6 +87,8 @@
 			<h1><i class="fa fa-info  fa-fw"></i> About</h1>
 		</div>
 		
+    <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
+
 		<script src = "js/netassess-shiny.js"></script>
 		<script src = "js/leaflet.js"></script>
 		<script src = "js/esri-leaflet.js"></script>

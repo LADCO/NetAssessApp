@@ -163,3 +163,47 @@ body {
 .na-draw-buttons > button:first-child {
 
 }
+
+div.loading {
+  position: absolute;
+  left: 48%;
+  top: 48%;
+  background-color: #EEE;
+  border: solid 1px #CCC;
+  border-radius: 3px; 
+  box-shadow: 3px 3px 3px #555;
+  padding: 10px;
+}
+
+div.loading.hidden {
+  display: none;
+}
+
+i.loading {
+  font-size: 50px;
+  font-weight: bold;
+  color: #555;
+}
+
+.hidden {
+  display: none;
+}
+
+.popup-header {
+  font-weight: bold;
+  font-size: 14px;
+  font-family: 'Roboto Condensed', sans-serif;
+  margin-bottom: 4px;
+}
+
+.popup-subheader {
+  text-decoration: underline;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 12px;
+  margin-bottom: 5px;
+  margin-top: 3px;
+}
+
+.popup-text {
+  font-size: 12px;
+}
