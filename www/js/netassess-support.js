@@ -177,11 +177,13 @@ function createSitePopup(feature, layer) {
   for(si in feature.properties.site_id) {
     po = po + feature.properties.site_id[si] + "<br />"
   }
+  po = po + "<span class = 'popup-subheader'>Street Address</span><br />"
+  po = po + feature.properties.Street_Address + "<br />"
   po = po + "<span class = 'popup-subheader'>Parameter Counts</span><br />"
-  po = po + "Total: " + feature.properties.Count + "<br />"
-  po = po + "Criteria: " + feature.properties.Crit_Count + "<br />"
-  po = po + "HAPS: " + feature.properties.HAP_Count + "<br />"
-  po = po + "Met: " + feature.properties.Met_Count + "<br />"
+  po = po + "<b>Total:</b> " + feature.properties.Count + "<br />"
+  po = po + "<b>Criteria:</b> " + feature.properties.Crit_Count + "<br />"
+  po = po + "<b>HAPS:</b> " + feature.properties.HAP_Count + "<br />"
+  po = po + "<b>Met:</b> " + feature.properties.Met_Count + "<br />"
   
   
   po = po + "</span>"

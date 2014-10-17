@@ -12,7 +12,6 @@ shinyServer(function(input, output, session) {
     east = input$mapBounds$bounds[[2]]$lng
     south = input$mapBounds$bounds[[1]]$lat
     west = input$mapBounds$bounds[[1]]$lng
-    print(input$mapBounds$zoom)
     vert = min((north - south) / 2, 4)
     horz = min(abs(west - east) / 2, 4)
     
@@ -42,32 +41,44 @@ shinyServer(function(input, output, session) {
     } else {return(NULL)}
   })
   
-  observe({
+  polygons <- reactive({
     if(!is.null(sites())) {
-      ss <- Sys.time()
-      keys <- unique(sites()$Key)
-      session$sendCustomMessage(type="showMonitors", keys)
-      
       if(input$expParam %in% aSapp & nrow(sites()) <= 400 & nrow(sites()) >= 2) {
-        print(ss)
         v <- voronoi(sites()$Key, sites()$Latitude, sites()$Longitude, usborder)
         ov <- over(localTracts(), v)
         t <- cbind(localTracts()@data, ov)
         t <- t[!is.na(t$id), ]
         d <- aggregate(t[, 3:47], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
-        voronoi <- lapply(v@polygons, function(p) {
-          lapply(p@Polygons, function(pp) {
-            coords <- pp@coords
-            apply(coords, 1, function(r) {
-              list(lat = r[[2]], lng = r[[1]])
-            })
+        proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
+        area <- areaPolygons(v, CRS("+init=epsg:2163"))
+        v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
+        v@data <- cbind(v@data, area = area)
+        ids <- sapply(v@data$id, function(i) {strsplit(i, " ")[[1]][1]})
+        v@data$id <- ids
+      } else {v <- NULL}
+    } else {v <- NULL}
+    return(v)
+  })
+  
+  observe({
+    if(!is.null(sites())) {
+      ss <- Sys.time()
+      keys <- unique(sites()$Key)
+      session$sendCustomMessage(type="showMonitors", keys)
+    }
+  })
+  
+  observe({
+    if(!is.null(polygons())) {
+      v <- lapply(polygons()@polygons, function(p) {
+        lapply(p@Polygons, function(pp) {
+          coords <- pp@coords
+          apply(coords, 1, function(r) {
+            list(lat = r[[2]], lng = r[[1]])
           })
         })
-        proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
-        (areaPolygons(v, CRS("+init=epsg:2163")))
-        session$sendCustomMessage(type = "showArea", voronoi)
-      }
-      print(Sys.time() - ss)
+      })
+      session$sendCustomMessage(type = "showArea", v)
     }
   })
   
@@ -110,6 +121,16 @@ shinyServer(function(input, output, session) {
     
   })
 
+  output$agePlot <- renderPlot({
+    
+    data <- polygons()@data
+    ggplot(data=data,aes(x=as.factor(v),fill=g)) + 
+      geom_bar(subset=.(g=="F")) + 
+      geom_bar(subset=.(g=="M"),aes(y=..count..*(-1))) + 
+      scale_y_continuous(breaks=seq(-40,40,10),labels=abs(seq(-40,40,10))) + 
+      coord_flip()
+    
+  })
 
 })
 

@@ -2,6 +2,8 @@ library(RSQLite)
 library(sp)
 library(deldir)
 library(rgeos)
+require(ggplot2)
+require(plyr)
 
 source("R/voronoi.R")
 load("data/tracts.rda")

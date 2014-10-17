@@ -68,19 +68,7 @@ Shiny.addCustomMessageHandler("showMonitors",
         $($(sites._layers[key])[0]._icon).toggleClass("hidden", !inc)
       }
     }
-/*    var mons = allSites.features.filter(function(el) {
-      var inc = false;
-      for(var i = 0; i < el.properties.key.length; i++) {
-        var val = el.properties.key[i] 
-        if(data.indexOf(val) != -1) {
-          inc = true;
-        }
-      }
-      return inc;
-    })
-    sites.clearLayers()
     areaServed.clearLayers()
-    sites.addData(mons)  */
   }
 )
 
