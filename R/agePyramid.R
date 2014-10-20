@@ -1,4 +1,5 @@
 library(ggplot2)
+library(plyr)
 
 agePyramid <- function(df, id) {
 
@@ -27,8 +28,8 @@ agePyramid <- function(df, id) {
   ss <- seq(-ceiling(m/s) * s, ceiling(m/s) * s, s*2)
   
   gg <- ggplot(d) +
-        geom_bar(subset=.(Gender=="Male"), aes(x=Age, y=Count*(-1), fill = Gender), stat = "identity") + 
-        geom_bar(subset=.(Gender=="Female"), aes(x=Age, y=Count, fill = Gender), stat = "identity") + 
+        geom_bar(subset=plyr::.(Gender=="Male"), aes(x=Age, y=Count*(-1), fill = Gender), stat = "identity") + 
+        geom_bar(subset=plyr::.(Gender=="Female"), aes(x=Age, y=Count, fill = Gender), stat = "identity") + 
         scale_y_continuous(breaks=ss, labels = abs(ss)) + ylab("Count") +
         coord_flip() + theme(legend.position="bottom")
   

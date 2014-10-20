@@ -124,10 +124,16 @@ shinyServer(function(input, output, session) {
   output$agePlot <- renderPlot({
     if(!is.null(input$monitorSelect)) {
       title <- isolate(sites()[sites()$Key %in% input$monitorSelect, ])
-      title <- paste0("Population served by ",
-                      sprintf("%02i-%03i-%04i", title$State_Code, title$County_Code, title$Site_ID))
-      gg <- agePyramid(isolate(polygons()@data), input$monitorSelect) + ggtitle(title)
-      print(gg)
+      if(nrow(title) > 0) {
+      
+        title <- paste0("Population served by ",
+                        sprintf("%02i-%03i-%04i", title$State_Code, title$County_Code, title$Site_ID))
+        gg <- agePyramid(polygons()@data, input$monitorSelect) + ggtitle(title)
+        print(gg)
+      } else {
+        return(NULL)
+      }  
+      
     }
   }, width = 400, height = 450)
 
