@@ -189,5 +189,9 @@ function createSitePopup(feature, layer) {
   po = po + "</span>"
   
   layer.bindPopup(po, {minWidth: 150});
+  layer.on("click", function(el) {
+    $("#monitorSelect").data("monitor", this.feature.properties.key)
+    $("#map").trigger("monitorSelect")
+  })
   
 }

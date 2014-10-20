@@ -23,7 +23,27 @@ $.extend(mapBoundsBinding, {
 })
 Shiny.inputBindings.register(mapBoundsBinding);
 
-
+var monSelectBinding = new Shiny.InputBinding();
+$.extend(monSelectBinding, {
+  find: function(scope) {
+    return $(scope).find("#monitorSelect")
+  },
+  getValue: function(el) {
+    return $(el).data("monitor");
+  },
+  setValue: function(el, value) {
+    $(el).data("monitor", value)
+  },
+  subscribe: function(el, callback) {
+    $("#map").on("monitorSelect", function(el) {
+      callback();
+    })
+  },
+  unsubscribe: function(el) {
+    $(el).off("click.netassess")
+  }
+})
+Shiny.inputBindings.register(monSelectBinding);
 
 Shiny.addCustomMessageHandler("addOverlay", 
   function(data) {

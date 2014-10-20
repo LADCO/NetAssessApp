@@ -31,7 +31,7 @@ shinyServer(function(input, output, session) {
   sites <- reactive({
     if(!is.null(input$expParam)) {
       if(input$expParam != -1) {
-        site.list <- dbGetQuery(db, paste0("SELECT sites.Key, sites.Latitude, sites.Longitude FROM sites JOIN monitors ON sites.Key =  monitors.Site_Key WHERE monitors.PARAMETER = ", input$expParam))
+        site.list <- dbGetQuery(db, paste0("SELECT sites.Key, sites.State_Code, sites.County_Code, sites.Site_ID, sites.Latitude, sites.Longitude FROM sites JOIN monitors ON sites.Key =  monitors.Site_Key WHERE monitors.PARAMETER = ", input$expParam))
         site.list <- unique(site.list[site.list$Latitude <= bbox()$north & 
                                       site.list$Latitude >= bbox()$south &
                                       site.list$Longitude >= bbox()$west &
@@ -122,15 +122,14 @@ shinyServer(function(input, output, session) {
   })
 
   output$agePlot <- renderPlot({
-    
-    data <- polygons()@data
-    ggplot(data=data,aes(x=as.factor(v),fill=g)) + 
-      geom_bar(subset=.(g=="F")) + 
-      geom_bar(subset=.(g=="M"),aes(y=..count..*(-1))) + 
-      scale_y_continuous(breaks=seq(-40,40,10),labels=abs(seq(-40,40,10))) + 
-      coord_flip()
-    
-  })
+    if(!is.null(input$monitorSelect)) {
+      title <- isolate(sites()[sites()$Key %in% input$monitorSelect, ])
+      title <- paste0("Population served by ",
+                      sprintf("%02i-%03i-%04i", title$State_Code, title$County_Code, title$Site_ID))
+      gg <- agePyramid(isolate(polygons()@data), input$monitorSelect) + ggtitle(title)
+      print(gg)
+    }
+  }, width = 400, height = 450)
 
 })
 
