@@ -121,7 +121,7 @@ body {
 	width: auto;
 }
 
-.sidebar .header {
+.header {
 	color: #2c3e50;
 	font-weight: 700;
 	font-size: 1.1em;
@@ -206,4 +206,50 @@ i.loading {
 
 .popup-text {
   font-size: 12px;
+}
+
+
+#aoi {
+  position: absolute;
+  width: 400px;
+  left: 48%;
+  top: 48%;
+  background-color: #EEE;
+  border: solid 1px #CCC;
+  border-radius: 5px; 
+  box-shadow: 3px 3px 3px #555;
+  padding: 20px;
+}
+
+#aoi .close {
+  
+  position: absolute;
+  color: white !important;
+  right: 3px;
+  top: 4px;
+  width: 19px;
+  height: 19px;
+  color: #333;
+  font-size: 15px;
+  line-height: 1em;
+  text-align: center;
+  cursor: pointer;
+  z-index: 8;
+  
+}
+
+#aoihandle {
+  position: absolute;
+  font-family: 'Roboto Condensed', sans-serif;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding-left: 10px;
+  top: 0px;
+  left: 0px;
+  width: 400px;
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: #2c3e50;
+  height: 25px;
+  color: white;
 }

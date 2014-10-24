@@ -42,12 +42,28 @@
       <p class = "header">Select a Parameter</p>
       <p>Selecting a parameter from below will display all currently active monitors for that parameter:</p>
       <div><select id="expParam" style="max-width:100%;"></select></div>
+      <p class = "header">Select and Area of Interest</p>
+      <p>You can further refine the geographic area of interest by clicking the button below:</p>
+      <center><button id = "ne-open" style = "width: 50px; height: 50px;"><i class = "fa fa-fw fa-crosshairs fa-2x"></i></button></center>
       <div id = 'agePlot' class="shiny-plot-output" style = 'width: 100%; text-align: center;'></div>
 		</div>
-		<div id = "loc-sb" class = "sidebar">
-			<h1><i class="fa fa-crosshairs  fa-fw"></i> Area of Interest</h1>
-      <p>The NetAssess app contains more information than can be displayed at one time. As such, certain decisions must be made before other tools within the app can be accessed. As the user, you must select a geographic area of interest and a set set of parameters. Use this tab to make those selections.</p>
-			<p class = "header">Select a geography</p>
+
+		<div id = "tools-sb" class = "sidebar">
+			<h1><i class="fa fa-cogs  fa-fw"></i>Monitor Statistics</h1>
+		</div>
+		
+		<div id = "help-sb" class = "sidebar">
+			<h1><i class="fa fa-question  fa-fw"></i> Help</h1>
+		</div>
+		
+		<div id = "about-sb" class = "sidebar">
+			<h1><i class="fa fa-info  fa-fw"></i> About</h1>
+		</div>
+		
+    <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
+    <div id = "aoi">
+      <div id = "aoihandle">Area of Interest</div>
+      <p class = "header">Select a geography</p>
 			<p>Use the buttons below to define your own area of interest:</p>
 			<div class = "na-draw-buttons">
 				<button id = "draw_polygon" class = "na-draw-button" title = "Define a Polygon"><img src = "images/glyphicons_096_vector_path_polygon.png" /></button>
@@ -71,25 +87,11 @@
 					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA" />
 					<span>CSA</span>
 				  </label>
-				</div> 
-          <select id="areaSelectSelect" multiple = "multiple", size = "4"></select>
+          <select id="areaSelectSelect" style = "width: 90%; margin: auto;"></select>
         </div>
-        
-		</div>
-
-		<div id = "tools-sb" class = "sidebar">
-			<h1><i class="fa fa-cogs  fa-fw"></i>Monitor Statistics</h1>
-		</div>
-		
-		<div id = "help-sb" class = "sidebar">
-			<h1><i class="fa fa-question  fa-fw"></i> Help</h1>
-		</div>
-		
-		<div id = "about-sb" class = "sidebar">
-			<h1><i class="fa fa-info  fa-fw"></i> About</h1>
-		</div>
-		
-    <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
+        <button style = "float: right">Okay</button>
+        <a class = "close"><i class = "fa fa-close"></i></a>
+    </div>
 
 		<script src = "js/netassess-shiny.js"></script>
 		<script src = "js/leaflet.js"></script>

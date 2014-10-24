@@ -107,7 +107,6 @@ map.on('draw:created', setAOI)
 
 // Adds buttons for controlling tools
 L.easyButton("fa-search", function() {toggleSidebars("exp");}, "Network Explorer");
-L.easyButton("fa-crosshairs", function() {toggleSidebars("loc");}, "Select Area of Interest");
 L.easyButton("fa-cogs", function() {toggleSidebars("tools");}, "Tools");
 L.easyButton("fa-question", function() {toggleSidebars("help");}, "Help");
 L.easyButton("fa-info", function() {toggleSidebars("about");}, "About"); 
@@ -115,7 +114,6 @@ L.easyButton("fa-info", function() {toggleSidebars("about");}, "About");
 // Creates the sidebars
 var sidebars = {
   exp:   L.control.sidebar('exp-sb', {position: 'right', autoPan: false}),
-	loc:   L.control.sidebar('loc-sb', {position: 'right', autoPan: false}),
 	tools: L.control.sidebar('tools-sb', {position: 'right', autoPan: false}),
 	help:  L.control.sidebar('help-sb', {position: 'right', autoPan: false}),
 	about: L.control.sidebar('about-sb', {position: 'right', autoPan: false})
@@ -127,3 +125,7 @@ for(var sb in sidebars) {
 		map.addControl(sidebars[sb]);
 	}
 };
+
+$('#aoi').drags({handle: "#aoihandle"});
+$("#aoi .close").on('click', function() {$("#aoi").css("display", "none")})
+$("#ne-open").on("click", function() {$("#aoi").css("display", "block")})
