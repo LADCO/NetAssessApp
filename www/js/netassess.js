@@ -6,6 +6,8 @@ $(window).resize(function() {
 	resizeMap();
 })
 
+resetPredefinedAreaSelect()
+
 // Define coordinates of the Continental United States
 var us = {bounds: L.latLngBounds([24.4, -124.8], [49.4, -66.9]), center: L.latLng([39.8333, -98.5833])}
 
@@ -109,7 +111,10 @@ var aoi = new L.FeatureGroup();
 map.addLayer(aoi);
 aoi.clearLayers();
 
-map.on('draw:created', setAOI)
+map.on('draw:created', function(e) {
+  setAOI(e)
+  resetPredefinedAreaSelect()
+})
 
 // Adds buttons for controlling tools
 L.easyButton("fa-search", function() {toggleSidebars("exp");}, "Network Explorer");

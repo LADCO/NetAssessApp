@@ -1,3 +1,8 @@
+function resetPredefinedAreaSelect() {
+  $('input[name=areaSelect]').attr('checked', false);
+  document.getElementById('areaSelectSelect').selectedIndex = -1;
+}
+
 var loading = {
   show: function() {
     $("div.loading").removeClass("hidden");
@@ -40,7 +45,17 @@ function setAOI(e) {
   
 	function checkPolygon(x) {
 
-		if(pip(x._latlng, this)) {
+    var inside = false;
+    
+    if(this.hasOwnProperty("_layers")) {
+      this.eachLayer(function(layer) {
+        if(pip(x._latlng, layer)) {inside = true}
+      })
+    } else {
+      inside = pip(x._latlng, this);
+    }
+    
+		if(inside) {
 			$(x._icon).addClass("selected");
 			x.feature.properties.selected = true;
 		} else {
@@ -66,7 +81,7 @@ function setAOI(e) {
 	aoi.addLayer(l);
 	
 	aoi.on("click", function(l) {
-		map.fitBounds(l.getBounds());
+		map.fitBounds(l.layer.getBounds());
 	})
 	
 	if(t == "polygon") {
