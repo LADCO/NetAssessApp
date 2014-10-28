@@ -32,23 +32,28 @@ basemaps["Gray"].addTo(map);
 
 var areaServed = L.featureGroup(null);
 
+var site_data = null;
 var sites = null;
 
 $.ajax({
   dataType: "json",
   url: "data/sites.geojson",
   success: function(data) {
-    sites = L.geoJson(data, {
-      pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});},
+    site_data = data;
+    for(var i = 0; i < site_data.features.length; i++) {
+      site_data.features[i].properties.visible = false;
+      site_data.features[i].properties.selected = false;
+    };
+    sites = L.geoJson(site_data, {
+      pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: siteIcon});},
       onEachFeature: createSitePopup
-    });
-    
+    }).addTo(map);
     L.control.layers(basemaps, 
-                 {"Sites": sites, "Area Served": areaServed}, 
+                 null, 
                  {position: 'topleft'})
                 .addTo(map);
 
-    $("div.loading").addClass("hidden");
+    loading.hide();
   }
 }).error(function(a) {
   alert("sites Error")
@@ -102,6 +107,7 @@ $("#draw_circle").on('click', function() {draw_circle.enable()});
 
 var aoi = new L.FeatureGroup();
 map.addLayer(aoi);
+aoi.clearLayers();
 
 map.on('draw:created', setAOI)
 
@@ -127,5 +133,6 @@ for(var sb in sidebars) {
 };
 
 $('#aoi').drags({handle: "#aoihandle"});
-$("#aoi .close").on('click', function() {$("#aoi").css("display", "none")})
-$("#ne-open").on("click", function() {$("#aoi").css("display", "block")})
+$("#aoi .minimize").on('click', function() {$("#aoi").toggleClass("minimized").toggleClass("open").removeClass("closed")})
+$("#aoi .close").on('click', function() {$("#aoi").addClass("closed").removeClass("open").removeClass("minimized")})
+$("#ne-open").on("click", function() {$("#aoi").addClass("open").removeClass("closed").removeClass("minimized")})

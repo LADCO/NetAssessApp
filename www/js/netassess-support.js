@@ -1,3 +1,12 @@
+var loading = {
+  show: function() {
+    $("div.loading").removeClass("hidden");
+  },
+  hide: function() {
+    $("div.loading").addClass("hidden");
+  }
+}
+
 // Set the dimensions of the map div to fill all available space
 function resizeMap() {
 	document.getElementById("map").style.width = window.innerWidth + "px";
@@ -20,8 +29,15 @@ function toggleSidebars(sb) {
 }
 
 function setAOI(e) {
-
 	
+  if(e.hasOwnProperty("layer")) {
+    var l = e.layer;
+    var t = e.layerType;
+  } else {
+    var l = e;
+    var t = "polygon";
+  }
+  
 	function checkPolygon(x) {
 
 		if(pip(x._latlng, this)) {
@@ -47,36 +63,25 @@ function setAOI(e) {
   }
 
 	aoi.clearLayers();
-	aoi.addLayer(e.layer);
+	aoi.addLayer(l);
 	
-	aoi.on("click", function(e) {
-		map.fitBounds(e.layer.getBounds());
+	aoi.on("click", function(l) {
+		map.fitBounds(l.getBounds());
 	})
 	
-	if(e.layerType == "polygon") {
-		sites.eachLayer(checkPolygon, e.layer);
-		//pm25mon.eachLayer(checkPolygon, e.layer);
-	} else if(e.layerType == "rectangle") {
-  	sites.eachLayer(checkPolygon, e.layer);
-		//pm25mon.eachLayer(checkPolygon, e.layer);
-	} else if(e.layerType == "circle") {
-    sites.eachLayer(checkCircle, e.layer);
-		//pm25mon.eachLayer(checkCircle, e.layer);
+	if(t == "polygon") {
+		sites.eachLayer(checkPolygon, l);
+	} else if(t == "rectangle") {
+  	sites.eachLayer(checkPolygon, l);
+	} else if(t == "circle") {
+    sites.eachLayer(checkCircle, l);
 	} else {
 		alert("Unknown Input")
 	}
+  
+  displaySites();
 
 }
-
-
-
-function monitorEach(feature, layer) {
-		layer.on("add", function(e) {
-			if(this.feature.properties.selected) {
-				$(this._icon).addClass("selected");
-			}
-		})
-	}
 
 // Function to test if point falls within a polygon
 // Converted from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
@@ -97,18 +102,7 @@ function pip(point, polygon) {
 }
 
 // Functions for styling map elements
-var o3Icon = L.divIcon({className: 'map-icon o3-icon'});
-var pm25Icon = L.divIcon({className: 'map-icon pm-icon'});
-
-function toggleMarker(a) {
-	if(this.feature.properties.selected) {
-		this.feature.properties.selected = false;
-		$(this._icon).removeClass("selected");
-	} else {
-		this.feature.properties.selected = true;
-		$(this._icon).addClass("selected");
-	}
-}
+var siteIcon = L.divIcon({className: 'site-icon hidden'});
 
 function getColor(d) {
 	return d > 750 ? "#800026":
@@ -170,6 +164,23 @@ function unhighlightAreaServed(e) {
   e.target.setStyle(areaSelectStyle);
 }
 
+function displaySites() {
+  
+  sites.eachLayer(function(layer) {
+    if(layer.feature.properties.visible == false) {
+      $(layer._icon).addClass("hidden");
+    } else {
+      $(layer._icon).removeClass("hidden");
+      if(layer.feature.properties.selected == false) {
+        $(layer._icon).removeClass("selected");
+      } else {
+        $(layer._icon).addClass("selected");
+      }
+    }
+  });
+  
+}
+
 function createSitePopup(feature, layer) {
   
   po = "<span class = 'popup-text'><h4 class = 'popup-header'>Site Information</h4>"
@@ -184,7 +195,6 @@ function createSitePopup(feature, layer) {
   po = po + "<b>Criteria:</b> " + feature.properties.Crit_Count + "<br />"
   po = po + "<b>HAPS:</b> " + feature.properties.HAP_Count + "<br />"
   po = po + "<b>Met:</b> " + feature.properties.Met_Count + "<br />"
-  
   
   po = po + "</span>"
   

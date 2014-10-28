@@ -115,7 +115,7 @@ shinyServer(function(input, output, session) {
 
       coords <- eval(parse(text = dbGetQuery(db, q)[1,1]))
       
-      session$sendCustomMessage(type="displayArea", list(properties = list(name = "test", type = type, id = input$areaSelectSelect), coords = coords))
+      session$sendCustomMessage(type="displayPredefinedArea", list(properties = list(name = "test", type = type, id = input$areaSelectSelect), coords = coords))
       
     }
     

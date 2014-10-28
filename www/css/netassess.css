@@ -55,43 +55,35 @@ body {
 }
 
 /* Map Icon Styling */
-.map-icon {
-  
+.site-icon {
   border: solid 1px black;
   border-radius: 10px;
   box-shadow: 1px 1px 1px 1px rgba(128, 128, 128, 0.5);
   opacity: 0.67;
-  
 }
 
-.o3-icon.selected {
-	background-color: rgb(255, 64, 64);
-}
-
-.o3-icon:not(.selected) {
-	background-color: rgb(128, 0, 0);
-}
-
-.pm-icon.selected {
-	background-color: rgb(64, 64, 255);
-}
-
-.pm-icon:not(.selected) {
-	background-color: rgb(0, 0, 128);
-}
-
-.map-icon.selected {
+.site-icon.selected {
+  background-color: rgb(255, 64, 64);
   width: 10px !important;
   height: 10px !important;
   margin-left: -5px !important;
   margin-top: -5px !important;
 }
 
-.map-icon:not(.selected) {
+.site-icon:not(.selected) {
+  background-color: rgb(128, 0, 0);
   width: 7px !important;
   height: 7px !important;
   margin-left: -4px !important;
   margin-top: -4px !important;
+}
+
+.site-icon.hidden {
+  display: none;
+}
+
+.site-icon:not(.hidden) {
+  display: block;
 }
 
 .fa-context {
@@ -212,13 +204,16 @@ i.loading {
 #aoi {
   position: absolute;
   width: 400px;
-  left: 48%;
-  top: 48%;
+  overflow-y: hidden;
+  left: 50px;
+  top: 50px;
   background-color: #EEE;
   border: solid 1px #CCC;
   border-radius: 5px; 
   box-shadow: 3px 3px 3px #555;
-  padding: 20px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 #aoi .close {
@@ -227,6 +222,23 @@ i.loading {
   color: white !important;
   right: 3px;
   top: 4px;
+  width: 19px;
+  height: 19px;
+  color: #333;
+  font-size: 15px;
+  line-height: 1em;
+  text-align: center;
+  cursor: pointer;
+  z-index: 8;
+  
+}
+
+#aoi .minimize {
+  
+  position: absolute;
+  color: white !important;
+  right: 25px;
+  top: 9px;
   width: 19px;
   height: 19px;
   color: #333;
@@ -252,4 +264,30 @@ i.loading {
   background-color: #2c3e50;
   height: 25px;
   color: white;
+}
+
+#aoi.open {
+  height: 400px;
+  display: block;
+  transition: height 1s;
+  padding-bottom: 20px;
+  -moz-transition: height 1s;
+  -webkit-transition: height 1s;
+  -o-transition: height 1s;
+}
+
+#aoi.closed {
+  display: none;
+  height: 400px;
+}
+
+#aoi.minimized {
+  display: block;
+  height: 5px;
+  padding-bottom: 0px;
+  overflow-y: hidden;
+  transition: height 1s;
+  -moz-transition: height 1s;
+  -webkit-transition: height 1s;
+  -o-transition: height 1s;
 }

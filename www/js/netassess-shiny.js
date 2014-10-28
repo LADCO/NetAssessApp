@@ -54,19 +54,14 @@ Shiny.addCustomMessageHandler("addOverlay",
   }
 );
 
-Shiny.addCustomMessageHandler("displayArea",
+Shiny.addCustomMessageHandler("displayPredefinedArea",
   function(data) {
-	if(data.coords.length == 1) {
-		var x = L.polygon(data.coords[0]);
-	} else if(data.coords.length > 1) {
-		var x = L.multiPolygon(data.coords);
-	}
-	aoi.clearLayers();
-	aoi.addLayer(x);
-	
-	o3mon.eachLayer(checkAttributes, data.properties);
-	pm25mon.eachLayer(checkAttributes, data.properties);
-	
+  	if(data.coords.length == 1) {
+  		var x = L.polygon(data.coords[0]);
+  	} else if(data.coords.length > 1) {
+  		var x = L.multiPolygon(data.coords);
+  	}
+    setAOI(x);	
   }
 );
 
@@ -85,10 +80,11 @@ Shiny.addCustomMessageHandler("showMonitors",
             inc = true;
           }
         }
-        $($(sites._layers[key])[0]._icon).toggleClass("hidden", !inc)
+        el.properties.visible = inc;
       }
     }
     areaServed.clearLayers()
+    displaySites();
   }
 )
 
