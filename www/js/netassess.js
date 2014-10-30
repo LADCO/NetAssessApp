@@ -8,11 +8,25 @@ $(window).resize(function() {
 
 resetPredefinedAreaSelect()
 
+$("#expParam").select2({width: "350px"});
+$("#areaSelectSelect").select2({width: "100%"});
+
 // Define coordinates of the Continental United States
 var us = {bounds: L.latLngBounds([24.4, -124.8], [49.4, -66.9]), center: L.latLng([39.8333, -98.5833])}
 
 // Create the map object
 var map = L.map('map', {
+  contextmenu: true,
+  contextmenuWidth: 140,
+  contextmenuItems: [{
+    text: "Full Extent",
+    iconCls: "fa fa-search-minus",
+    callback: fullExtent
+  }, {
+    text: "Area of Interest",
+    iconCls: "fa fa-crosshairs",
+    callback: areaOfInterest
+  }],
 	drawControl: false, 
 	zoomControl: false,
 	maxZoom: 12, 
@@ -31,8 +45,8 @@ var basemaps = {
 basemaps["Gray"].addTo(map);
 
 // Add Feature Layers to Map
-
-var areaServed = L.featureGroup(null);
+    
+var areaServed = L.featureGroup(null).addTo(map);
 
 var site_data = null;
 var sites = null;
@@ -47,11 +61,17 @@ $.ajax({
       site_data.features[i].properties.selected = false;
     };
     sites = L.geoJson(site_data, {
-      pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: siteIcon});},
+      pointToLayer: function(feature, latlon) {
+          var mark = new L.marker(latlon, {contextmenu: true, icon: siteIcon});
+          mark.options.contextmenuItems = [{text: "Toggle Selected", index: 0, callback: toggleSelected, context: mark},
+                                           {text: "Hide Monitor", index: 1, callback: hideMonitor, context: mark},
+                                           {separator: true, index: 2}];
+          return mark;
+      },
       onEachFeature: createSitePopup
     }).addTo(map);
     L.control.layers(basemaps, 
-                 null, 
+                null, 
                  {position: 'topleft'})
                 .addTo(map);
 
@@ -60,44 +80,6 @@ $.ajax({
 }).error(function(a) {
   alert("sites Error")
 });
-
-/*
-var sites = L.geoJson(null, {
-  pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: o3Icon});}
-});
-
-var allSites = null;
-
-$.ajax({
-  dataType: "json",
-  url: "data/sites.geojson",
-  success: function(data) {
-    allSites = data;
-    $("div.loading").addClass("hidden");
-  }
-}).error(function(a) {
-  alert("sites Error")
-});
-*/
-// Adds the control to allow user to select visible layers
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Creates the drawing functions for area selection and then binds them to the appropriate buttons.
 var draw_polygon = new L.Draw.Polygon(map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#bada55'}});
@@ -140,4 +122,7 @@ for(var sb in sidebars) {
 $('#aoi').drags({handle: "#aoihandle"});
 $("#aoi .minimize").on('click', function() {$("#aoi").toggleClass("minimized").toggleClass("open").removeClass("closed")})
 $("#aoi .close").on('click', function() {$("#aoi").addClass("closed").removeClass("open").removeClass("minimized")})
-$("#ne-open").on("click", function() {$("#aoi").addClass("open").removeClass("closed").removeClass("minimized")})
+$("#ne-open").on("click", areaOfInterest)
+
+$("#full_extent").on("click", fullExtent)
+$("#aoi_button").on("click", areaOfInterest)

@@ -10,8 +10,6 @@ load("data/usborder.rda")
 
 db <- dbConnect(SQLite(), dbname = "data/netassess.sqlite")
 
-aSapp <- c(42401, 44201, 88101, 88502)
-
 states <- unique(dbGetQuery(db, "SELECT CODE, NAME FROM states"))
 state.list <- states$CODE
 names(state.list) <- states$NAME

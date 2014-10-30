@@ -1,3 +1,24 @@
+function fullExtent() {
+  map.fitBounds(us.bounds);
+}
+
+function areaOfInterest() {
+  $("#aoi").addClass("open").removeClass("closed").removeClass("minimized");
+}
+
+
+function toggleSelected() {
+  this.feature.properties.selected = !this.feature.properties.selected
+  $(this._icon).toggleClass("selected", this.feature.properties.selected);
+  $("#map").trigger("siteSelection");
+}
+
+function hideMonitor() {
+  this.feature.properties.visible = false;
+  $(this._icon).addClass("hidden");
+  $("#map").trigger("siteSelection");
+}
+
 function resetPredefinedAreaSelect() {
   $('input[name=areaSelect]').attr('checked', false);
   document.getElementById('areaSelectSelect').selectedIndex = -1;
@@ -95,6 +116,7 @@ function setAOI(e) {
 	}
   
   displaySites();
+  $("#map").trigger("siteSelection")
 
 }
 

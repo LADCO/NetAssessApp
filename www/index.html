@@ -22,6 +22,7 @@
 		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.draw.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/L.Control.Sidebar.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/font-awesome.min.css" />
+    <link type = "text/css" rel = "stylesheet" href = "css/select2.css" />
 
 		<link type = "text/css" rel = "stylesheet" href = "css/netassess.css" />
 
@@ -33,22 +34,31 @@
 			<span>NetAssess</span>
 			<span>Ambient Air Monitoring Network Assessment Tool</span>
       <span class = "right-items">
-        <span class = "header-button"><i class = "fa fa-fw fa-search-minus"></i></span>
+        <div class = "header-item"><select id="expParam"></select></div>
+        <div class = "header-divider"></div>
+        <button class = "header-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served"><img style = "vertical-align: middle;" src = "images/area_served.png"></button>
+        <div class = "header-divider"></div>
+        <button class = "header-button" id = "bookmarks" title = "Bookmark Location"><i class = "fa fa-bookmark"></i></button>
+        <div class = "header-divider"></div>
+        <button class = "header-button" id = "aoi_button" title = "Set Area of Interest"><i class = "fa fa-crosshairs"></i></button>
+        <div class = "header-divider"></div>
+        <button class = "header-button" id = "full_extent" title = "Zoom to Continental US"><i class = "fa fa-search-minus"></i></button>
       </span>
 		</div>
-	  <div id = "mapBounds"></div>
+	  <div id = "mapState"></div>
     <div id = "monitorSelect"></div>
+    <div id = "selectedSites"></div>
 		<div id = "map"></div>
 		<div id = "exp-sb" class = "sidebar">
   	  <h1><i class = "fa fa-search fa-fw"></i> Network Explorer</h1>
       <p>From this panel you can explore the current ambient air monitoring network in the United States.</p>
       <p class = "header">Select a Parameter</p>
       <p>Selecting a parameter from below will display all currently active monitors for that parameter:</p>
-      <div><select id="expParam" style="max-width:100%;"></select></div>
-      <p class = "header">Select and Area of Interest</p>
-      <p>You can further refine the geographic area of interest by clicking the button below:</p>
-      <center><button id = "ne-open" style = "width: 50px; height: 50px;"><i class = "fa fa-fw fa-crosshairs fa-2x"></i></button></center>
-      <div id = 'agePlot' class="shiny-plot-output" style = 'width: 100%; text-align: center;'></div>
+      <div></div>
+      <p class = "header">View Area Served</p>
+      <p>You can see statistics about the area served by a monitor by first selecting an area of interest with the Area of Interest tool. Click the <i class = "fa fa-crosshairs"></i> button in the menubar above to select an area of interest.</p>
+      <p>Once an area of interest is selected you can click the button below to view the areas served by monitors within that area.</p>
+
 		</div>
 
 		<div id = "tools-sb" class = "sidebar">
@@ -103,7 +113,11 @@
 		<script src = "js/leaflet.contextmenu.js"></script>
 		<script src = "js/L.Control.Sidebar.js"></script>
 		<script src = "js/easy-button.js"></script>
-		
+    <script src = "js/heatmap.js"></script>
+    <script src = "js/leaflet-heatmap.js"></script>
+		<script src = "js/select2.min.js"></script>
+    
+    
 		<script src = "js/netassess-support.js"></script>
 		<script src = "js/netassess.js"></script>
 

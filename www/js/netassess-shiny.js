@@ -1,10 +1,10 @@
-var mapBoundsBinding = new Shiny.InputBinding();
-$.extend(mapBoundsBinding, {
+var mapStateBinding = new Shiny.InputBinding();
+$.extend(mapStateBinding, {
   find: function(scope) {
-    return $(scope).find("#mapBounds")
+    return $(scope).find("#mapState")
   },
   getValue: function(el) {
-    return {bounds: map.getBounds(), zoom: map.getZoom()};
+    return {bounds: map.getBounds(), zoom: map.getZoom(), center: map.getCenter()};
   },
   setValue: function(el, value) {
     map.fitBounds(value);
@@ -15,13 +15,49 @@ $.extend(mapBoundsBinding, {
     })
   },
   getRatePolicy: function() {
-    return {policy: 'debounce', delay: 3000};
+    return {policy: 'debounce', delay: 500};
   },
   unsubscribe: function(el) {
     $(el).off("viewreset");
   }
 })
-Shiny.inputBindings.register(mapBoundsBinding);
+Shiny.inputBindings.register(mapStateBinding);
+
+var selectedSitesBinding = new Shiny.InputBinding()
+$.extend(selectedSitesBinding, {
+  find: function(scope) {
+    return $(scope).find("#selectedSites")
+  },
+  getValue: function(el) {
+    if(sites != null) {
+      var selSites = [];
+      sites.eachLayer(function(layer) {
+          if(layer.feature.properties.selected & layer.feature.properties.visible) {
+              selSites.push(layer.feature.properties.key)
+          }
+      })
+      return selSites;
+    }
+  },
+  subscribe: function(el, callback) {
+    $("#map").on("siteSelection", callback);
+  },
+  unsubscribe: function(el) {
+    $("#map").off("siteSelection");
+  }  
+})
+Shiny.inputBindings.register(selectedSitesBinding);
+
+
+
+
+
+
+
+
+
+
+
 
 var monSelectBinding = new Shiny.InputBinding();
 $.extend(monSelectBinding, {
@@ -85,12 +121,20 @@ Shiny.addCustomMessageHandler("showMonitors",
     }
     areaServed.clearLayers()
     displaySites();
+    $("#map").trigger("siteSelection");
+  }
+)
+
+Shiny.addCustomMessageHandler("showAlert",
+  function(data) {
+  
+    alert(data);
   }
 )
 
 Shiny.addCustomMessageHandler("showArea", 
   function(data) {
-    
+    areaServed.clearLayers()
     for(var i = 0; i < data.length; i++) {
       if(data[i].length == 1) {
         L.polygon(data[i][0]).addTo(areaServed)
@@ -108,7 +152,8 @@ Shiny.addCustomMessageHandler("showArea",
   }
 )
 
-
+Shiny.addCustomMessageHandler("showLoading", loading.show())
+Shiny.addCustomMessageHandler("hideLoading", loading.hide())
 
 
 function checkAttributes(layer) {
