@@ -2,9 +2,12 @@ body {
   font-family: 'Open Sans', sans-serif;
 	padding: 0px;
 	margin: 0px;
+  overflow: hidden;
 }
 
-
+.area-info-text {
+  padding-top: 10px;
+}
 
 #header {
 	font-family: 'Roboto Condensed', sans-serif;
@@ -204,13 +207,13 @@ i.loading {
 }
 
 
-#aoi {
+.float-panel {
   position: absolute;
   width: 400px;
   overflow: hidden;
   left: 50px;
   top: 50px;
-  background-color: #EEE;
+  background-color: #FFFFFF;
   border: solid 1px #CCC;
   border-radius: 5px; 
   box-shadow: 3px 3px 3px #555;
@@ -219,7 +222,7 @@ i.loading {
   padding-right: 20px;
 }
 
-#aoi .close {
+.float-panel .close {
   
   position: absolute;
   color: white !important;
@@ -236,7 +239,7 @@ i.loading {
   
 }
 
-#aoi .minimize {
+.float-panel .minimize {
   
   position: absolute;
   color: white !important;
@@ -253,7 +256,7 @@ i.loading {
   
 }
 
-#aoihandle {
+.float-handle {
   position: absolute;
   font-family: 'Roboto Condensed', sans-serif;
   font-weight: bold;
@@ -271,7 +274,7 @@ i.loading {
   color: white;
 }
 
-#aoi.open {
+.float-panel.open {
   height: 350px;
   display: block;
   transition: height 0.5s;
@@ -281,12 +284,12 @@ i.loading {
   -o-transition: height 0.5s;
 }
 
-#aoi.closed {
+.float-panel.closed {
   display: none;
   height: 400px;
 }
 
-#aoi.minimized {
+.float-panel.minimized {
   display: block;
   height: 5px;
   padding-bottom: 0px;

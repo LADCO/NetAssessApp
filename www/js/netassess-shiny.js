@@ -48,8 +48,22 @@ $.extend(selectedSitesBinding, {
 })
 Shiny.inputBindings.register(selectedSitesBinding);
 
-
-
+var clickedAreaServedBinding = new Shiny.InputBinding()
+$.extend(clickedAreaServedBinding, {
+  find: function(scope) {
+    return $(scope).find("#clickedAreaServed");
+  },
+  getValue: function(el) {
+    return $(el).data("clicked");
+  },
+  subscribe: function(el, callback) {
+    $("#map").on("areaClick", callback);
+  },
+  unsubscribe: function(el) {
+    $("#map").off("areaClick");
+  }
+})
+Shiny.inputBindings.register(clickedAreaServedBinding);
 
 
 
@@ -136,25 +150,20 @@ Shiny.addCustomMessageHandler("showArea",
   function(data) {
     areaServed.clearLayers()
     for(var i = 0; i < data.length; i++) {
-      if(data[i].length == 1) {
-        L.polygon(data[i][0]).addTo(areaServed)
-          .setStyle(areaSelectStyle)
-          .on("mouseover", highlightAreaServed)
-          .on("mouseout", unhighlightAreaServed)
+      if(data[i].coords.length == 1) {
+        var a = L.polygon(data[i].coords[0], {id: data[i].id}).addTo(areaServed)
       } else {
-        L.multiPolygon([data[i]]).addTo(areaServed)
-          .setStyle(areaSelectStyle)
+        var a = L.multiPolygon([data[i].coords], {id: data[i].id}).addTo(areaServed)
+      }
+      a.setStyle(areaSelectStyle)
           .on("mouseover", highlightAreaServed)
           .on("mouseout", unhighlightAreaServed)
-      }
+          .on("click", showAreaInfo)
+      
     }
 
   }
 )
-
-Shiny.addCustomMessageHandler("showLoading", loading.show())
-Shiny.addCustomMessageHandler("hideLoading", loading.hide())
-
 
 function checkAttributes(layer) {
 

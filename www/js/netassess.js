@@ -9,7 +9,7 @@ $(window).resize(function() {
 resetPredefinedAreaSelect()
 
 $("#expParam").select2({width: "350px"});
-$("#areaSelectSelect").select2({width: "100%"});
+$("#areaSelectSelect").select2({width: "80%"});
 
 // Define coordinates of the Continental United States
 var us = {bounds: L.latLngBounds([24.4, -124.8], [49.4, -66.9]), center: L.latLng([39.8333, -98.5833])}
@@ -25,7 +25,7 @@ var map = L.map('map', {
   }, {
     text: "Area of Interest",
     iconCls: "fa fa-crosshairs",
-    callback: areaOfInterest
+    callback: function() {floatOpen("#aoi")}
   }],
 	drawControl: false, 
 	zoomControl: false,
@@ -119,10 +119,32 @@ for(var sb in sidebars) {
 	}
 };
 
+function floatClose(id) {
+  $(id).addClass("closed").removeClass("open").removeClass("minimized");
+}
+function floatMinimize(id) {
+  $(id).toggleClass("minimized").toggleClass("open").removeClass("closed");
+}
+function floatOpen(id) {
+  $(id).addClass("open").removeClass("closed").removeClass("minimized");
+}
+
 $('#aoi').drags({handle: "#aoihandle"});
-$("#aoi .minimize").on('click', function() {$("#aoi").toggleClass("minimized").toggleClass("open").removeClass("closed")})
-$("#aoi .close").on('click', function() {$("#aoi").addClass("closed").removeClass("open").removeClass("minimized")})
-$("#ne-open").on("click", areaOfInterest)
+$('#areainfo').drags({handle: "#areainfohandle"});
+$("#aoi .minimize").on('click', function() {floatMinimize("#aoi")});
+$("#aoi .close").on('click', function() {floatClose("#aoi")});
+$("#ne-open").on("click", function() {floatOpen("#aoi")});
+$("#areainfo .minimize").on('click', function() {floatMinimize("#areainfo")});
+$("#areainfo .close").on("click", function() {floatClose("#areainfo")});
+
+$(".float-panel").on("click", function() {
+  $(".float-panel").css("z-index", 50)
+  $(this).css("z-index", 100)
+})
 
 $("#full_extent").on("click", fullExtent)
-$("#aoi_button").on("click", areaOfInterest)
+$("#aoi_button").on("click", function() {floatOpen("#aoi")})
+
+$("#areaSelectZoom, #aoiZoom").on("click", function() {
+  map.fitBounds(aoi.getBounds())
+})

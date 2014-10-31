@@ -42,12 +42,15 @@
         <div class = "header-divider"></div>
         <button class = "header-button" id = "aoi_button" title = "Set Area of Interest"><i class = "fa fa-crosshairs"></i></button>
         <div class = "header-divider"></div>
-        <button class = "header-button" id = "full_extent" title = "Zoom to Continental US"><i class = "fa fa-search-minus"></i></button>
+        <button class = "header-button" id = "aoiZoom" title = "Zoom to Area of Interest"><i class = "fa fa-binoculars"></i></button>
+        <div class = "header-divider"></div>
+        <button class = "header-button" id = "full_extent" title = "Zoom to Continental US"><img style = "vertical-align: middle;" src = "images/cont_us.png"></button>
       </span>
 		</div>
 	  <div id = "mapState"></div>
     <div id = "monitorSelect"></div>
     <div id = "selectedSites"></div>
+    <div id = "clickedAreaServed"></div>
 		<div id = "map"></div>
 		<div id = "exp-sb" class = "sidebar">
   	  <h1><i class = "fa fa-search fa-fw"></i> Network Explorer</h1>
@@ -74,8 +77,9 @@
 		</div>
 		
     <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
-    <div id = "aoi" class = "closed">
-      <div id = "aoihandle">Area of Interest</div>
+    
+    <div id = "aoi" class = "float-panel closed">
+      <div id = "aoihandle" class = "float-handle">Area of Interest</div>
       <p class = "header">Select a geography</p>
 			<p>Use the buttons below to define your own area of interest:</p>
 			<div class = "na-draw-buttons">
@@ -100,25 +104,34 @@
 					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA" />
 					<span>CSA</span>
 				  </label>
-          <select id="areaSelectSelect" style = "width: 90%; margin: auto;"></select>
+          <select id="areaSelectSelect"></select><button id = "areaSelectZoom" style = "height: 30px; width: 30px;"><i class="fa fa-binoculars"></i></button>
         </div>
         <a class = "close"><i class = "fa fa-close"></i></a>
         <a class = "minimize"><i class = "fa fa-minus"></i></a>
     </div>
-
-		<script src = "js/netassess-shiny.js"></script>
-		<script src = "js/leaflet.js"></script>
+  </div>
+    
+  <div id = "areainfo" class = "float-panel">
+    <div id = "areainfohandle" class = "float-handle">Area Served Information</div>
+    <p class = "header">Area Served</p>
+    <div id = "areaServed" class = "shiny-text-output area-info-text"></div>
+    <p class = "header">Population Served</p>
+    <div id = "totalPopServed" class = "shiny-text-output area-info-text"></div>
+    <div id="agePlot" class="shiny-plot-output" style="width: 100%; text-align: center;"></div>
+    <a class = "close"><i class = "fa fa-close"></i></a>
+    <a class = "minimize"><i class = "fa fa-minus"></i></a>
+  </div>
+    
+  	<script src = "js/netassess-shiny.js"></script>
+    <script src = "js/leaflet.js"></script>
 		<script src = "js/esri-leaflet.js"></script>
 		<script src = "js/leaflet.draw.js"></script>
 		<script src = "js/leaflet.contextmenu.js"></script>
 		<script src = "js/L.Control.Sidebar.js"></script>
 		<script src = "js/easy-button.js"></script>
-    <script src = "js/heatmap.js"></script>
-    <script src = "js/leaflet-heatmap.js"></script>
 		<script src = "js/select2.min.js"></script>
     
-    
-		<script src = "js/netassess-support.js"></script>
+    <script src = "js/netassess-support.js"></script>
 		<script src = "js/netassess.js"></script>
 
 	</body>

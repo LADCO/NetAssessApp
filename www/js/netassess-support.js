@@ -2,11 +2,6 @@ function fullExtent() {
   map.fitBounds(us.bounds);
 }
 
-function areaOfInterest() {
-  $("#aoi").addClass("open").removeClass("closed").removeClass("minimized");
-}
-
-
 function toggleSelected() {
   this.feature.properties.selected = !this.feature.properties.selected
   $(this._icon).toggleClass("selected", this.feature.properties.selected);
@@ -98,6 +93,7 @@ function setAOI(e) {
   
   }
 
+  areaServed.clearLayers();
 	aoi.clearLayers();
 	aoi.addLayer(l);
 	
@@ -185,6 +181,12 @@ function highlightAreaServed(e) {
     layer.bringToFront();
   }
   
+}
+
+function showAreaInfo(e) {
+  var layer = e.target;
+  $("#clickedAreaServed").data("clicked", layer.options.id)
+  $("#map").trigger("areaClick")
 }
 
 var areaSelectStyle = {
