@@ -34,6 +34,9 @@
 			<span>NetAssess</span>
 			<span>Ambient Air Monitoring Network Assessment Tool</span>
       <span class = "right-items">
+        <div class = "header-divider"></div>
+        <div class = "header-button action-button" id = "makeReport" title = "Generate Report"><i class = "fa fa-file-pdf-o"></i></div>
+        <div class = "header-divider"></div>
         <div class = "header-item"><select id="expParam"></select></div>
         <div class = "header-divider"></div>
         <button class = "header-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served"><img style = "vertical-align: middle;" src = "images/area_served.png"></button>
@@ -78,7 +81,7 @@
 		
     <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
     
-    <div id = "aoi" class = "float-panel closed">
+    <div id = "aoi" class = "float-panel closed" style = "top: 50px; left: 55px;">
       <div id = "aoihandle" class = "float-handle">Area of Interest</div>
       <p class = "header">Select a geography</p>
 			<p>Use the buttons below to define your own area of interest:</p>
@@ -104,14 +107,14 @@
 					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA" />
 					<span>CSA</span>
 				  </label>
-          <select id="areaSelectSelect"></select><button id = "areaSelectZoom" style = "height: 30px; width: 30px;"><i class="fa fa-binoculars"></i></button>
+          <select id="areaSelectSelect"></select><button id = "areaSelectZoom" style = "height: 30px; width: 30px; margin-left: 10px;"><i class="fa fa-binoculars"></i></button>
         </div>
         <a class = "close"><i class = "fa fa-close"></i></a>
         <a class = "minimize"><i class = "fa fa-minus"></i></a>
     </div>
   </div>
     
-  <div id = "areainfo" class = "float-panel">
+  <div id = "areainfo" class = "float-panel" style = "top: 50px; right: 50px;">
     <div id = "areainfohandle" class = "float-handle">Area Served Information</div>
     <p class = "header">Area Served</p>
     <div id = "areaServed" class = "shiny-text-output area-info-text"></div>

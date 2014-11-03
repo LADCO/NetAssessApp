@@ -1,5 +1,4 @@
 library(shiny)
-library(sp)
 
 shinyServer(function(input, output, session) {
   
@@ -13,12 +12,6 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$expParam)) {
       if(input$expParam != -1) {
         site.list <- dbGetQuery(db, paste0("SELECT sites.Key, sites.State_Code, sites.County_Code, sites.Site_ID, sites.Latitude, sites.Longitude FROM sites JOIN monitors ON sites.Key =  monitors.Site_Key WHERE monitors.PARAMETER = ", input$expParam))
-# This code subsets the site.list based on a bounding box provided by the map
-# This may improve performance of the browser (especially Firefox)
-#        site.list <- unique(site.list[site.list$Latitude <= bbox()$north & 
-#                                        site.list$Latitude >= bbox()$south &
-#                                        site.list$Longitude >= bbox()$west &
-#                                        site.list$Longitude <= bbox()$east, ])
         return(site.list)
       } else {return(NULL)}
     } else {return(NULL)}
@@ -82,8 +75,15 @@ shinyServer(function(input, output, session) {
 
     if(input$areaServedCalcButton > 0) {
       sites <- isolate(sites())
-      return(sites[sites$Key %in% isolate(input$selectedSites), c("Key", "Latitude", "Longitude")])
+      if(!is.null(sites)) {
+        ss <- sites[sites$Key %in% isolate(input$selectedSites), c("Key", "Latitude", "Longitude")]
+        if(nrow(ss) == 0) {ss <- NULL}
+      } else {
+        ss <- NULL
+      }
+      return(ss)
     }
+    
   })
 
   selectedNeighbors <- reactive({
@@ -91,8 +91,10 @@ shinyServer(function(input, output, session) {
     ss <- selectedSites()
     sites <- isolate(sites())
     
+    ss <<- ss
+    sites <<- sites
+    
     if(!is.null(ss)) {
-      bounds <- list(list(24.4, -124.8), list(49.4, -66.9))
       
       us.lats <- c(24.4, 49.4)
       us.lngs <- c(-124.8, -66.9)
@@ -101,6 +103,9 @@ shinyServer(function(input, output, session) {
       lngs <- range(ss$Longitude)
       lat.rng <- abs(lats[2] - lats[1])
       lng.rng <- abs(lngs[2] - lngs[1])
+      
+      lats <<- lats
+      lngs <<- lngs
       
       gtG <- FALSE
       
@@ -188,37 +193,37 @@ shinyServer(function(input, output, session) {
     polygons <- isolate({polygons()})
     if(!is.null(polygons)) {
       data <- polygons@data
-      txt <- paste(data$area[data$id == input$clickedAreaServed], "square km")
+      txt <- paste(format(data$area[data$id == input$clickedAreaServed], big.mark = ","), "square km")
     } else {
       txt <- ""
     }
     return(txt)
   })
 
-output$totalPopServed <- renderText({
-  input$clickedAreaServed
-  polygons <- isolate({polygons()})
-  if(!is.null(polygons)) {
-    data <- polygons@data
-    txt <- paste(data$total[data$id == input$clickedAreaServed], "Total Population")
-  } else {
-    txt <- ""
-  }
-  return(txt)
-})
+  output$totalPopServed <- renderText({
+    input$clickedAreaServed
+    polygons <- isolate({polygons()})
+    if(!is.null(polygons)) {
+      data <- polygons@data
+      txt <- paste(format(data$total[data$id == input$clickedAreaServed], big.mark = ","), "Total Population")
+    } else {
+      txt <- ""
+    }
+    return(txt)
+  })
 
   output$agePlot <- renderPlot({
     input$clickedAreaServed
-    print(1)
+
     if(!is.null(input$clickedAreaServed)) {
       title <- isolate(sites()[sites()$Key %in% input$clickedAreaServed, ])
-      print(title)
+
       if(nrow(title) > 0) {
         
         title <- paste0("Population served by ",
                         sprintf("%02i-%03i-%04i", title$State_Code, title$County_Code, title$Site_ID))
         gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title)
-        print(gg)
+        suppressWarnings(print(gg))
       } else {
         return(NULL)
       }  

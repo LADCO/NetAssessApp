@@ -2,6 +2,7 @@ library(RSQLite)
 library(sp)
 library(deldir)
 library(rgeos)
+library(rgdal)
 
 source("R/voronoi.R")
 source("R/agePyramid.R")

@@ -27,11 +27,11 @@ agePyramid <- function(df, id) {
   s <- 10^floor(log10(m))
   ss <- seq(-ceiling(m/s) * s, ceiling(m/s) * s, s*2)
   
-  gg <- ggplot(d) +
+  gg <- suppressWarnings({ggplot(d) +
         geom_bar(subset=plyr::.(Gender=="Male"), aes(x=Age, y=Count*(-1), fill = Gender), stat = "identity") + 
         geom_bar(subset=plyr::.(Gender=="Female"), aes(x=Age, y=Count, fill = Gender), stat = "identity") + 
         scale_y_continuous(breaks=ss, labels = abs(ss)) + ylab("Count") +
-        coord_flip() + theme(legend.position="bottom")
+        coord_flip() + theme(legend.position="bottom")})
   
   return(gg)
   
