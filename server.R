@@ -11,14 +11,21 @@ shinyServer(function(input, output, session) {
   sites <- reactive({
     if(!is.null(input$expParam)) {
       if(input$expParam != -1) {
-        site.list <- dbGetQuery(db, paste0("SELECT sites.Key, sites.State_Code, sites.County_Code, sites.Site_ID, sites.Latitude, sites.Longitude FROM sites JOIN monitors ON sites.Key =  monitors.Site_Key WHERE monitors.PARAMETER = ", input$expParam))
+        site.list <- dbGetQuery(db, paste0("SELECT sites.* FROM sites JOIN monitors ON sites.Key =  monitors.Site_Key WHERE monitors.PARAMETER = ", input$expParam))
         return(site.list)
       } else {return(NULL)}
     } else {return(NULL)}
   })
   
+  visibleSites <- reactive({
+    
+    return(sites()[sites()$Key %in% input$visibleSites, ])
+    
+  })
+  
   # Send a custom message to update visible monitors based on parameter selection
   observe({
+
     if(!is.null(sites())) {
       keys <- unique(sites()$Key)
     } else {
@@ -73,8 +80,7 @@ shinyServer(function(input, output, session) {
 
   selectedSites <- reactive({
 
-    if(input$areaServedCalcButton > 0) {
-      sites <- isolate(sites())
+      sites <- visibleSites()
       if(!is.null(sites)) {
         ss <- sites[sites$Key %in% isolate(input$selectedSites), c("Key", "Latitude", "Longitude")]
         if(nrow(ss) == 0) {ss <- NULL}
@@ -82,50 +88,70 @@ shinyServer(function(input, output, session) {
         ss <- NULL
       }
       return(ss)
-    }
     
   })
 
   selectedNeighbors <- reactive({
 
     ss <- selectedSites()
-    sites <- isolate(sites())
-    
-    ss <<- ss
-    sites <<- sites
-    
+    sites <- isolate(visibleSites())
+
     if(!is.null(ss)) {
-      
+        
       us.lats <- c(24.4, 49.4)
       us.lngs <- c(-124.8, -66.9)
       
       lats <- range(ss$Latitude)
       lngs <- range(ss$Longitude)
+      
       lat.rng <- abs(lats[2] - lats[1])
       lng.rng <- abs(lngs[2] - lngs[1])
-      
-      lats <<- lats
-      lngs <<- lngs
-      
+          
       gtG <- FALSE
       
       while(!gtG) {
         
-        lats.test <- c(max(lats[1] - lat.rng, us.lats[1]), min(lats[2] + lat.rng, us.lats[2]))
-        lngs.test <- c(max(lngs[1] - lng.rng, us.lngs[1]), min(lngs[2] + lng.rng, us.lngs[2]))
-
-        neighbors <- unique(sites[sites$Latitude >= lats.test[1] & sites$Latitude <= lats.test[2] & sites$Longitude >= lngs.test[1] & sites$Longitude <= lngs.test[2], ])
-      
-        new.lats <- range(neighbors$Latitude)
-        new.lngs <- range(neighbors$Longitude)
+        lats.test <- c(lats[1] - lat.rng, lats[2] + lat.rng)
+        lngs.test <- c(lngs[1] - lng.rng, lngs[2] + lng.rng)
         
-        if((new.lats[1] < lats[1] | new.lats[1] <= us.lats[1]) &
-           (new.lats[2] > lats[2] | new.lats[2] >= us.lats[2]) &
-           (new.lngs[1] < lngs[1] | new.lngs[1] <= us.lngs[1]) &
-           (new.lngs[2] > lngs[2] | new.lngs[2] >= us.lngs[2])) {
-          gtG = TRUE
+        # Test if us border has been reach in any cardinal direction
+        bounds <- list(north = lats.test[2] >= us.lats[2],
+                       south = lats.test[1] <= us.lats[1],
+                       east =  lngs.test[2] >= us.lngs[2],
+                       west =  lngs.test[1] <= us.lngs[1])
+
+        neighbors <- unique(sites[sites$Latitude >= lats.test[1] & 
+                                  sites$Latitude <= lats.test[2] & 
+                                  sites$Longitude >= lngs.test[1] & 
+                                  sites$Longitude <= lngs.test[2], ])
+
+        if(!bounds$north) {
+          n <- neighbors[neighbors$Latitude > lats[2], ]
+          bounds$north <- (sum(n$Longitude > lngs[2]) > 0 &
+                           sum(n$Longitude < lngs[1]) > 0 &
+                           sum(n$Longitude < lngs[2] & n$Longitude > lngs[1]) > 0)
+        }
+        if(!bounds$south) {
+          n <- neighbors[neighbors$Latitude < lats[1], ]
+          bounds$south <- (sum(n$Longitude > lngs[2]) > 0 &
+                             sum(n$Longitude < lngs[1]) > 0 &
+                             sum(n$Longitude < lngs[2] & n$Longitude > lngs[1]) > 0)
+        }
+        if(!bounds$east) {
+          n <- neighbors[neighbors$Longitude > lngs[2], ]
+          bounds$east <- (sum(n$Latitude > lats[2]) > 0 &
+                             sum(n$Latitude < lats[1]) > 0 &
+                             sum(n$Latitude < lats[2] & n$Latitude > lats[1]) > 0)
+        }
+        if(!bounds$west) {
+          n <- neighbors[neighbors$Longitude < lngs[1], ]
+          bounds$west <- (sum(n$Latitude > lats[2]) > 0 &
+                            sum(n$Latitude < lats[1]) > 0 &
+                            sum(n$Latitude < lats[2] & n$Latitude > lats[1]) > 0)
         }
         
+        gtG <- bounds$north & bounds$south & bounds$east & bounds$west
+              
         lat.rng <- lat.rng * 2
         lng.rng <- lng.rng * 2
         
@@ -146,29 +172,31 @@ shinyServer(function(input, output, session) {
   })
 
   polygons <- reactive({
-    ss <- isolate(selectedSites())
-    sn <- selectedNeighbors()
-    if(!is.null(ss)) {
-      if(nrow(ss) <= 300 & nrow(ss) >= 2) {
-        v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, usborder)
-        v <- isolate({subset(v, id %in% ss$Key)})
-        ov <- over(tracts, v)
-        t <- cbind(tracts@data, ov)
-        t <- t[!is.na(t$id), ]
-        d <- aggregate(t[, 3:47], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
-        proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
-        area <- areaPolygons(v, CRS("+init=epsg:2163"))
-        v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
-        v@data <- cbind(v@data, area = area)
-        ids <- sapply(v@data$id, function(i) {strsplit(i, " ")[[1]][1]})
-        v@data$id <- ids
+    if(input$areaServedCalcButton > 0) {
+      ss <- isolate(selectedSites())
+      sn <- isolate(selectedNeighbors())
+      if(!is.null(ss)) {
+        if(nrow(ss) <= 300 & nrow(ss) >= 2) {
+          v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, usborder)
+          v <- isolate({subset(v, id %in% ss$Key)})
+          ov <- over(tracts, v)
+          t <- cbind(tracts@data, ov)
+          t <- t[!is.na(t$id), ]
+          d <- aggregate(t[, 3:47], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
+          proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
+          area <- areaPolygons(v, CRS("+init=epsg:2163"))        
+          v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
+          v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
+          ids <- sapply(v@data$id, function(i) {strsplit(i, " ")[[1]][1]})
+          v@data$id <- ids
+        } else {
+          v <- NULL
+        }
       } else {
         v <- NULL
       }
-    } else {
-      v <- NULL
+      return(v)
     }
-    return(v)
   })
 
   observe({
@@ -230,6 +258,32 @@ shinyServer(function(input, output, session) {
       
     }
   }, width = 400, height = 450)
+
+  output$corplot <- renderPlot({
+    
+    input$cormatButton
+    parameter <- isolate(input$expParam)
+    if(is.null(parameter)) {parameter = -1}
+    sites <- isolate(selectedSites()$Key)
+        
+    if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
+      
+      parameter <<- parameter
+      print(sites)
+      sites <<- sites
+      return(cormat(db, sites, parameter))      
+    
+    }
+  
+  }, width = 1000, height = 800)
+
+  output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", Sys.Date(), ".csv")},
+                                         content = function(file) {
+                                           d <- polygons()@data
+                                           d$area <- unlist(d$area)
+                                           d <- merge(d, sites(), by.x = "id", by.y = "Key", all.x = TRUE, all.y = FALSE)
+                                           write.csv(d, file)
+                                         })
 
 
 })

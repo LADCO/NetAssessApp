@@ -1,11 +1,16 @@
-library(RSQLite)
-library(sp)
-library(deldir)
-library(rgeos)
-library(rgdal)
+library(RSQLite)  # database
+library(sp)       # areaserved
+library(deldir)   # areaserved
+library(rgeos)    # areaserved
+library(rgdal)    # areaserved
+library(reshape2) # cormat
+library(plotrix)  # cormat
+library(ellipse)  # cormat
+library(Hmisc)    # cormat
 
 source("R/voronoi.R")
 source("R/agePyramid.R")
+source("R/cormatdb.R")
 load("data/tracts.rda")
 load("data/usborder.rda")
 
@@ -23,7 +28,7 @@ csa <- dbGetQuery(db, "SELECT CODE, NAME FROM csas")
 csa.list <- csa$CODE
 names(csa.list) <- csa$NAME
 
-params <- dbGetQuery(db, "SELECT Parameter_Code, Parameter_Desc, Count FROM params")
+params <- dbGetQuery(db, "SELECT Parameter_Code, Parameter_Desc FROM params")
 params.list <- params$Parameter_Code
 names(params.list) <- paste(params$Parameter_Code, params$Parameter_Desc, sep = " - ")
 params.list <- c("None" = -1, params.list)
@@ -107,8 +112,15 @@ areaPolygons<- function(spPoly, proj4string = NULL) {
   else {
     spP <- spPoly
   }
-  areas <- unlist(lapply(spP@polygons, function(x) a <- x@area))
-  return(round(areas * 3.86101e-7, 1))
+  spP <<- spP
+  areas <- lapply(spP@polygons, function(x) {
+    list(round(x@area * 3.86101e-7, 0), unlist(strsplit(x@ID, " "))[[1]])
+    }
+  )
+  
+  areas <- do.call(rbind, areas)
+  colnames(areas) <- c("area", "id")
+  return(areas)
 }
 
 

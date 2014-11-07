@@ -35,9 +35,11 @@
 			<span>Ambient Air Monitoring Network Assessment Tool</span>
       <span class = "right-items">
         <div class = "header-divider"></div>
-        <div class = "header-button action-button" id = "makeReport" title = "Generate Report"><i class = "fa fa-file-pdf-o"></i></div>
+        <a class = "header-button shiny-download-link" id = "downloadData" title = "Generate Report" href = "" target = "_blank"><i class = "fa fa-file-pdf-o"></i></a>
         <div class = "header-divider"></div>
         <div class = "header-item"><select id="expParam"></select></div>
+        <div class = "header-divider"></div>
+        <button class = "header-button action-button" id = "cormatButton" title = "Calculate Correlations"><i class = "fa fa-birthday-cake"></i></button>
         <div class = "header-divider"></div>
         <button class = "header-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served"><img style = "vertical-align: middle;" src = "images/area_served.png"></button>
         <div class = "header-divider"></div>
@@ -54,6 +56,8 @@
     <div id = "monitorSelect"></div>
     <div id = "selectedSites"></div>
     <div id = "clickedAreaServed"></div>
+    <div id = "visibleSites"></div>
+    <div id = "windowDims"></div>
 		<div id = "map"></div>
 		<div id = "exp-sb" class = "sidebar">
   	  <h1><i class = "fa fa-search fa-fw"></i> Network Explorer</h1>
@@ -114,7 +118,7 @@
     </div>
   </div>
     
-  <div id = "areainfo" class = "float-panel" style = "top: 50px; right: 50px;">
+  <div id = "areainfo" class = "float-panel closed" style = "top: 50px; right: 10px;">
     <div id = "areainfohandle" class = "float-handle">Area Served Information</div>
     <p class = "header">Area Served</p>
     <div id = "areaServed" class = "shiny-text-output area-info-text"></div>
@@ -125,7 +129,13 @@
     <a class = "minimize"><i class = "fa fa-minus"></i></a>
   </div>
     
-  	<script src = "js/netassess-shiny.js"></script>
+  <div id = "cormat" class = "float-panel closed" style = "top: 75px; right 50px;">
+    <div id = "cormathandle" class = "float-handle">Correlation Matrix</div>
+    <div id = "corplot" class = "shiny-plot-output" style = "width: 100% text-align: center;"></div>
+    <a class = "close"><i class = "fa fa-close"></i></a>
+    <a class = "minimize"><i class = "fa fa-minus"></i></a>
+  </div>
+    
     <script src = "js/leaflet.js"></script>
 		<script src = "js/esri-leaflet.js"></script>
 		<script src = "js/leaflet.draw.js"></script>
@@ -135,6 +145,7 @@
 		<script src = "js/select2.min.js"></script>
     
     <script src = "js/netassess-support.js"></script>
+    <script src = "js/netassess-shiny.js"></script>
 		<script src = "js/netassess.js"></script>
 
 	</body>

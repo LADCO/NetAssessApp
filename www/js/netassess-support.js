@@ -1,3 +1,5 @@
+var sites = L.layerGroup(null);
+
 function fullExtent() {
   map.fitBounds(us.bounds);
 }
@@ -12,6 +14,7 @@ function hideMonitor() {
   this.feature.properties.visible = false;
   $(this._icon).addClass("hidden");
   $("#map").trigger("siteSelection");
+  $("#map").trigger("siteUpdate");
 }
 
 function resetPredefinedAreaSelect() {
@@ -185,7 +188,12 @@ function highlightAreaServed(e) {
 
 function showAreaInfo(e) {
   var layer = e.target;
-  $("#clickedAreaServed").data("clicked", layer.options.id)
+  if(layer.hasOwnProperty("options")) {
+    $("#clickedAreaServed").data("clicked", layer.options.id)
+  } else if(layer.hasOwnProperty("_options")) {
+    $("#clickedAreaServed").data("clicked", layer._options.id)
+  }
+  floatOpen("#areainfo")
   $("#map").trigger("areaClick")
 }
 
@@ -267,12 +275,13 @@ function createSitePopup(feature, layer) {
                 drg_w = $drag.outerWidth(),
                 pos_y = $drag.offset().top + drg_h - e.pageY,
                 pos_x = $drag.offset().left + drg_w - e.pageX;
-            $drag.css('z-index', 1000).parents().on("mousemove", function(e) {
+            $(".float-panel").removeClass("on-top");
+            $drag.addClass("on-top").parents().on("mousemove", function(e) {
                 $('.draggable').offset({
                     top:e.pageY + pos_y - drg_h,
                     left:e.pageX + pos_x - drg_w
                 }).on("mouseup", function() {
-                    $(this).removeClass('draggable').css('z-index', z_idx);
+                    $(this).removeClass('draggable');
                 });
             });
             e.preventDefault(); // disable selection

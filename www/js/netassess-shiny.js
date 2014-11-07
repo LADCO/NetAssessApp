@@ -1,3 +1,42 @@
+var windowDimsBinding = new Shiny.InputBinding();
+$.extend(windowDimsBinding, {
+  find: function(scope) {
+    return $(scope).find("#windowDims");
+  },
+  getValue: function(el) {
+    return {height: window.innerHeight, width: window.innerWidth}
+  },
+  subscribe: function(el, callback) {
+    $(window).resize(callback);
+  },
+  unsubscribe: function(el) {
+    $(window).off("resize");
+  }
+});
+Shiny.inputBindings.register(windowDimsBinding);
+
+
+var visibleSitesBinding = new Shiny.InputBinding();
+$.extend(visibleSitesBinding, {
+  find: function(scope) {
+    return $(scope).find("#visibleSites");
+  },
+  getValue: function(el) {
+    var vs = [];
+    sites.eachLayer(function(layer) {
+      if(layer.feature.properties.visible) vs.push(layer.feature.properties.key)
+    })
+    return vs;
+  },
+  subscribe: function(el, callback) {
+    $("#map").on("siteUpdate", callback);
+  },
+  unsubscribe: function(el) {
+    $("#map").off("siteUpdate");
+  }
+});
+Shiny.inputBindings.register(visibleSitesBinding);
+
 var mapStateBinding = new Shiny.InputBinding();
 $.extend(mapStateBinding, {
   find: function(scope) {
@@ -136,6 +175,7 @@ Shiny.addCustomMessageHandler("showMonitors",
     areaServed.clearLayers()
     displaySites();
     $("#map").trigger("siteSelection");
+    $("#map").trigger("siteUpdate");
   }
 )
 
