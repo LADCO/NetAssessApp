@@ -30,26 +30,34 @@
 
 	<body>
 
-		<div id = "header">
+		<div id = "menu-bar">
 			<span>NetAssess</span>
 			<span>Ambient Air Monitoring Network Assessment Tool</span>
       <span class = "right-items">
-        <div class = "header-divider"></div>
-        <a class = "header-button shiny-download-link" id = "downloadData" title = "Generate Report" href = "" target = "_blank"><i class = "fa fa-file-pdf-o"></i></a>
-        <div class = "header-divider"></div>
-        <div class = "header-item"><select id="expParam"></select></div>
-        <div class = "header-divider"></div>
-        <button class = "header-button action-button" id = "cormatButton" title = "Calculate Correlations"><i class = "fa fa-birthday-cake"></i></button>
-        <div class = "header-divider"></div>
-        <button class = "header-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served"><img style = "vertical-align: middle;" src = "images/area_served.png"></button>
-        <div class = "header-divider"></div>
-        <button class = "header-button" id = "bookmarks" title = "Bookmark Location"><i class = "fa fa-bookmark"></i></button>
-        <div class = "header-divider"></div>
-        <button class = "header-button" id = "aoi_button" title = "Set Area of Interest"><i class = "fa fa-crosshairs"></i></button>
-        <div class = "header-divider"></div>
-        <button class = "header-button" id = "aoiZoom" title = "Zoom to Area of Interest"><i class = "fa fa-binoculars"></i></button>
-        <div class = "header-divider"></div>
-        <button class = "header-button" id = "full_extent" title = "Zoom to Continental US"><img style = "vertical-align: middle;" src = "images/cont_us.png"></button>
+        <a class = "menu-bar-button shiny-download-link" id = "downloadData" title = "Generate Report" href = "" target = "_blank">
+          <i class = "fa fa-file-pdf-o"></i>
+        </a>
+        <div class = "menu-bar-item">
+          <select id="expParam"></select>
+        </div>
+        <button class = "menu-bar-button action-button" id = "cormatButton" title = "Calculate Correlations">
+          <i class = "fa fa-birthday-cake"></i>
+        </button>
+        <button class = "menu-bar-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served">
+          <img src = "images/area_served.png" />
+        </button>
+        <button class = "menu-bar-button" id = "bookmarks" title = "Bookmark Location">
+          <i class = "fa fa-bookmark"></i>
+        </button>
+        <button class = "menu-bar-button" id = "aoi_button" title = "Set Area of Interest">
+          <i class = "fa fa-crosshairs"></i>
+        </button>
+        <button class = "menu-bar-button" id = "aoiZoom" title = "Zoom to Area of Interest">
+          <i class = "fa fa-binoculars"></i>
+        </button>
+        <button class = "menu-bar-button" id = "full_extent" title = "Zoom to Continental US">
+          <img src = "images/cont_us.png">
+        </button>
       </span>
 		</div>
 	  <div id = "mapState"></div>
@@ -85,8 +93,7 @@
 		
     <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
     
-    <div id = "aoi" class = "float-panel closed" style = "top: 50px; left: 55px;">
-      <div id = "aoihandle" class = "float-handle">Area of Interest</div>
+    <div id = "aoi">
       <p class = "header">Select a geography</p>
 			<p>Use the buttons below to define your own area of interest:</p>
 			<div class = "na-draw-buttons">
@@ -113,27 +120,19 @@
 				  </label>
           <select id="areaSelectSelect"></select><button id = "areaSelectZoom" style = "height: 30px; width: 30px; margin-left: 10px;"><i class="fa fa-binoculars"></i></button>
         </div>
-        <a class = "close"><i class = "fa fa-close"></i></a>
-        <a class = "minimize"><i class = "fa fa-minus"></i></a>
     </div>
   </div>
     
-  <div id = "areainfo" class = "float-panel closed" style = "top: 50px; right: 10px;">
-    <div id = "areainfohandle" class = "float-handle">Area Served Information</div>
+  <div id = "areainfo">
     <p class = "header">Area Served</p>
     <div id = "areaServed" class = "shiny-text-output area-info-text"></div>
     <p class = "header">Population Served</p>
     <div id = "totalPopServed" class = "shiny-text-output area-info-text"></div>
     <div id="agePlot" class="shiny-plot-output" style="width: 100%; text-align: center;"></div>
-    <a class = "close"><i class = "fa fa-close"></i></a>
-    <a class = "minimize"><i class = "fa fa-minus"></i></a>
   </div>
     
-  <div id = "cormat" class = "float-panel closed" style = "top: 75px; right 50px;">
-    <div id = "cormathandle" class = "float-handle">Correlation Matrix</div>
+  <div id = "cormat">
     <div id = "corplot" class = "shiny-plot-output" style = "width: 100% text-align: center;"></div>
-    <a class = "close"><i class = "fa fa-close"></i></a>
-    <a class = "minimize"><i class = "fa fa-minus"></i></a>
   </div>
     
     <script src = "js/leaflet.js"></script>
@@ -143,6 +142,7 @@
 		<script src = "js/L.Control.Sidebar.js"></script>
 		<script src = "js/easy-button.js"></script>
 		<script src = "js/select2.min.js"></script>
+    <script src = "js/floaters.js"></script>
     
     <script src = "js/netassess-support.js"></script>
     <script src = "js/netassess-shiny.js"></script>

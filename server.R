@@ -80,13 +80,14 @@ shinyServer(function(input, output, session) {
 
   selectedSites <- reactive({
 
-      sites <- visibleSites()
+      sites <- sites()
       if(!is.null(sites)) {
-        ss <- sites[sites$Key %in% isolate(input$selectedSites), c("Key", "Latitude", "Longitude")]
+        ss <- sites[sites$Key %in% input$selectedSites, c("Key", "Latitude", "Longitude")]
         if(nrow(ss) == 0) {ss <- NULL}
       } else {
         ss <- NULL
       }
+
       return(ss)
     
   })
@@ -218,7 +219,7 @@ shinyServer(function(input, output, session) {
 
   output$areaServed <- renderText({
     input$clickedAreaServed
-    polygons <- isolate({polygons()})
+    polygons <- polygons()
     if(!is.null(polygons)) {
       data <- polygons@data
       txt <- paste(format(data$area[data$id == input$clickedAreaServed], big.mark = ","), "square km")
@@ -230,7 +231,7 @@ shinyServer(function(input, output, session) {
 
   output$totalPopServed <- renderText({
     input$clickedAreaServed
-    polygons <- isolate({polygons()})
+    polygons <- polygons()
     if(!is.null(polygons)) {
       data <- polygons@data
       txt <- paste(format(data$total[data$id == input$clickedAreaServed], big.mark = ","), "Total Population")
@@ -241,9 +242,11 @@ shinyServer(function(input, output, session) {
   })
 
   output$agePlot <- renderPlot({
+    
     input$clickedAreaServed
 
     if(!is.null(input$clickedAreaServed)) {
+      
       title <- isolate(sites()[sites()$Key %in% input$clickedAreaServed, ])
 
       if(nrow(title) > 0) {
@@ -267,10 +270,6 @@ shinyServer(function(input, output, session) {
     sites <- isolate(selectedSites()$Key)
         
     if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
-      
-      parameter <<- parameter
-      print(sites)
-      sites <<- sites
       return(cormat(db, sites, parameter))      
     
     }

@@ -118,41 +118,13 @@ for(var sb in sidebars) {
 	}
 };
 
-function floatClose(id) {
-  $(id).addClass("closed").removeClass("open").removeClass("minimized");
-}
-function floatMinimize(id) {
-  $(id).toggleClass("minimized").removeClass("open").removeClass("closed");
-}
-function floatOpen(id) {
-  $(".float-panel").removeClass("on-top");
-  $(id).addClass("open on-top").removeClass("closed").removeClass("minimized");
-}
-
-$('#aoi').drags({handle: "#aoihandle"});
-$('#areainfo').drags({handle: "#areainfohandle"});
-$("#aoi .minimize").on('click', function() {floatMinimize("#aoi")});
-$("#aoi .close").on('click', function() {floatClose("#aoi")});
-$("#ne-open").on("click", function() {floatOpen("#aoi")});
-$("#cormat .close").on("click", function() {floatClose("#cormat")});
-$("#cormat .minimize").on("click", function() {
-  floatMinimize("#cormat")
-});
-$("#areainfo .minimize").on('click', function() {floatMinimize("#areainfo")});
-$("#areainfo .close").on("click", function() {floatClose("#areainfo")});
-
-$('#cormat').drags({handle: "#cormathandle"});
-//document.getElementById("cormathandle").style.width = "100%";
-
-
-$(".float-panel").on("click", function() {
-  $(".float-panel").removeClass("on-top");
-  $(this).addClass("on-top");
-})
+var cormatFloat = new $.floater("#cormat", {title: "Correlation Matrix", width: "900px", top: "80px", left: "80px"});
+var areaservedFloat = new $.floater("#areainfo", {title: "Area Served Information", top: "50px", right: "50px"});
+var aoiFloat = new $.floater("#aoi", {title: "Area of Interest"});
 
 $("#full_extent").on("click", fullExtent);
-$("#aoi_button").on("click", function() {floatOpen("#aoi")});
-$("#cormatButton").on("click", function() {floatOpen("#cormat")});
+$("#aoi_button").on("click", aoiFloat.open);
+$("#cormatButton").on("click", cormatFloat.open);
 
 $("#areaSelectZoom, #aoiZoom").on("click", function() {
   map.fitBounds(aoi.getBounds())
