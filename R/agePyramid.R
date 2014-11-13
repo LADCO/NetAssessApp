@@ -7,14 +7,12 @@ agePyramid <- function(df, id) {
   f <- df[df$id == id, grep("^f_", colnames(df))]
   r <- gsub("_", "-", substr(colnames(m), 3, 10))
   r[length(r)] <- "Over 84"
-  r <- r[seq(length(r), 1)]
   
   m <- as.data.frame(cbind(r, t(m), deparse.level = 0), stringsAsFactors = FALSE)
   m$gender = "Male"
-  
+  print(m)
   f <- as.data.frame(cbind(r, t(f), deparse.level = 0), stringsAsFactors = FALSE)
   f$gender = "Female"
-  
   
   d <- rbind(m, f)
   colnames(d) <- c("Age", "Count", "Gender")
@@ -22,7 +20,7 @@ agePyramid <- function(df, id) {
   d$Age <- factor(d$Age, levels = r)
   d$Count <- as.numeric(d$Count)
   d$Gender <- as.factor(d$Gender)
-  
+    
   m <- max(d$Count)
   s <- 10^floor(log10(m))
   ss <- seq(-ceiling(m/s) * s, ceiling(m/s) * s, s*2)

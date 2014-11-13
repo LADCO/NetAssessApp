@@ -41,7 +41,7 @@
           <select id="expParam"></select>
         </div>
         <button class = "menu-bar-button action-button" id = "cormatButton" title = "Calculate Correlations">
-          <i class = "fa fa-birthday-cake"></i>
+          <span style = "font-family: serif; font-weight: bold; font-size: 24px;">&rho;</span>
         </button>
         <button class = "menu-bar-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served">
           <img src = "images/area_served.png" />
@@ -58,29 +58,40 @@
         <button class = "menu-bar-button" id = "full_extent" title = "Zoom to Continental US">
           <img src = "images/cont_us.png">
         </button>
+        <button class = "menu-bar-button" id = "resetApp" title = "Reset App">
+          <i class = "fa fa-undo"></i>
+        </button>
       </span>
 		</div>
-	  <div id = "mapState"></div>
+    <!-- These divs serve as anchors to bind custom shiny inputs. I haven't
+         found a better way to do this -->
     <div id = "monitorSelect"></div>
     <div id = "selectedSites"></div>
     <div id = "clickedAreaServed"></div>
     <div id = "visibleSites"></div>
-    <div id = "windowDims"></div>
+    <div id = "areaOfInterest"></div>
+    
 		<div id = "map"></div>
-		<div id = "exp-sb" class = "sidebar">
-  	  <h1><i class = "fa fa-search fa-fw"></i> Network Explorer</h1>
-      <p>From this panel you can explore the current ambient air monitoring network in the United States.</p>
-      <p class = "header">Select a Parameter</p>
-      <p>Selecting a parameter from below will display all currently active monitors for that parameter:</p>
-      <div></div>
-      <p class = "header">View Area Served</p>
-      <p>You can see statistics about the area served by a monitor by first selecting an area of interest with the Area of Interest tool. Click the <i class = "fa fa-crosshairs"></i> button in the menubar above to select an area of interest.</p>
-      <p>Once an area of interest is selected you can click the button below to view the areas served by monitors within that area.</p>
 
-		</div>
-
-		<div id = "tools-sb" class = "sidebar">
-			<h1><i class="fa fa-cogs  fa-fw"></i>Monitor Statistics</h1>
+		<div id = "settings-sb" class = "sidebar">
+			<h1><i class="fa fa-cogs  fa-fw"></i>Settings</h1>
+      <p>These setting allow you to customize how the NetAssess App works</p>
+      <p class = "header">Area Served Clipping</p>
+      <p>By default, the area served tool clips the polygons it creates at the US border. You can turn off clipping entirely, or set it to clip at the area of interest with the options below</p>
+      <div id="areaServedClipping" class="control-group shiny-input-radiogroup">
+        <label class="radio inline">
+          <input type="radio" name="areaServedClipping" id="areaServedClipping1" value="none"/>
+          <span>None</span>
+        </label>
+        <label class="radio inline">
+          <input type="radio" name="areaServedClipping" id="areaServedClipping2" value="border" checked="checked"/>
+          <span>US Border</span>
+        </label>
+        <label class="radio inline">
+          <input type="radio" name="areaServedClipping" id="areaServedClipping3" value="aoi"/>
+          <span>Area of Interest</span>
+        </label>
+      </div> 
 		</div>
 		
 		<div id = "help-sb" class = "sidebar">
@@ -100,6 +111,7 @@
 				<button id = "draw_polygon" class = "na-draw-button" title = "Define a Polygon"><img src = "images/glyphicons_096_vector_path_polygon.png" /></button>
 				<button id = "draw_circle" class = "na-draw-button" title = "Define a Circle"><img src = "images/glyphicons_095_vector_path_circle.png" /></button>
 				<button id = "draw_rectangle" class = "na-draw-button" title = "Define a Rectangle"><img src = "images/glyphicons_094_vector_path_square.png" /></button>
+  			<button id = "cancel_draw" class = "na-draw-button" title = "Cancel Drawing"><img src = "images/glyphicons_197_remove.png" /></button>
 			</div>
 			<p class = "header">Select predefined area</p>
 			<p>Select an area type with the radio buttons, then select a specific area from the dropdown menu:</p>
@@ -124,6 +136,8 @@
   </div>
     
   <div id = "areainfo">
+    <p class = "header">Monitor</p>
+    <div id = "areaServedMonitor" class = "shiny-text-output area-info-text"></div>
     <p class = "header">Area Served</p>
     <div id = "areaServed" class = "shiny-text-output area-info-text"></div>
     <p class = "header">Population Served</p>

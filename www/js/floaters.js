@@ -3,6 +3,7 @@
   $.floater = function(id, opt) {
     
     var $floater = $(id);
+    var $this = this;
     
     opt = $.extend({title: "Floater", cursor: "move", close: true, minimize: true, width: 400, top: "50px", left: "50px"}, opt);
     
@@ -48,21 +49,25 @@
     
     if(opt.minimize) {
       var min = $floater.append("<a class = 'minimize'><i class = 'fa fa-minus'></i></a>").find(".minimize");
-      min.on("click", function() {
-        $floater.toggleClass("minimized").removeClass("open").removeClass("closed");
-      })          
+      min.on("click", function() { $floater.toggleClass("minimized").removeClass("open").removeClass("closed");})
     }
         
     if(opt.close) {
       var clo = $floater.append("<a class = 'close'><i class = 'fa fa-close'></i></a>").find(".close");
-      clo.on("click", function() {
-        $floater.addClass("closed").removeClass("open").removeClass("minimized");
-      })
+      clo.on("click", function() {$floater.addClass("closed").removeClass("open").removeClass("on-top").removeClass("minimized");})
     }
     
     this.open = function() {
       $(".float-panel").removeClass("on-top");
       $floater.addClass("open on-top").removeClass("closed").removeClass("minimized");
+    }
+    
+    this.close = function() {
+      $floater.addClass("closed").removeClass("open").removeClass("on-top").removeClass("minimized");
+    }
+    
+    this.minimize = function() {
+      $floater.toggleClass("minimized").removeClass("open").removeClass("closed");
     }
     
     return this;

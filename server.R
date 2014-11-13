@@ -25,13 +25,12 @@ shinyServer(function(input, output, session) {
   
   # Send a custom message to update visible monitors based on parameter selection
   observe({
-
     if(!is.null(sites())) {
       keys <- unique(sites()$Key)
     } else {
       keys <- list()
     }
-    session$sendCustomMessage(type="showMonitors", keys)
+    session$sendCustomMessage(type="updateVisibleMonitors", keys)
   })
 
 #### Functions for controlling the Area of Interest Selection
@@ -105,8 +104,8 @@ shinyServer(function(input, output, session) {
       lats <- range(ss$Latitude)
       lngs <- range(ss$Longitude)
       
-      lat.rng <- abs(lats[2] - lats[1])
-      lng.rng <- abs(lngs[2] - lngs[1])
+      lat.rng <- max(abs(lats[2] - lats[1]), 1)
+      lng.rng <- max(abs(lngs[2] - lngs[1]), 1)
           
       gtG <- FALSE
       
@@ -177,8 +176,17 @@ shinyServer(function(input, output, session) {
       ss <- isolate(selectedSites())
       sn <- isolate(selectedNeighbors())
       if(!is.null(ss)) {
-        if(nrow(ss) <= 300 & nrow(ss) >= 2) {
-          v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, usborder)
+        if(nrow(ss) <= 400 & nrow(sn) >= 2) {
+          if(input$areaServedClipping == "none") {
+            v <- voronoi(sn$Key, sn$Latitude, sn$Longitude)
+          } else {
+            if(input$areaServedClipping == "border") {
+              b <- usborder
+            } else {
+              b <- areaOfInterest()
+            }
+            v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
+          }
           v <- isolate({subset(v, id %in% ss$Key)})
           ov <- over(tracts, v)
           t <- cbind(tracts@data, ov)
@@ -213,8 +221,31 @@ shinyServer(function(input, output, session) {
               })
         )
       })
-      session$sendCustomMessage(type = "showArea", v)
+      session$sendCustomMessage(type = "updateAreaServed", v)
     }
+  })
+
+  output$areaServedMonitor <- renderText({
+    sites <- isolate(sites())
+    mon <- sites[sites$Key %in% as.numeric(input$clickedAreaServed), ]
+    mon <- sprintf("%02i-%03i-%04i", mon$State_Code, mon$County_Code, mon$Site_ID)
+    return(mon)
+  })
+
+  areaOfInterest <- reactive({
+    
+    aoi <- input$areaOfInterest
+    aoi <- aoi[[1]]
+    polygons <- lapply(aoi, function(p) {
+      m <- matrix(as.numeric(do.call(rbind, p)), ncol = 2)
+      m <- rbind(m, m[1, ])
+      m <- m[, c(2, 1)]
+      Polygon(coords = m, hole = FALSE)
+    })
+    polygons <- SpatialPolygons(list(Polygons(polygons, "aoi")))
+#    proj4string(polygons) <- CRS("+proj=longlat +ellps=WGS84")
+    return(polygons)
+    
   })
 
   output$areaServed <- renderText({
@@ -247,17 +278,8 @@ shinyServer(function(input, output, session) {
 
     if(!is.null(input$clickedAreaServed)) {
       
-      title <- isolate(sites()[sites()$Key %in% input$clickedAreaServed, ])
-
-      if(nrow(title) > 0) {
-        
-        title <- paste0("Population served by ",
-                        sprintf("%02i-%03i-%04i", title$State_Code, title$County_Code, title$Site_ID))
-        gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title)
-        suppressWarnings(print(gg))
-      } else {
-        return(NULL)
-      }  
+      gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle("Age Pyramid")
+      suppressWarnings(print(gg))
       
     }
   }, width = 400, height = 450)

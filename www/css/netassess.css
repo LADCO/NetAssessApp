@@ -16,6 +16,7 @@
 
   /* Classes for the loading animation */
   div.loading {
+    z-index: 9000;
     position: absolute;
     left: 48%;
     top: 48%;

@@ -1,218 +1,130 @@
-var windowDimsBinding = new Shiny.InputBinding();
-$.extend(windowDimsBinding, {
-  find: function(scope) {
-    return $(scope).find("#windowDims");
-  },
-  getValue: function(el) {
-    return {height: window.innerHeight, width: window.innerWidth}
-  },
-  subscribe: function(el, callback) {
-    $(window).resize(callback);
-  },
-  unsubscribe: function(el) {
-    $(window).off("resize");
-  }
-});
-Shiny.inputBindings.register(windowDimsBinding);
+/* Input Bindings for custom shiny inputs */
 
-
-var visibleSitesBinding = new Shiny.InputBinding();
-$.extend(visibleSitesBinding, {
-  find: function(scope) {
-    return $(scope).find("#visibleSites");
-  },
-  getValue: function(el) {
-    var vs = [];
-    sites.eachLayer(function(layer) {
-      if(layer.feature.properties.visible) vs.push(layer.feature.properties.key)
-    })
-    return vs;
-  },
-  subscribe: function(el, callback) {
-    $("#map").on("siteUpdate", callback);
-  },
-  unsubscribe: function(el) {
-    $("#map").off("siteUpdate");
-  }
-});
-Shiny.inputBindings.register(visibleSitesBinding);
-
-var mapStateBinding = new Shiny.InputBinding();
-$.extend(mapStateBinding, {
-  find: function(scope) {
-    return $(scope).find("#mapState")
-  },
-  getValue: function(el) {
-    return {bounds: map.getBounds(), zoom: map.getZoom(), center: map.getCenter()};
-  },
-  setValue: function(el, value) {
-    map.fitBounds(value);
-  },
-  subscribe: function(el, callback) {
-    map.on("moveend zoomend", function(e) {
-      callback();
-    })
-  },
-  getRatePolicy: function() {
-    return {policy: 'debounce', delay: 500};
-  },
-  unsubscribe: function(el) {
-    $(el).off("viewreset");
-  }
-})
-Shiny.inputBindings.register(mapStateBinding);
-
-var selectedSitesBinding = new Shiny.InputBinding()
-$.extend(selectedSitesBinding, {
-  find: function(scope) {
-    return $(scope).find("#selectedSites")
-  },
-  getValue: function(el) {
-    if(sites != null) {
-      var selSites = [];
-      sites.eachLayer(function(layer) {
-          if(layer.feature.properties.selected & layer.feature.properties.visible) {
-              selSites.push(layer.feature.properties.key)
-          }
-      })
-      return selSites;
-    }
-  },
-  subscribe: function(el, callback) {
-    $("#map").on("siteSelection", callback);
-  },
-  unsubscribe: function(el) {
-    $("#map").off("siteSelection");
-  }  
-})
-Shiny.inputBindings.register(selectedSitesBinding);
-
-var clickedAreaServedBinding = new Shiny.InputBinding()
-$.extend(clickedAreaServedBinding, {
-  find: function(scope) {
-    return $(scope).find("#clickedAreaServed");
-  },
-  getValue: function(el) {
-    return $(el).data("clicked");
-  },
-  subscribe: function(el, callback) {
-    $("#map").on("areaClick", callback);
-  },
-  unsubscribe: function(el) {
-    $("#map").off("areaClick");
-  }
-})
-Shiny.inputBindings.register(clickedAreaServedBinding);
-
-
-
-
-
-
-
-
-
-var monSelectBinding = new Shiny.InputBinding();
-$.extend(monSelectBinding, {
-  find: function(scope) {
-    return $(scope).find("#monitorSelect")
-  },
-  getValue: function(el) {
-    return $(el).data("monitor");
-  },
-  setValue: function(el, value) {
-    $(el).data("monitor", value)
-  },
-  subscribe: function(el, callback) {
-    $("#map").on("monitorSelect", function(el) {
-      callback();
-    })
-  },
-  unsubscribe: function(el) {
-    $(el).off("click.netassess")
-  }
-})
-Shiny.inputBindings.register(monSelectBinding);
-
-Shiny.addCustomMessageHandler("addOverlay", 
-  function(data) {
-    if(data.type == "points") {
-      var x = 5
-    }
-    
-  }
-);
-
-Shiny.addCustomMessageHandler("displayPredefinedArea",
-  function(data) {
-  	if(data.coords.length == 1) {
-  		var x = L.polygon(data.coords[0]);
-  	} else if(data.coords.length > 1) {
-  		var x = L.multiPolygon(data.coords);
-  	}
-    setAOI(x);	
-  }
-);
-
-Shiny.addCustomMessageHandler("showMonitors", 
-  function(data) {
-    if(!$.isArray(data)) {
-      data = [data];
-    }
-    for(var key in sites._layers) {
-      if(sites._layers.hasOwnProperty(key)) {
-        var el = sites._layers[key].feature;
-        var inc = false;
-        for(var i = 0; i < el.properties.key.length; i++) {
-          var val = el.properties.key[i]
-          if(data.indexOf(val) != -1) {
-            inc = true;
-          }
-        }
-        el.properties.visible = inc;
+  // Input that informs shiny about the monitoring locations that have been 
+  // selected.
+  var selectedSitesBinding = new Shiny.InputBinding()
+  $.extend(selectedSitesBinding, {
+    find: function(scope) {
+      return $(scope).find("#selectedSites")
+    },
+    getValue: function(el) {
+      if(sites != null) {
+        var selSites = [];
+        sites.eachLayer(function(layer) {
+            if(layer.feature.properties.selected & layer.feature.properties.visible) {
+                selSites.push(layer.feature.properties.key)
+            }
+        })
+        return selSites;
       }
-    }
-    areaServed.clearLayers()
-    displaySites();
-    $("#map").trigger("siteSelection");
-    $("#map").trigger("siteUpdate");
-  }
-)
-
-Shiny.addCustomMessageHandler("showAlert",
-  function(data) {
+    },
+    subscribe: function(el, callback) {
+      $("#map").on("siteSelection", callback);
+    },
+    unsubscribe: function(el) {
+      $("#map").off("siteSelection");
+    }  
+  })
+  Shiny.inputBindings.register(selectedSitesBinding);
   
-    alert(data);
-  }
-)
-
-Shiny.addCustomMessageHandler("showArea", 
-  function(data) {
-    areaServed.clearLayers()
-    for(var i = 0; i < data.length; i++) {
-      if(data[i].coords.length == 1) {
-        var a = L.polygon(data[i].coords[0], {id: data[i].id}).addTo(areaServed)
-      } else {
-        var a = L.multiPolygon([data[i].coords], {id: data[i].id}).addTo(areaServed)
-      }
-      a.setStyle(areaSelectStyle)
-          .on("mouseover", highlightAreaServed)
-          .on("mouseout", unhighlightAreaServed)
-          .on("click", showAreaInfo)
-      
+  // Input that informs shiny about currently visible monitoring locations. This
+  // really complicated things but was necessary to allow users to remove a 
+  // monitor within an area of interest that they didn't want to affect analysis
+  var visibleSitesBinding = new Shiny.InputBinding();
+  $.extend(visibleSitesBinding, {
+    find: function(scope) {
+      return $(scope).find("#visibleSites");
+    },
+    getValue: function(el) {
+      var vs = [];
+      sites.eachLayer(function(layer) {
+        if(layer.feature.properties.visible) vs.push(layer.feature.properties.key)
+      })
+      return vs;
+    },
+    subscribe: function(el, callback) {
+      $("#map").on("siteUpdate", callback);
+    },
+    unsubscribe: function(el) {
+      $("#map").off("siteUpdate");
     }
+  });
+  Shiny.inputBindings.register(visibleSitesBinding);
+  
+  // Input that updates when an area served polygon is clicked. Allows shiny to
+  // provide demographic and geographic information about that area, including
+  // the age pyramid plot.
+  var clickedAreaServedBinding = new Shiny.InputBinding()
+  $.extend(clickedAreaServedBinding, {
+    find: function(scope) {
+      return $(scope).find("#clickedAreaServed");
+    },
+    getValue: function(el) {
+      return $(el).data("clicked");
+    },
+    subscribe: function(el, callback) {
+      $("#map").on("areaClick", callback);
+    },
+    unsubscribe: function(el) {
+      $("#map").off("areaClick");
+    }
+  })
+  Shiny.inputBindings.register(clickedAreaServedBinding);
+  
+  // Input that updates when a monitoring location is selected. This was used
+  // when the demographic/geographic data was handled differently. Still here
+  // in case I need it later.
+  var monSelectBinding = new Shiny.InputBinding();
+  $.extend(monSelectBinding, {
+    find: function(scope) {
+      return $(scope).find("#monitorSelect")
+    },
+    getValue: function(el) {
+      return $(el).data("monitor");
+    },
+    setValue: function(el, value) {
+      $(el).data("monitor", value)
+    },
+    subscribe: function(el, callback) {
+      $("#map").on("monitorSelect", function(el) {
+        callback();
+      })
+    },
+    unsubscribe: function(el) {
+      $(el).off("click.netassess")
+    }
+  })
+  Shiny.inputBindings.register(monSelectBinding);
 
-  }
-)
+  // Binding to let shiny know what the currently selected area of interest is. 
+  // Used for clipping area served polygons.
+  var areaOfInterestBinding = new Shiny.InputBinding();
+  $.extend(areaOfInterestBinding, {
+    find: function(scope) {
+      return $(scope).find("#areaOfInterest")
+    },
+    getValue: function(el) {
+      return $(el).data("aoi")
+    },
+    subscribe: function(el, callback) {
+      $("#map").on("aoiChange", function(el) {
+        callback();
+      })
+    },
+    unsubscribe: function(el) {
+      $("#map").off("aoiChange");
+    }
+  })
+  Shiny.inputBindings.register(areaOfInterestBinding);
 
-function checkAttributes(layer) {
 
-	if(layer.feature.properties[this.type + "_CODE"] == this.id) {
-		$(layer._icon).addClass("selected");
-		layer.feature.properties.selected = true;
-	} else {
-		$(layer._icon).removeClass("selected");
-		layer.feature.properties.selected = false;
-	}
 
-}
+
+/* Custom Message Handlers */
+
+Shiny.addCustomMessageHandler("displayPredefinedArea", setPredefinedArea);
+
+Shiny.addCustomMessageHandler("updateAreaServed", updateAreaServed)
+
+Shiny.addCustomMessageHandler("updateVisibleMonitors", updateVisibleMonitors)
+
