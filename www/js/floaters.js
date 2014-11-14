@@ -5,14 +5,22 @@
     var $floater = $(id);
     var $this = this;
     
-    opt = $.extend({title: "Floater", cursor: "move", close: true, minimize: true, width: 400, top: "50px", left: "50px"}, opt);
+    opt = $.extend({title: "Floater", cursor: "move", close: true, minimize: true, resize: false, width: 400, top: "50px", left: "50px"}, opt);
     
     $floater.css({width: opt.width, top: opt.top});
+    
+    if(opt.hasOwnProperty("height")) {
+      $floater.css({height: opt.height})
+    }
     
     if(opt.hasOwnProperty("right")) {
       $floater.css({right: opt.right});
     } else {
       $floater.css({left: opt.left});
+    }
+
+    if(opt.resize) {
+      $floater.css({resize: "horizontal"});
     }
 
     $floater.addClass("float-panel closed")

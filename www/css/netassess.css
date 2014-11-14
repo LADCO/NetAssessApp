@@ -50,6 +50,7 @@
   	box-shadow: 0px 3px 2px -1px rgba(44,62,80,0.5);
   	background-color: #2c3e50;
   	color: #FFFFFF;
+    z-index: 5;
   }
   
   /* Formatting for the title and subtitle */
@@ -167,6 +168,7 @@
     height: 25px !important;
     padding-bottom: 0px;
     overflow-y: hidden;
+    resize: none !important;
   }
   
   /* Class for the grabable top bar of the popups */
@@ -344,13 +346,41 @@
 
 
 
+/* Alert Classes */
+#alert {
+  
+  position: absolute;
+  top: 50px;
+  left: 25%;
+  z-index: 1;
+  padding: 15px;
+  background-color: rgba(217,237,247, 0.6);
+  border: 1px solid #31708F;
+  border-radius: 4px;
+  width: 50%;
+  margin: auto;
+  color: #31708F;
+  
+}
 
+#alert-heading {
+  font-size: 1.2em;
+  padding-bottom: 5px;
+  padding-top: 0px;
+  font-weight: bold;
+}
 
+#alert-close {
+  position: absolute;
+  top: 0px;
+  right: 5px;
+  cursor: pointer;
+}
 
+#alert:hover {
+  background-color: rgb(217,237,247);
+}
 
-
-
-
-
-
-
+#alert.alert-open {
+  z-index: 9000 !important;
+}

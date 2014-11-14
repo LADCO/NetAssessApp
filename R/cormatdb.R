@@ -44,7 +44,7 @@ cormat <- function(db, sites, parameter, output = "screen") {
   screen(1)
   par(plt=c(0,0.8,0,1),new=TRUE)
   plotcorr(cor,type="lower",col=dif,diag=TRUE,cex.lab=.8,mar=c(3,0,3,1),outline=TRUE, main=paste(chart_label,"\n All Valid Pairs"))
-  text(expand.grid(y=seq(nrow(dis)),x=seq(nrow(dis), 1)),labels=dis,font=2,cex=.5,col="blue",srt=45)
+  text(expand.grid(y=seq(nrow(dis)),x=seq(nrow(dis), 1)),labels=dis,font=2,cex=.6,col="blue",srt=45)
   
   #Plot ellipse legend
   screen(2)

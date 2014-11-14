@@ -31,7 +31,7 @@ names(csa.list) <- csa$NAME
 params <- dbGetQuery(db, "SELECT Parameter_Code, Parameter_Desc FROM params")
 params.list <- params$Parameter_Code
 names(params.list) <- paste(params$Parameter_Code, params$Parameter_Desc, sep = " - ")
-params.list <- c("None" = -1, params.list)
+params.list <- c("Choose Parameter of Interest" = -1, params.list)
 
 createSites <- function() {
   

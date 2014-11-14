@@ -10,7 +10,7 @@ agePyramid <- function(df, id) {
   
   m <- as.data.frame(cbind(r, t(m), deparse.level = 0), stringsAsFactors = FALSE)
   m$gender = "Male"
-  print(m)
+
   f <- as.data.frame(cbind(r, t(f), deparse.level = 0), stringsAsFactors = FALSE)
   f$gender = "Female"
   

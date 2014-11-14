@@ -1,4 +1,5 @@
 voronoi <- function(ids, lats, longs, boundary) {
+
   # Create a dataframe from the user's inputs
   df <- cbind(ids, lats, longs)
   # Create a SpatialPointsDataFrame
@@ -9,7 +10,12 @@ voronoi <- function(ids, lats, longs, boundary) {
   # calculating the voronoi polygons vertices
   if(!missing(boundary)) {
     bb <- bbox(boundary)
-    rw <- as.numeric(t(bbox(boundary)))
+    bb2 <- bbox(points)
+    bb[1,1] <- min(bb[1,1], bb2[1,1])
+    bb[2,1] <- min(bb[2,1], bb2[2,1])
+    bb[1,2] <- max(bb[1,2], bb2[1,2])
+    bb[2,2] <- max(bb[2,2], bb2[2,2])
+    rw <- as.numeric(t(bb))
     z <- deldir(crds[,1], crds[,2], rw=rw)
   } else {
     z <- deldir(crds[,1], crds[,2])

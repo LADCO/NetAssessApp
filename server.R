@@ -304,7 +304,7 @@ shinyServer(function(input, output, session) {
     
     }
   
-  }, width = 1000, height = 800)
+  }, width = 1200, height = 900)
 
   output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", Sys.Date(), ".csv")},
                                          content = function(file) {

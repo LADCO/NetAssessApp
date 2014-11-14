@@ -1,3 +1,7 @@
+  if($(window).height() < 800 || $(window).width() < 1200) {
+    showAlert("Screen Resolution", "For optimal performance, please use the NetAssess App on a higher resolution screen.")
+  }
+  
   // Call the resizeMap function on page load to set the initial size
   resizeMap();
   
@@ -90,12 +94,12 @@
   // Menubar buttons
   $("#full_extent").on("click", fullExtent);
   $("#aoi_button").on("click", aoiFloat.open);
-  $("#cormatButton").on("click", cormatFloat.open);
+  $("#cormatButton").on("click", checkCorMat);
   $("#resetApp").on("click", resetApp)
   $("#areaSelectZoom, #aoiZoom").on("click", function() {
     map.fitBounds(aoi.getBounds())
   })
-  $("#areaServedCalcButton").on("click", loading.show);
+  $("#areaServedCalcButton").on("click", checkAreaServed);
   $("#expParam").on("change", loading.show)
   
   // Drawing events
@@ -111,11 +115,13 @@
     disableDrawing();
     draw_rectangle.enable()
   });
-  $("#draw_circle").on('click', function() {
-    disableDrawing();
-    draw_circle.enable()
-  });
   $("#cancel_draw").on('click', disableDrawing);
+  
+  $("#alert-close").on('click', function(e) {
+    $("#alert").removeClass("alert-open")
+  })
+  
+  $("#downloadData").on('click', checkReport)
   
 /* Make sure that everything starts "clean" */
   resetApp();

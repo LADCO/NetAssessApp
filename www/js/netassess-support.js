@@ -36,7 +36,7 @@
   $("#areaSelectSelect").select2({width: "80%"});
   
   // Floating Panel Initialization
-  var cormatFloat = new $.floater("#cormat", {title: "Correlation Matrix", width: "900px", top: "80px", left: "80px"});
+  var cormatFloat = new $.floater("#cormat", {title: "Correlation Matrix", width: "800px", height: "640px;", top: "80px", resize: true, left: "80px"});
   var areaservedFloat = new $.floater("#areainfo", {title: "Area Served Information", top: "50px", right: "50px"});
   var aoiFloat = new $.floater("#aoi", {title: "Area of Interest"});
 
@@ -304,7 +304,7 @@
   function resetApp() {
     loading.show();
     resetPredefinedAreaSelect();
-    $("#expParam").select2("val", -1)
+    $("#expParam").select2("val", "-1")
     $("#expParam").trigger("change");
     aoi.clearLayers();
     areaServed.clearLayers();
@@ -313,6 +313,12 @@
     cormatFloat.close();
     fullExtent();
     loading.hide();
+    $("input[name='areaServedClipping'][value='border']").prop("checked", true);
+    $("#areaServedClipping").trigger('change.radioInputBinding');
+    sites.eachLayer(function(layer) {
+      layer.feature.properties.visible = false;
+      layer.feature.properties.selected = false;
+    })
   }
   
   // Functions for changing the state of monitoring locations
@@ -348,5 +354,87 @@
   function disableDrawing() {
     draw_polygon.disable();
     draw_rectangle.disable();
-    draw_circle.disable();
   }
+  
+  // Function to update and show the alert box
+  function showAlert(heading, body) {
+    $("#alert-heading").html(heading);
+    $("#alert-body").html(body);
+    $("#alert").addClass("alert-open");
+  }
+  
+/* Functions to do error checking on inputs before sending data to shiny server */
+
+function checkBasics(siteMax, siteMin) {
+  
+  var active = true;
+  var body = "Please correct the following problems:<ul>";
+  
+  if($("#expParam").select2("val") == "-1") {
+    active = false;
+    body = body + "<li>No parameter selected</li>"
+  }
+  
+  var ss = 0;
+  
+  sites.eachLayer(function(layer, feature) {
+    if(layer.feature.properties.selected && layer.feature.properties.visible) {
+      ss++;
+    }
+  })   
+  
+  if(ss == 0) {
+    active = false;
+    body = body + "<li>No monitors selected</li>";
+  } else if(ss < siteMin && siteMin != 1) {
+    active = false;
+    body = body + "<li>Too few monitors selected</li>";
+  }else if(ss > siteMax) {
+    active = false;
+    body = body + "<li>Too many monitors selected</li>";
+  }
+  
+  return {active: active, body: body};
+
+}
+
+function checkAreaServed(event) {
+  event.stopPropagation();
+  var bc = checkBasics(300, 1);
+
+  if(bc.active) {
+    loading.show();
+    $("#areaServedCalcButton").trigger(event);
+  } else {
+    bc.body = bc.body + "</ul>";
+    showAlert("Area Served Error", bc.body)
+  }
+    
+}
+
+function checkCorMat(event) {
+  var bc = checkBasics(30, 3);
+
+  var param = $("#expParam").select2("val");
+  var vp = ["44201", "88101", "88502"];
+  if(vp.indexOf(param) == -1) {
+    bc.active = false;
+    bc.body = bc.body + "<li>Correlation matrices are only available for parameter codes 44201, 88101, and 88502.</li>"
+  }
+  
+  if(bc.active) {
+    cormatFloat.open()
+  } else {
+    bc.body = bc.body + "</ul>";
+    showAlert("Correlation Matrix Error", bc.body)
+  }
+}
+
+function checkReport(event) {
+  event.stopPropagation()
+  var active = true;
+  if(active == true) {
+    alert("Hello");
+    $("#downloadData").trigger(event);
+  }
+}
