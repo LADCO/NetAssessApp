@@ -175,6 +175,7 @@ shinyServer(function(input, output, session) {
     if(input$areaServedCalcButton > 0) {
       ss <- isolate(selectedSites())
       sn <- isolate(selectedNeighbors())
+
       if(!is.null(ss)) {
         if(nrow(ss) <= 400 & nrow(sn) >= 2) {
           if(input$areaServedClipping == "none") {
@@ -185,9 +186,10 @@ shinyServer(function(input, output, session) {
             } else {
               b <- areaOfInterest()
             }
+
             v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
           }
-          v <- isolate({subset(v, id %in% ss$Key)})
+          v <- subset(v, id %in% ss$Key)
           ov <- over(tracts, v)
           t <- cbind(tracts@data, ov)
           t <- t[!is.na(t$id), ]
@@ -196,8 +198,8 @@ shinyServer(function(input, output, session) {
           area <- areaPolygons(v, CRS("+init=epsg:2163"))        
           v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
-          ids <- sapply(v@data$id, function(i) {strsplit(i, " ")[[1]][1]})
-          v@data$id <- ids
+          #ids <- sapply(v@data$id, function(i) {strsplit(i, " ")[[1]][1]})
+          #v@data$id <- ids
         } else {
           v <- NULL
         }
@@ -236,14 +238,20 @@ shinyServer(function(input, output, session) {
     
     aoi <- input$areaOfInterest
     aoi <- aoi[[1]]
-    polygons <- lapply(aoi, function(p) {
-      m <- matrix(as.numeric(do.call(rbind, p)), ncol = 2)
+    if(is.null(names(aoi[[1]]))) {
+      polygons <- lapply(aoi, function(p) {
+        m <- matrix(as.numeric(do.call(rbind, p)), ncol = 2)
+        m <- rbind(m, m[1, ])
+        m <- m[, c(2, 1)]
+        Polygon(coords = m, hole = FALSE)
+      })
+    } else {
+      m <- matrix(as.numeric(do.call(rbind, aoi)), ncol = 2)
       m <- rbind(m, m[1, ])
       m <- m[, c(2, 1)]
-      Polygon(coords = m, hole = FALSE)
-    })
+      polygons <- list(Polygon(coords = m, hole = FALSE))
+    }
     polygons <- SpatialPolygons(list(Polygons(polygons, "aoi")))
-#    proj4string(polygons) <- CRS("+proj=longlat +ellps=WGS84")
     return(polygons)
     
   })

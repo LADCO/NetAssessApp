@@ -34,7 +34,9 @@ voronoi <- function(ids, lats, longs, boundary) {
   # Use the SP object to create a SpatialPolygonsDataFrame that has the polygons
   # plus additional information like the the monitor id.
   pid <- sapply(slot(SP, "polygons"), function(x) slot(x, "ID"))
-  pid2 <- sapply(pid, function(x) unlist(strsplit(x, " "))[1])
+  pid2 <- as.numeric(sapply(pid, function(x) unlist(strsplit(x, " "))[1]))
+  points <- points[points$ids %in% pid2, ]
+  crds <- points@coords
   voronoi <- SpatialPolygonsDataFrame(SP, data=data.frame(pnt_x=crds[,1],
                                                           pnt_y = crds[,2], id = pid2, row.names=pid, stringsAsFactors = FALSE))
   # Return the SpatialPolygonsDataFrameObject
