@@ -6,7 +6,25 @@
   	margin: 0px;
     overflow: hidden;
   }
+
+  #curtain {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: grey;
+
+  }
   
+  #curtain.loading {
+    z-index: 8500;
+  }
+  
+  #curatin:not(.loading) {
+    z-index: 0;
+  }
+
   #map {
     position: absolute;
   	left: 0px;
@@ -69,7 +87,7 @@
   .right-items {
     display: inline-block;
     float: right;
-    height: 100%;
+    height: 40px;
   }
   
   .menu-bar-item {
@@ -97,6 +115,35 @@
   
   .menu-bar-button:hover {
     background-color: #476481;
+  }
+  
+  /* Class to vertically align icons on the menu-bar */
+  span.valign {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+  
+  .v-divide::before {
+    content: "";
+  }
+  
+  .v-divide::after {
+    content: "";
+  }
+  
+  .v-divide {
+
+    content: "";
+    display: inline-block;
+    width: 0px;
+    height: 24px;
+    position: relative;
+    top: 5px;
+    border-right:2px solid rgba(255,255,255,0.4); 
+    padding: 0px;
+    margin: 0px;
+
   }
   
 /* Classes for the Sidebars */
@@ -167,7 +214,7 @@
     resize: none !important;
   }
   
-  /* Class for the grabable top bar of the popups */
+  /* Class for the grabbable top bar of the popups */
   
   .float-handle {
     position: absolute;
@@ -227,6 +274,23 @@
     color: #476481;
   }
   
+  .img-download-icon {
+
+    font-size: 20px;
+    color: rgba(44,62,80,0.75);
+    padding-right: 5px;
+    float: right;
+  }
+  
+  .img-download-link {
+    position: relative;
+    top: 20px;
+  }
+  
+  .img-download-icon:hover {
+    color: #2c3e50;
+  }
+  
 /* Site Icon Styling */
 
   .site-icon {
@@ -266,6 +330,7 @@
     color: #2c3e50;
   	font-weight: 700;
   	font-size: 1.1em;
+    line-height: 1.1em;
   	margin-bottom: -5px;
   	padding-bottom: 2px;
   	border-bottom: solid 1px rgba(44,62,80,0.75);
@@ -331,6 +396,7 @@
 }
 
 #agePlot > img {
+  margin-top: 10px;
   width: 100%;
 }
 
@@ -378,11 +444,6 @@
 }
 
 #alert.alert-open {
-  z-index: 9000 !important;
+  z-index: 8000 !important;
 }
 
-span.valign {
-  display: inline-block;
-  height: 100%;
-  vertical-align: middle;
-}

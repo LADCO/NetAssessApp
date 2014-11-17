@@ -1,3 +1,8 @@
+  function notImp() {
+    alert("This feature is not yet implemented.")
+  }
+
+
   if($(window).height() < 800 || $(window).width() < 1200) {
     showAlert("Screen Resolution", "For optimal performance, please use the NetAssess App on a higher resolution screen.")
   }
@@ -122,6 +127,11 @@
   })
   
   $("#downloadData").on('click', checkReport)
+  
+  $("#bookmarks").on("click", notImp);
+  $("#removebias").on("click", notImp);
+  
+  $("#curtain").removeClass("loading");
   
 /* Make sure that everything starts "clean" */
   resetApp();

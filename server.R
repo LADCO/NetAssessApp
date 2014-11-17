@@ -227,11 +227,15 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  output$areaServedMonitor <- renderText({
+  areaServedMonitor <- reactive({
     sites <- isolate(sites())
     mon <- sites[sites$Key %in% as.numeric(input$clickedAreaServed), ]
     mon <- sprintf("%02i-%03i-%04i", mon$State_Code, mon$County_Code, mon$Site_ID)
     return(mon)
+  })
+
+  output$areaServedMonitor <- renderText({
+    areaServedMonitor()
   })
 
   areaOfInterest <- reactive({
@@ -286,7 +290,7 @@ shinyServer(function(input, output, session) {
 
     if(!is.null(input$clickedAreaServed)) {
       
-      gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle("Age Pyramid")
+      gg <- agePyramid(polygons()@data, input$clickedAreaServed)
       suppressWarnings(print(gg))
       
     }
@@ -306,12 +310,32 @@ shinyServer(function(input, output, session) {
   
   }, width = 1200, height = 900)
 
+  output$downloadAgePlot <- downloadHandler(filename = function() {paste("AgePlot_", areaServedMonitor(), "_", input$expParam, ".png")},
+                                            content = function(file) {
+                                              device <- function(..., width, height) grDevices::png(..., width = 6, height = 8, res = 150, units = "in")
+                                              ggsave(file, plot = agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(bquote(atop("Age Pyramid", atop(.(paste0("Site ID: ", areaServedMonitor())), .(paste0("Parameter Code: ", input$expParam)))))), device = device)
+                                            })
+
+  output$downloadCorMat <- downloadHandler(filename = function() {paste("CorMat_", input$expParam, "_", as.integer(runif(1, 1, 999999)),".png")},
+                                           content = function(file) {
+                                             parameter <- isolate(input$expParam)
+                                             if(is.null(parameter)) {parameter = -1}
+                                             sites <- isolate(selectedSites()$Key)
+                                             if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
+                                               png(file, 1200, 900)
+                                               cormat(db, sites, parameter)      
+                                               dev.off()
+                                             }
+                                           })
+
   output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", Sys.Date(), ".csv")},
                                          content = function(file) {
                                            d <- polygons()@data
                                            d$area <- unlist(d$area)
                                            d <- merge(d, sites(), by.x = "id", by.y = "Key", all.x = TRUE, all.y = FALSE)
-                                           write.csv(d, file)
+                                           d <- d[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "area", "total", "Count", "Crit_Count", "HAP_Count", "Met_Count")]
+                                           colnames(d) <- c("State Code", "County Code", "Site ID", "Latitude", "Longitude", "Street Addres", "Area (km^2)", "Total Population", "Total Parameters Monitored", "Criteria Monitored", "HAPS Monitored", "Meteorology Monitored")
+                                           write.csv(d, file, row.names = FALSE)
                                          })
 
 

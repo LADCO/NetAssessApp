@@ -28,29 +28,32 @@
 
 	</head>
 
-	<body>
+	<body class = "loading">
 
+    <div id = 'curtain'></div>
+    
 		<div id = "menu-bar">
 			<span>NetAssess</span>
 			<span>Ambient Air Monitoring Network Assessment Tool</span>
       <span class = "right-items">
-        <a class = "menu-bar-button shiny-download-link" id = "downloadData" title = "Generate Report" href = "" target = "_blank">
-          <span class = "valign"><img src = "images/csv.png" /></span>
-        </a>
         <div class = "menu-bar-item">
           <select id="expParam"></select>
         </div>
+        <button class = "menu-bar-button" id = "aoi_button" title = "Set Area of Interest">
+          <i class = "fa fa-crosshairs"></i>
+        </button><span class = "v-divide"></span>
         <button class = "menu-bar-button action-button" id = "cormatButton" title = "Calculate Correlations">
           <span style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -5px;">&rho;</span>
         </button>
         <button class = "menu-bar-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served">
           <span class = "valign"><img src = "images/area_served.png" /></span>
         </button>
+        <button class = "menu-bar-button" id = "removebias" title = "Remove Bias">
+          <i class = "fa fa-birthday-cake"></i>
+        </button>
+        <span class = "v-divide"></span>
         <button class = "menu-bar-button" id = "bookmarks" title = "Bookmark Location">
           <i class = "fa fa-bookmark"></i>
-        </button>
-        <button class = "menu-bar-button" id = "aoi_button" title = "Set Area of Interest">
-          <i class = "fa fa-crosshairs"></i>
         </button>
         <button class = "menu-bar-button" id = "aoiZoom" title = "Zoom to Area of Interest">
           <i class = "fa fa-binoculars"></i>
@@ -58,6 +61,11 @@
         <button class = "menu-bar-button" id = "full_extent" title = "Zoom to Continental US">
           <span class = "valign"><img src = "images/cont_us.png"></span>
         </button>
+        <span class = "v-divide"></span>
+        <a class = "menu-bar-button shiny-download-link" id = "downloadData" title = "Generate Report" href = "" target = "_blank">
+          <span class = "valign"><img src = "images/csv.png" /></span>
+        </a>
+        <span class = "v-divide"></span>
         <button class = "menu-bar-button" id = "resetApp" title = "Reset App">
           <i class = "fa fa-undo"></i>
         </button>
@@ -157,36 +165,49 @@
     <div id = "areaServedMonitor" class = "shiny-text-output area-info-text"></div>
     <p class = "header">Area Served</p>
     <div id = "areaServed" class = "shiny-text-output area-info-text"></div>
-    <p class = "header">Population Served</p>
+    <p class = "header">
+      Population Served
+    </p>
     <div id = "totalPopServed" class = "shiny-text-output area-info-text"></div>
-    <div id="agePlot" class="shiny-plot-output" style="width: 100%; text-align: center;">
-      This is a test
-    </div>
+    <p class = 'header'>
+      Age Pyramid
+      <a class = "shiny-download-link img-download-link" id = "downloadAgePlot" title = "Download Age Plot" href = "" target = "_blank">
+          <i class = "fa fa-download img-download-icon"></i>
+      </a>
+    </p>
+    <div id="agePlot" class="shiny-plot-output" style="width: 100%; text-align: center;"></div>
   </div>
+    
+  <div id = "cormat">
+    <p class = "header">
+      Correlation Matrix
+      <a class = "shiny-download-link img-download-link" id = "downloadCorMat" title = "Download Correlation Matrix" href = "" target = "_blank">
+        <i class = "fa fa-download img-download-icon"></i>
+      </a>
+    </p>
+    <div id = "corplot" class = "shiny-plot-output" style = "width: 100%; text-align: center;"></div>
+  </div>
+    
     
   <div id = "alert">
     <div id = "alert-heading">Heading</div>
     <span id = "alert-body">Main Body of Alert</span>
     <a id = 'alert-close'><i class = 'fa fa-close'></i></a>
   </div>
-    
-  <div id = "cormat">
-    <div id = "corplot" class = "shiny-plot-output" style = "width: 100%; text-align: center;"></div>
-  </div>
-    
-    <script src = "js/leaflet.js"></script>
-		<script src = "js/esri-leaflet.js"></script>
-		<script src = "js/leaflet.draw.js"></script>
-		<script src = "js/leaflet.contextmenu.js"></script>
-		<script src = "js/L.Control.Sidebar.js"></script>
-		<script src = "js/easy-button.js"></script>
-		<script src = "js/select2.min.js"></script>
-    <script src = "js/floaters.js"></script>
-    
-    <script src = "js/netassess-support.js"></script>
-    <script src = "js/netassess-shiny.js"></script>
-		<script src = "js/netassess.js"></script>
+  
+  <script src = "js/leaflet.js"></script>
+	<script src = "js/esri-leaflet.js"></script>
+	<script src = "js/leaflet.draw.js"></script>
+	<script src = "js/leaflet.contextmenu.js"></script>
+	<script src = "js/L.Control.Sidebar.js"></script>
+	<script src = "js/easy-button.js"></script>
+	<script src = "js/select2.min.js"></script>
+  <script src = "js/floaters.js"></script>
+  
+  <script src = "js/netassess-support.js"></script>
+  <script src = "js/netassess-shiny.js"></script>
+	<script src = "js/netassess.js"></script>
 
-	</body>
+  </body>
 
 </html>

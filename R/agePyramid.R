@@ -23,7 +23,7 @@ agePyramid <- function(df, id) {
     
   m <- max(d$Count)
   s <- 10^floor(log10(m))
-  ss <- seq(-ceiling(m/s) * s, ceiling(m/s) * s, s*2)
+  ss <- seq(-ceiling(m/s) * s, ceiling(m/s) * s, s)
   
   gg <- suppressWarnings({ggplot(d) +
         geom_bar(subset=plyr::.(Gender=="Male"), aes(x=Age, y=Count*(-1), fill = Gender), stat = "identity") + 
