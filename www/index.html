@@ -35,16 +35,16 @@
 			<span>Ambient Air Monitoring Network Assessment Tool</span>
       <span class = "right-items">
         <a class = "menu-bar-button shiny-download-link" id = "downloadData" title = "Generate Report" href = "" target = "_blank">
-          <i class = "fa fa-file-pdf-o"></i>
+          <span class = "valign"><img src = "images/csv.png" /></span>
         </a>
         <div class = "menu-bar-item">
           <select id="expParam"></select>
         </div>
         <button class = "menu-bar-button action-button" id = "cormatButton" title = "Calculate Correlations">
-          <span style = "font-family: serif; font-weight: bold; font-size: 24px;">&rho;</span>
+          <span style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -5px;">&rho;</span>
         </button>
         <button class = "menu-bar-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served">
-          <img src = "images/area_served.png" />
+          <span class = "valign"><img src = "images/area_served.png" /></span>
         </button>
         <button class = "menu-bar-button" id = "bookmarks" title = "Bookmark Location">
           <i class = "fa fa-bookmark"></i>
@@ -56,7 +56,7 @@
           <i class = "fa fa-binoculars"></i>
         </button>
         <button class = "menu-bar-button" id = "full_extent" title = "Zoom to Continental US">
-          <img src = "images/cont_us.png">
+          <span class = "valign"><img src = "images/cont_us.png"></span>
         </button>
         <button class = "menu-bar-button" id = "resetApp" title = "Reset App">
           <i class = "fa fa-undo"></i>
@@ -159,7 +159,9 @@
     <div id = "areaServed" class = "shiny-text-output area-info-text"></div>
     <p class = "header">Population Served</p>
     <div id = "totalPopServed" class = "shiny-text-output area-info-text"></div>
-    <div id="agePlot" class="shiny-plot-output" style="width: 100%; text-align: center;"></div>
+    <div id="agePlot" class="shiny-plot-output" style="width: 100%; text-align: center;">
+      This is a test
+    </div>
   </div>
     
   <div id = "alert">

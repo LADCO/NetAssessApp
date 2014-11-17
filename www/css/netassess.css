@@ -95,10 +95,6 @@
     color: #FFF;
   }
   
-  .menu-bar-button > img {
-    vertical-align: middle;
-  }
-  
   .menu-bar-button:hover {
     background-color: #476481;
   }
@@ -383,4 +379,10 @@
 
 #alert.alert-open {
   z-index: 9000 !important;
+}
+
+span.valign {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
 }

@@ -434,7 +434,6 @@ function checkReport(event) {
   event.stopPropagation()
   var active = true;
   if(active == true) {
-    alert("Hello");
     $("#downloadData").trigger(event);
   }
 }
