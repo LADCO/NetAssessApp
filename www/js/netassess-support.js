@@ -21,6 +21,9 @@
   // Layer containing the area served polygons
   var areaServed = L.featureGroup(null);
 
+  // Layer for Ozone Probabilities
+  var o3prob = L.imageOverlay("images/o375.png", [[24.51748, -124.76255], [49.41748, -66.86255]], {opacity: 0.45})
+
   // Area of Interest Layer
   var aoi = new L.FeatureGroup();
 
@@ -40,6 +43,7 @@
   var areaservedFloat = new $.floater("#areainfo", {title: "Area Served Information", top: "50px", right: "50px"});
   var aoiFloat = new $.floater("#aoi", {title: "Area of Interest"});
 
+  var o3legendFloat = new $.floater("#o3legend", {title: "Probability", close: false, width: '150px', height: "400px", right: "50px", bottom: "50px"})
 
 /* Functions for Controlling the display of the map */
 

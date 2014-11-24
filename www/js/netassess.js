@@ -57,7 +57,7 @@
       sites.addData(site_data)
       
       L.control.layers(basemaps, 
-                       {"Area of Interest": aoi, "Area Served": areaServed}, 
+                       {"Area of Interest": aoi, "Area Served": areaServed, "Ozone Exceedence Probability": o3prob}, 
                        {position: 'topleft'}).addTo(map);
   
       loading.hide();
@@ -78,9 +78,8 @@
 /* Initialize map objects */
   
   // Creates the drawing functions for area selection.
-  var draw_polygon = new L.Draw.Polygon(map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#bada55'}});
-  var draw_rectangle = new L.Draw.Rectangle(map, {shapeOptions: {color: '#bada55'}});
-  var draw_circle = new L.Draw.Circle(map, {shapeOptions: {color: '#bada55'}});
+  var draw_polygon = new L.Draw.Polygon(map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#0033ff'}});
+  var draw_rectangle = new L.Draw.Rectangle(map, {shapeOptions: {color: '#0033ff'}});
 
   // Add the sidebars to the map
   for(var sb in sidebars) {
@@ -93,6 +92,8 @@
     L.easyButton("fa-cogs", function() {toggleSidebars("settings");}, "Settings");
     L.easyButton("fa-question", function() {toggleSidebars("help");}, "Help");
     L.easyButton("fa-info", function() {toggleSidebars("about");}, "About"); 
+    
+  L.control.scale().addTo(map);
 
 /* Set Event Handlers */
 
@@ -131,6 +132,18 @@
   $("#bookmarks").on("click", notImp);
   $("#removebias").on("click", notImp);
   
+  map.on("overlayadd", function(layer) {
+    if(layer.name == "Ozone Exceedence Probability") {
+      o3legendFloat.open()
+    }
+  })
+
+  map.on("overlayremove", function(layer) {
+    if(layer.name == "Ozone Exceedence Probability") {
+      o3legendFloat.close()
+    }
+  })
+
   $("#curtain").removeClass("loading");
   
 /* Make sure that everything starts "clean" */

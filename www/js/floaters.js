@@ -7,7 +7,7 @@
     
     opt = $.extend({title: "Floater", cursor: "move", close: true, minimize: true, resize: false, width: 400, top: "50px", left: "50px"}, opt);
     
-    $floater.css({width: opt.width, top: opt.top});
+    $floater.css({width: opt.width});
     
     if(opt.hasOwnProperty("height")) {
       $floater.css({height: opt.height})
@@ -19,6 +19,11 @@
       $floater.css({left: opt.left});
     }
 
+    if(opt.hasOwnProperty("bottom")) {
+      $floater.css({bottom: opt.bottom});
+    } else {
+      $floater.css({top: opt.top});
+    }
     if(opt.resize) {
       $floater.css({resize: "horizontal"});
     }
@@ -55,12 +60,12 @@
       $floater.addClass("on-top");
     })
     
-    if(opt.minimize) {
+    if(opt.minimize == true) {
       var min = $floater.append("<a class = 'minimize'><i class = 'fa fa-minus'></i></a>").find(".minimize");
       min.on("click", function() { $floater.toggleClass("minimized").removeClass("open").removeClass("closed");})
     }
         
-    if(opt.close) {
+    if(opt.close == true) {
       var clo = $floater.append("<a class = 'close'><i class = 'fa fa-close'></i></a>").find(".close");
       clo.on("click", function() {$floater.addClass("closed").removeClass("open").removeClass("on-top").removeClass("minimized");})
     }
