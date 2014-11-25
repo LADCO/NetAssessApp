@@ -1,5 +1,38 @@
 /* Input Bindings for custom shiny inputs */
 
+  // Input that informs shiny about the new monitoring locations that have been 
+  // added
+  var newSitesBinding = new Shiny.InputBinding();
+  $.extend(newSitesBinding, {
+    find: function(scope) {
+      return $(scope).find("#newSites")
+    },
+    getValue: function(el) {
+      if(newSites != null) {
+        var new_sites = [];
+        newSites.eachLayer(function(layer) {
+          
+          new_sites.push({lat: layer.feature.geometry.coordinates[1],
+                          lng: layer.feature.geometry.coordinates[0],
+                          name: layer.feature.properties.Name,
+                          params: layer.feature.properties.Params,
+                          visible: layer.feature.properties.visible,
+                          selected: layer.feature.properties.selected,
+                          key: layer.feature.properties.key});
+                          
+        })
+        return {data: new_sites};
+      }
+    },
+    subscribe: function(el, callback) {
+      $("#map").on("newSiteAdd", callback);
+    },
+    unsubscribe: function(el) {
+      $("#map").off("newSiteAdd");
+    }
+  })
+  Shiny.inputBindings.register(newSitesBinding);
+
   // Input that informs shiny about the monitoring locations that have been 
   // selected.
   var selectedSitesBinding = new Shiny.InputBinding()

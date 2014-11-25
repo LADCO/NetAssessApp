@@ -14,6 +14,8 @@ source("R/cormatdb.R")
 load("data/tracts.rda")
 load("data/usborder.rda")
 
+options(stringsAsFactors = FALSE)
+
 db <- dbConnect(SQLite(), dbname = "data/netassess.sqlite")
 
 states <- unique(dbGetQuery(db, "SELECT CODE, NAME FROM states"))

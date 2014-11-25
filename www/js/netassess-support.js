@@ -5,6 +5,8 @@
 
   // Default icon for displaying monitor locations
   var siteIcon = L.divIcon({className: 'site-icon hidden'});
+  var newSiteIcon = L.divIcon({className: 'new-site-icon'});
+  var newSiteSelector = L.divIcon({className: 'fa fa-crosshairs new-site-selector'});
 
   // Layer containing monitor locations
   var sites = L.geoJson(null, {
@@ -17,6 +19,19 @@
         },
         onEachFeature: initializeSite
       });
+      
+  var newSites = L.geoJson(null, {
+        pointToLayer: function(feature, latlon) {
+            var mark = new L.marker(latlon, {contextmenu: true, icon: newSiteIcon});
+            mark.options.contextmenuItems = [{text: "Toggle Selected", index: 0, callback: toggleSelected, context: mark},
+                                             {text: "Delete Monitor", index: 1, callback: hideMonitor, context: mark},
+                                             {separator: true, index: 2}];
+            return mark;
+        },
+        onEachFeature: initializeNewSite
+  })
+  
+  var newSiteSelectionLayer = L.layerGroup();
   
   // Layer containing the area served polygons
   var areaServed = L.featureGroup(null);
@@ -37,6 +52,7 @@
   // Select Boxes
   $("#expParam").select2({width: "350px"});
   $("#areaSelectSelect").select2({width: "80%"});
+  $("#new_site_parameters").select2({width: "100%", placeholder: "Click to Select Parameters"});
   
   // Floating Panel Initialization
   var cormatFloat = new $.floater("#cormat", {title: "Correlation Matrix", width: "800px", height: "640px;", top: "80px", resize: true, left: "80px"});
@@ -44,6 +60,8 @@
   var aoiFloat = new $.floater("#aoi", {title: "Area of Interest"});
 
   var o3legendFloat = new $.floater("#o3legend", {title: "Probability", close: false, width: '150px', height: "400px", right: "50px", bottom: "50px"})
+  
+  var newSiteFloat = new $.floater("#new_site", {title: "Add New Site", width: '400px'})
 
 /* Functions for Controlling the display of the map */
 
@@ -73,40 +91,6 @@
       var t = "polygon";
     }
     
-  	function checkPolygon(x) {
-  
-      var inside = false;
-      
-      if(this.hasOwnProperty("_layers")) {
-        this.eachLayer(function(layer) {
-          if(pip(x._latlng, layer)) {inside = true}
-        })
-      } else {
-        inside = pip(x._latlng, this);
-      }
-      
-  		if(inside) {
-  			$(x._icon).addClass("selected");
-  			x.feature.properties.selected = true;
-  		} else {
-  			$(x._icon).removeClass("selected");
-  			x.feature.properties.selected = false;
-  		}
-  
-  	}
-  
-    function checkCircle(x) {
-    
-      if(this._latlng.distanceTo(x._latlng) <= this._mRadius) {
-    		$(x._icon).addClass("selected");
-  			x.feature.properties.selected = true;      
-      } else {
-    		$(x._icon).removeClass("selected");
-  			x.feature.properties.selected = false;
-      }
-    
-    }
-  
     areaServed.clearLayers();
   	aoi.clearLayers();
   	aoi.addLayer(l);
@@ -117,10 +101,10 @@
   	
   	if(t == "polygon") {
   		sites.eachLayer(checkPolygon, l);
+      newSites.eachLayer(checkPolygon, l);
   	} else if(t == "rectangle") {
     	sites.eachLayer(checkPolygon, l);
-  	} else if(t == "circle") {
-      sites.eachLayer(checkCircle, l);
+      newSites.eachLayer(checkPolygon, l);
   	} else {
   		alert("Unknown Input")
   	}
@@ -140,6 +124,28 @@
     
   }
   
+  function checkPolygon(x) {
+  
+    var inside = false;
+    
+    if(this.hasOwnProperty("_layers")) {
+      this.eachLayer(function(layer) {
+        if(pip(x._latlng, layer)) {inside = true}
+      })
+    } else {
+      inside = pip(x._latlng, this);
+    }
+    
+  	if(inside) {
+  		$(x._icon).addClass("selected");
+  		x.feature.properties.selected = true;
+  	} else {
+  		$(x._icon).removeClass("selected");
+  		x.feature.properties.selected = false;
+  	}
+  
+  }
+    
   // Function to test if point falls within a polygon
   // Converted from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
   function pip(point, polygon) {
@@ -191,6 +197,9 @@
         el.properties.visible = inc;
       }
     }
+    newSites.eachLayer(function(layer) {
+      layer.feature.properties.visible = layer.feature.properties.Params.indexOf($("#expParam").val()) != -1;
+    })
     areaServed.clearLayers()
     displaySites();
     $("#map").trigger("siteSelection");
@@ -203,33 +212,50 @@
   // and 'selected' properties
   function displaySites() {
   
-    sites.eachLayer(function(layer) {
-      if(layer.feature.properties.visible == false) {
-        $(layer._icon).addClass("hidden");
-      } else {
-        $(layer._icon).removeClass("hidden");
-        if(layer.feature.properties.selected == false) {
-          $(layer._icon).removeClass("selected");
-        } else {
-          $(layer._icon).addClass("selected");
-        }
-      }
-    });
+    sites.eachLayer(siteCheck);
+    newSites.eachLayer(siteCheck);
   
+  }
+  
+  function siteCheck(layer) {
+    if(layer.feature.properties.visible == false) {
+      $(layer._icon).addClass("hidden");
+    } else {
+      $(layer._icon).removeClass("hidden");
+      if(layer.feature.properties.selected == false) {
+        $(layer._icon).removeClass("selected");
+      } else {
+        $(layer._icon).addClass("selected");
+      }
+    }
   }
   
   // Function that adds the popups to the site icons and adds event triggers for 
   // shiny inputs
+  function initializeNewSite(feature, layer) {
+    po = "<span class = 'popup-text'><h4 class = 'popup-header'>New Site Information</h4>"
+    po = po + "<span class = 'popup-header'>Site Name</span><br />"
+    po = po + feature.properties.Name + "<br />"
+    po = po + "<span class = 'popup-header'>State</span><br />"
+    po = po + feature.properties.State + "<br />"
+    po = po + "<span class = 'popup-header'>County</span><br />"
+    po = po + feature.properties.County + "<br />"
+    po = po + "</span>"
+
+    layer.bindPopup(po, {minWidth: 150});
+
+  }
+  
   function initializeSite(feature, layer) {
   
     po = "<span class = 'popup-text'><h4 class = 'popup-header'>Site Information</h4>"
-    po = po + "<span class = 'popup-subheader'>Site ID(s)</span><br />"
+    po = po + "<span class = 'popup-header'>Site ID(s)</span><br />"
     for(si in feature.properties.site_id) {
       po = po + feature.properties.site_id[si] + "<br />"
     }
-    po = po + "<span class = 'popup-subheader'>Street Address</span><br />"
+    po = po + "<span class = 'popup-header'>Street Address</span><br />"
     po = po + feature.properties.Street_Address + "<br />"
-    po = po + "<span class = 'popup-subheader'>Parameter Counts</span><br />"
+    po = po + "<span class = 'popup-header'>Parameter Counts</span><br />"
     po = po + "<b>Total:</b> " + feature.properties.Count + "<br />"
     po = po + "<b>Criteria:</b> " + feature.properties.Crit_Count + "<br />"
     po = po + "<b>HAPS:</b> " + feature.properties.HAP_Count + "<br />"
@@ -440,4 +466,43 @@ function checkReport(event) {
   if(active == true) {
     $("#downloadData").trigger(event);
   }
+}
+
+function populateNewSiteData(event) {
+  
+  event.layer.addTo(newSiteSelectionLayer);
+  
+  $("#ns_lat").val(Math.round(event.layer._latlng.lat * 10000) / 10000);
+  $("#ns_lng").val(Math.round(event.layer._latlng.lng * 10000) / 10000);
+  
+  var lat = event.layer._latlng.lat;
+  var lng = event.layer._latlng.lng;
+  var url = "http://data.fcc.gov/api/block/find?latitude=" + lat + "&longitude=" + lng + "&showall=false&format=jsonp&callback=?"
+  $.getJSON(url, function(wd) {
+    
+    $("#ns_state").val(wd.State.name);
+    $("#ns_county").val(wd.County.name);
+    newSiteFloat.open();
+
+  })
+
+}
+
+function addNewSite() {
+  newSiteSelectionLayer.eachLayer(function(layer) {
+    var gj = layer.toGeoJSON();
+    var props = {County: $("#ns_county").val(), State: $("#ns_state").val(), 
+                 Name: $("#ns_name").val(), Params: $("#new_site_parameters").val(),
+                 key: "n" + new_site_count
+                }
+    new_site_count++
+    props.selected = false;
+    props.visible = props.Params.indexOf($("#expParam").val()) != -1;
+    gj.properties = props;
+    newSites.addData(gj)
+    newSites.eachLayer(siteCheck);
+  })
+  $("#map").trigger("newSiteAdd");
+  newSiteSelectionLayer.clearLayers();
+  newSiteFloat.close();
 }

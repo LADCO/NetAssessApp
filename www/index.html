@@ -41,7 +41,11 @@
         </div>
         <button class = "menu-bar-button" id = "aoi_button" title = "Set Area of Interest">
           <i class = "fa fa-crosshairs"></i>
-        </button><span class = "v-divide"></span>
+        </button>
+        <button class = "menu-bar-button" id = "new_site_button" title = "Add New Site">
+          <i class = "fa fa-plus-circle"></i>
+        </button>
+        <span class = "v-divide"></span>
         <button class = "menu-bar-button action-button" id = "cormatButton" title = "Calculate Correlations">
           <span style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -5px;">&rho;</span>
         </button>
@@ -78,6 +82,7 @@
     <div id = "clickedAreaServed"></div>
     <div id = "visibleSites"></div>
     <div id = "areaOfInterest"></div>
+    <div id = "newSites"></div>
     
 		<div id = "map"></div>
 
@@ -186,6 +191,37 @@
       </a>
     </p>
     <div id = "corplot" class = "shiny-plot-output" style = "width: 100%; text-align: center;"></div>
+  </div>
+    
+  <div id = "new_site">
+    <table>
+      <tr>
+        <td><label for = "ns_name">Site Name</label></td>
+        <td><input type = "text" name = "ns_name" id = "ns_name" /></td>
+      </tr>
+    </table>
+    <p class = "header">Location</p>
+    <table>
+      <tr>
+        <td><label for = "ns_lat">Latitude</label></td>
+        <td><input type = "text" name = "ns_lat" id = "ns_lat" /></td>
+      </tr>
+      <tr>
+        <td><label for = "ns_lng">Longitude</label></td>
+        <td><input type = "text" name = "ns_lng" id = "ns_lng" /></td>
+      </tr>
+      <tr>
+        <td><label for = "ns_state">State</label></td>
+        <td><input type = "text" name = "ns_state" id = "ns_state" /></td>
+      </tr>
+      <tr>
+        <td><label for = "ns_county">County</label></td>
+        <td><input type = "text" name = "ns_county" id = "ns_county" /></td>
+      </tr>
+    </table>
+    <p class = "header" style = "margin-bottom: 10px;">Parameters</p>
+    <select id = "new_site_parameters" multiple size = 4></select>
+    <button style = "float: right; margin-top: 10px;" id = "new_site_add">Add Site</button>
   </div>
     
   <div id = "o3legend">

@@ -2,6 +2,8 @@
     alert("This feature is not yet implemented.")
   }
 
+  // Counter for assigning unique ids to new sites
+  var new_site_count = 1;
 
   if($(window).height() < 800 || $(window).width() < 1200) {
     showAlert("Screen Resolution", "For optimal performance, please use the NetAssess App on a higher resolution screen.")
@@ -72,14 +74,17 @@
   // Sets the initial basemap to "Gray"
   basemaps["Gray"].addTo(map);
   map.addLayer(sites);
+  map.addLayer(newSites);
+  map.addLayer(newSiteSelectionLayer);
   map.addLayer(aoi);
   areaServed.addTo(map);
 
 /* Initialize map objects */
   
-  // Creates the drawing functions for area selection.
+  // Creates the drawing functions for area selection and new site addition.
   var draw_polygon = new L.Draw.Polygon(map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#0033ff'}});
   var draw_rectangle = new L.Draw.Rectangle(map, {shapeOptions: {color: '#0033ff'}});
+  var draw_new_site = new L.Draw.Marker(map, {icon: newSiteSelector})
 
   // Add the sidebars to the map
   for(var sb in sidebars) {
@@ -110,8 +115,12 @@
   
   // Drawing events
   map.on('draw:created', function(e) {
-    setAOI(e)
-    resetPredefinedAreaSelect()
+    if(e.layerType != "marker") {
+      setAOI(e)
+      resetPredefinedAreaSelect()
+    } else {
+      populateNewSiteData(e);
+    }
   })
   $("#draw_polygon").on('click', function() {
     disableDrawing();
@@ -125,6 +134,15 @@
   
   $("#alert-close").on('click', function(e) {
     $("#alert").removeClass("alert-open")
+  })
+  
+  $("#new_site_button").on('click', function(e) {
+    newSiteSelectionLayer.clearLayers()
+    draw_new_site.enable();
+  })
+  
+  $("#new_site_add").on('click', function(e) {
+    addNewSite();
   })
   
   $("#downloadData").on('click', checkReport)

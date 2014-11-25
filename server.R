@@ -6,6 +6,7 @@ shinyServer(function(input, output, session) {
   
   # Populate the parameter selection dropdown  
   updateSelectInput(session, "expParam", choices = params.list)
+  updateSelectInput(session, "new_site_parameters", choices = params.list[2:length(params.list)])
   
   # Contains a list of sites based on the currently selected parameter
   sites <- reactive({
@@ -17,12 +18,35 @@ shinyServer(function(input, output, session) {
     } else {return(NULL)}
   })
   
+  visibleNewSites <- reactive({
+    new_sites <- input$newSites$data
+    vns <- data.frame(stringsAsFactors = FALSE)
+    for(i in seq(length(new_sites))) {
+      n <- new_sites[[i]]
+      if(n$visible == TRUE) {
+        vns <- rbind(vns, c(n$lat, n$lng, n$key, n$selected, n$name))
+      }
+    }
+    
+    colnames(vns) <- c("Latitude", "Longitude", "Key", "selected", "name")
+    vns$Latitude <- as.numeric(vns$Latitude)
+    vns$Longitude <- as.numeric(vns$Longitude)
+    vns$selected <- as.logical(vns$selected)
+
+    return(vns)
+  })
+  
+  selectedNewSites <- reactive({
+    vns <- visibleNewSites()
+    return(vns[vns$selected, ])
+  })
+  
   visibleSites <- reactive({
     
     return(sites()[sites()$Key %in% input$visibleSites, ])
     
   })
-  
+
   # Send a custom message to update visible monitors based on parameter selection
   observe({
     if(!is.null(sites())) {
@@ -94,8 +118,16 @@ shinyServer(function(input, output, session) {
   selectedNeighbors <- reactive({
 
     ss <- selectedSites()
-    sites <- isolate(visibleSites())
+    nss <- selectedNewSites()[, c("Key", "Latitude", "Longitude")]
+    print(nss)
+    sites <- isolate(visibleSites()[, c("Key", "Latitude", "Longitude")])
+    newsites <- isolate(visibleNewSites()[, c("Key", "Latitude", "Longitude")])
+    
+    ss <- rbind(ss, nss)
+    sites <- rbind(sites, newsites)
 
+
+    
     if(!is.null(ss)) {
         
       us.lats <- c(24.4, 49.4)
@@ -174,6 +206,9 @@ shinyServer(function(input, output, session) {
   polygons <- reactive({
     if(input$areaServedCalcButton > 0) {
       ss <- isolate(selectedSites())
+      nss <- selectedNewSites()[, c("Key", "Latitude", "Longitude")]
+      ss <- rbind(ss, nss)
+      
       sn <- isolate(selectedNeighbors())
 
       if(!is.null(ss)) {
