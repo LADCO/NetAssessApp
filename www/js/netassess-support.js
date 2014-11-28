@@ -120,7 +120,10 @@
     
     $("#areaOfInterest").data("aoi", aoiPolygons);
     
-    $("#map").trigger("siteSelection").trigger("aoiChange");
+    $("#map")
+      .trigger("siteSelection")
+      .trigger("aoiChange")
+      .trigger("newSiteUpdate");
     
   }
   
@@ -202,8 +205,9 @@
     })
     areaServed.clearLayers()
     displaySites();
-    $("#map").trigger("siteSelection");
-    $("#map").trigger("siteUpdate");
+    $("#map").trigger("siteSelection")
+      .trigger("newSiteUpdate")
+      .trigger("siteUpdate");
     loading.hide();
   }
 
@@ -356,15 +360,17 @@
   function toggleSelected() {
     this.feature.properties.selected = !this.feature.properties.selected
     $(this._icon).toggleClass("selected", this.feature.properties.selected);
-    $("#map").trigger("siteSelection");
+    $("#map").trigger("siteSelection").trigger("newSiteUpdate");
   }
 
   function hideMonitor() {
     this.feature.properties.visible = false;
     this.feature.properties.selected = false;
     $(this._icon).addClass("hidden");
-    $("#map").trigger("siteSelection");
-    $("#map").trigger("siteUpdate");
+    $("#map")
+      .trigger("siteSelection")
+      .trigger("siteUpdate")
+      .trigger("newSiteUpdate");
   }
   
   // Toggles the provided sidebar panel, and makes sure all others are closed.
@@ -493,7 +499,7 @@ function addNewSite() {
     var gj = layer.toGeoJSON();
     var props = {County: $("#ns_county").val(), State: $("#ns_state").val(), 
                  Name: $("#ns_name").val(), Params: $("#new_site_parameters").val(),
-                 key: "n" + new_site_count
+                 key: new_site_count
                 }
     new_site_count++
     props.selected = false;
@@ -502,7 +508,7 @@ function addNewSite() {
     newSites.addData(gj)
     newSites.eachLayer(siteCheck);
   })
-  $("#map").trigger("newSiteAdd");
+  $("#map").trigger("newSiteUpdate");
   newSiteSelectionLayer.clearLayers();
   newSiteFloat.close();
 }

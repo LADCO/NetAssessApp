@@ -25,10 +25,10 @@
       }
     },
     subscribe: function(el, callback) {
-      $("#map").on("newSiteAdd", callback);
+      $("#map").on("newSiteUpdate", callback);
     },
     unsubscribe: function(el) {
-      $("#map").off("newSiteAdd");
+      $("#map").off("newSiteUpdate");
     }
   })
   Shiny.inputBindings.register(newSitesBinding);

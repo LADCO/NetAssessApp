@@ -20,20 +20,21 @@ shinyServer(function(input, output, session) {
   
   visibleNewSites <- reactive({
     new_sites <- input$newSites$data
-    vns <- data.frame(stringsAsFactors = FALSE)
-    for(i in seq(length(new_sites))) {
-      n <- new_sites[[i]]
-      if(n$visible == TRUE) {
-        vns <- rbind(vns, c(n$lat, n$lng, n$key, n$selected, n$name))
+    if(length(new_sites) > 0) {
+      vns <- data.frame(stringsAsFactors = FALSE)
+      for(i in seq(length(new_sites))) {
+        n <- new_sites[[i]]
+        if(n$visible == TRUE) {
+          vns <- rbind(vns, c(n$lat, n$lng, n$key, n$selected, n$name))
+        }
       }
+      
+      colnames(vns) <- c("Latitude", "Longitude", "Key", "selected", "name")
+      vns$Latitude <- as.numeric(vns$Latitude)
+      vns$Longitude <- as.numeric(vns$Longitude)
+      vns$selected <- as.logical(vns$selected)
+      return(vns)
     }
-    
-    colnames(vns) <- c("Latitude", "Longitude", "Key", "selected", "name")
-    vns$Latitude <- as.numeric(vns$Latitude)
-    vns$Longitude <- as.numeric(vns$Longitude)
-    vns$selected <- as.logical(vns$selected)
-
-    return(vns)
   })
   
   selectedNewSites <- reactive({
@@ -118,15 +119,18 @@ shinyServer(function(input, output, session) {
   selectedNeighbors <- reactive({
 
     ss <- selectedSites()
+    ss <<- ss
     nss <- selectedNewSites()[, c("Key", "Latitude", "Longitude")]
-    print(nss)
-    sites <- isolate(visibleSites()[, c("Key", "Latitude", "Longitude")])
+    nss <<- nss
+    sss <- isolate(visibleSites()[, c("Key", "Latitude", "Longitude")])
+    sss <<- sites
     newsites <- isolate(visibleNewSites()[, c("Key", "Latitude", "Longitude")])
+    newsites <<- newsites
     
     ss <- rbind(ss, nss)
-    sites <- rbind(sites, newsites)
+    sites <- rbind(sss, newsites)
 
-
+    
     
     if(!is.null(ss)) {
         
@@ -210,7 +214,7 @@ shinyServer(function(input, output, session) {
       ss <- rbind(ss, nss)
       
       sn <- isolate(selectedNeighbors())
-
+      
       if(!is.null(ss)) {
         if(nrow(ss) <= 400 & nrow(sn) >= 2) {
           if(input$areaServedClipping == "none") {

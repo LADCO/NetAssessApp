@@ -3,7 +3,7 @@
   }
 
   // Counter for assigning unique ids to new sites
-  var new_site_count = 1;
+  var new_site_count = 90001;
 
   if($(window).height() < 800 || $(window).width() < 1200) {
     showAlert("Screen Resolution", "For optimal performance, please use the NetAssess App on a higher resolution screen.")
