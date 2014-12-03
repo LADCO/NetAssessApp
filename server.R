@@ -267,10 +267,18 @@ shinyServer(function(input, output, session) {
   })
 
   areaServedMonitor <- reactive({
-    sites <- isolate(sites())
-    mon <- sites[sites$Key %in% as.numeric(input$clickedAreaServed), ]
-    mon <- sprintf("%02i-%03i-%04i", mon$State_Code, mon$County_Code, mon$Site_ID)
-    return(mon)
+    monkey <- as.numeric(input$clickedAreaServed)
+    if(length(monkey) > 0) {
+      if(monkey < 90000) {
+        sites <- isolate(sites())
+        mon <- sites[sites$Key %in% monkey, ]
+        mon <- sprintf("%02i-%03i-%04i", mon$State_Code, mon$County_Code, mon$Site_ID)
+      } else {
+        sites <- isolate(visibleNewSites())
+        mon <- paste(sites[sites$Key %in% monkey, "name"], "(New Site)")
+      }
+      return(mon)
+    }
   })
 
   output$areaServedMonitor <- renderText({

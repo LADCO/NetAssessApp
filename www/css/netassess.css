@@ -257,7 +257,6 @@
     
     position: absolute;
     color: white !important;
-    right: 25px;
     top: 9px;
     width: 19px;
     height: 19px;
@@ -315,7 +314,7 @@
     margin-left: -4px !important;
     margin-top: -4px !important;
   }
-  
+    
   .site-icon.hidden {
     display: none;
   }
@@ -509,3 +508,28 @@
   width: 100%;
 }
 
+
+#legend > table {
+  margin-top: 15px;
+
+}
+
+#legend > table td {
+  padding: 2px;
+}
+
+#legend > table td:nth-child(even) {
+  text-align: left;
+}
+
+#legend > table td:nth-child(odd) {
+  text-align: center;
+}
+
+
+
+/* This fixes the problem of the image overlays disappearing when you zoom in 
+Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
+.leaflet-container img.leaflet-image-layer {
+  max-width: none !important;
+}

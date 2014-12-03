@@ -62,6 +62,11 @@
     
     if(opt.minimize == true) {
       var min = $floater.append("<a class = 'minimize'><i class = 'fa fa-minus'></i></a>").find(".minimize");
+      if(opt.close == true) {
+        min.css({right: "25px"})
+      } else {
+        min.css({right: "5px"})
+      }
       min.on("click", function() { $floater.toggleClass("minimized").removeClass("open").removeClass("closed");})
     }
         

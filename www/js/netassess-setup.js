@@ -1,0 +1,566 @@
+	// Temporary function for non-implemented buttons/placeholders
+	function notImp() {
+		alert("This feature is not yet implemented.")
+	}
+
+// Create the global netAssess Object
+var netAssess = {
+	data: {
+		newSiteCounter: 90001,
+		us_bounds: L.latLngBounds([24.4, -124.8], [49.4, -66.9]),
+		us_center: L.latLng([39.8333, -98.5833])
+	},
+	loading: {
+		show: function() {
+			$("div.loading").removeClass("hidden");
+		},
+		hide: function() {
+			$("div.loading").addClass("hidden");
+		}
+	},
+	icons: {
+		existingSite: L.divIcon({className: 'site-icon hidden'}),
+		newSite: L.divIcon({className: 'new-site-icon'}),
+		siteSelector: L.divIcon({className: 'fa fa-crosshairs new-site-selector'})
+	},
+	basemaps: {
+		"Gray": L.layerGroup([L.esri.basemapLayer("Gray"), L.esri.basemapLayer("GrayLabels")]),
+		"Street": L.esri.basemapLayer("Streets"),
+		"Satellite" : L.esri.basemapLayer("Imagery"),
+		"Satellite - Labelled": L.layerGroup([L.esri.basemapLayer("Imagery"), L.esri.basemapLayer("ImageryLabels")])
+	},
+	overlays: {
+		o375ppb: L.imageOverlay("images/o375.png", [[24.51748, -124.76255], [49.41748, -66.86255]], {opacity: 0.45}),
+		pm25: L.imageOverlay("images/pm25.png", [[24.51748, -124.76255], [49.41748, -66.86255]], {opacity: 0.45})
+	},
+	controls: {
+		sidebars: {
+			settings: L.control.sidebar('settings-sb', {position: 'right', autoPan: false}),
+			help:  L.control.sidebar('help-sb', {position: 'right', autoPan: false}),
+			about: L.control.sidebar('about-sb', {position: 'right', autoPan: false})
+		}
+	},
+	floaters: {
+		cormat: new $.floater("#cormat", {title: "Correlation Matrix", width: "800px", height: "640px;", top: "80px", resize: true, left: "80px"}),
+		areaServed: new $.floater("#areainfo", {title: "Area Served Information", top: "50px", right: "50px"}),
+		aoi: new $.floater("#aoi", {title: "Area of Interest"}),
+		legend: new $.floater("#legend", {title: "Legend", close: false, width: '400px', height: "250px", right: "50px", bottom: "50px"}),
+		newSite: new $.floater("#new_site", {title: "Add New Site", width: '400px'})
+	},
+	resizeMap: function() {
+		document.getElementById("map").style.width = window.innerWidth + "px";
+		document.getElementById("map").style.height = (window.innerHeight - 40) + "px";
+	}
+};
+
+netAssess.layerGroups = {
+	newSiteSelectionLayer: L.layerGroup(),
+	areaServed: L.featureGroup(null),
+	aoi: L.featureGroup(),
+	sites: L.geoJson(null, {
+		pointToLayer: function(feature, latlon) {
+			var mark = new L.marker(latlon, {contextmenu: true, icon: netAssess.icons.existingSite});
+			mark.options.contextmenuItems = [
+				{text: "Toggle Selected", index: 0, callback: netAssess.toggleSelected, context: mark},
+				{text: "Hide Monitor", index: 1, callback: netAssess.hideMonitor, context: mark},
+				{separator: true, index: 2}
+			];
+			return mark;
+		},
+		onEachFeature: netAssess.initializeSite
+	}),
+	newSites: L.geoJson(null, {
+		pointToLayer: function(feature, latlon) {
+			var mark = new L.marker(latlon, {contextmenu: true, icon: netAssess.icons.newSite});
+			mark.options.contextmenuItems = [
+				{text: "Toggle Selected", index: 0, callback: toggleSelected, context: mark},
+				{text: "Delete Monitor", index: 1, callback: hideMonitor, context: mark},
+				{separator: true, index: 2}
+			];
+			return mark;
+		},
+		onEachFeature: netAssess.initializeNewSite
+	})
+}
+
+netAssess.mapControls = {
+	fullExtent: function() {
+		netAssess.map.fitBounds(us.bounds);
+	}
+}
+
+// Create the map
+netAssess.map = L.map('map', {
+	contextmenu: true, 
+	contextmenuWidth: 140, 
+	contextmenuItems: [
+		{text: "Full Extent", iconCls: "fa fa-search-minus", callback: netAssess.mapControls.fullExtent},
+		{text: "Area of Interest", iconCls: "fa fa-crosshairs", callback: netAssess.floaters.aoi.open}
+	],
+	drawControl: false, 
+	zoomControl: false,
+	maxZoom: 12, 
+	minZoom: 3
+}).fitBounds(netAssess.data.us_bounds);
+  
+netAssess.draw = {
+	polygon: new L.Draw.Polygon(netAssess.map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#0033ff'}}),
+	rectangle: new L.Draw.Rectangle(netAssess.map, {shapeOptions: {color: '#0033ff'}}),
+	new_site: new L.Draw.Marker(netAssess.map, {icon: netAssess.icons.newSiteSelector})
+}
+
+// Tests visible monitoring locations to see if they fall with the defined
+// area of interests. Sets properties accordingly and then updates sites layer
+netAssess.setAOI = function(e) {  
+
+	// Hack to handle both polygon and multipolygon layers
+	if(e.hasOwnProperty("layer")) {
+		var l = e.layer;
+		var t = e.layerType;
+	} else {
+		var l = e;
+		var t = "polygon";
+	}
+
+	netAssess.layerGroups.areaServed.clearLayers();
+	netAssess.layerGroups.aoi.clearLayers();
+	netAssess.layerGroups.aoi.addLayer(l);
+
+	netAssess.layerGroups.aoi.on("click", function(l) {
+		netAssess.map.fitBounds(l.layer.getBounds());
+	})
+
+	if(t == "polygon" || t == "rectangle") {
+		netAssess.layerGroups.sites.eachLayer(netAssess.checkPolygon, l);
+		netAssess.layerGroups.newSites.eachLayer(netAssess.checkPolygon, l);
+	} else {
+		alert("Unknown Input to checkAOI function")
+	}
+
+	displaySites();
+
+	var aoiPolygons = {};
+
+	netAssess.layerGroups.aoi.eachLayer(function(layer) {
+		var ll = layer.getLatLngs();
+		aoiPolygons[layer._leaflet_id] = ll;
+	})
+
+	$("#areaOfInterest").data("aoi", aoiPolygons);
+
+	$("#map")
+		.trigger("siteSelection")
+		.trigger("aoiChange")
+		.trigger("newSiteUpdate");
+
+}
+
+netAssess.checkPolygon = function(x) {
+
+	var inside = false;
+
+	if(this.hasOwnProperty("_layers")) {
+		this.eachLayer(function(layer) {
+			if(netAssess.pip(x._latlng, layer)) {inside = true}
+		})
+	} else {
+		inside = netAssess.pip(x._latlng, this);
+	}
+
+	if(inside) {
+		$(x._icon).addClass("selected");
+		x.feature.properties.selected = true;
+	} else {
+		$(x._icon).removeClass("selected");
+		x.feature.properties.selected = false;
+	}
+
+}
+
+// Function to test if point falls within a polygon
+// Converted from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+netAssess.pip = function(point, polygon) {
+
+	var coords = polygon._latlngs;
+	var inside = false;
+	var j = coords.length - 1
+
+	for(var i = 0; i < coords.length; i++) {
+		if(((coords[i].lat > point.lat) != (coords[j].lat > point.lat)) &&
+			(point.lng < (coords[j].lng - coords[i].lng) * (point.lat - coords[i].lat) / (coords[j].lat - coords[i].lat) + coords[i].lng)) {
+				inside = !inside;
+			}
+		
+		j = i;
+	}
+
+	return inside;
+
+	}
+  
+// A 'bridge' function that lets the setAOI function work with the predefined
+// area polygons (state, cbsa, csa). Called by a shiny custom message handler.
+netAssess.setPredefinedArea = function(data) {
+
+	if(data.coords.length == 1) {
+		var x = L.polygon(data.coords[0]);
+	} else if(data.coords.length > 1) {
+		var x = L.multiPolygon(data.coords);
+	}
+
+	netAssess.disableDrawing();
+	netAssess.setAOI(x);
+
+}
+
+// Function called by a shiny custom message handler when the selected
+// parameter changes. Takes a list of monitor ids from the server and changes 
+// their visible status to true, sets all sites layers to visible properties
+// to false.
+netAssess.updateVisibleMonitors = function(data) {
+
+	var sites = netAssess.layerGroups.sites;
+	var newSites = netAssess.layerGroups.newSites;
+	
+	if(!$.isArray(data)) {
+		data = [data];
+	}
+	
+	for(var key in sites._layers) {
+	  if(sites._layers.hasOwnProperty(key)) {
+		var el = sites._layers[key].feature;
+		var inc = false;
+		for(var i = 0; i < el.properties.key.length; i++) {
+			var val = el.properties.key[i]
+			if(data.indexOf(val) != -1) {inc = true;}
+		}
+		el.properties.visible = inc;
+	  }
+	}
+	
+	newSites.eachLayer(function(layer) {
+		layer.feature.properties.visible = layer.feature.properties.Params.indexOf($("#expParam").val()) != -1;
+	})
+	
+	netAssess.layerGroups.areaServed.clearLayers()
+	netAssess.displaySites();
+
+	$("#map")
+		.trigger("siteSelection")
+		.trigger("newSiteUpdate")
+		.trigger("siteUpdate");
+
+	netAssess.loading.hide();
+
+  }
+
+
+  // Cycles through the sites layer updating the sites based on their 'visible'
+  // and 'selected' properties
+netAssess.displaySites = function() {
+
+	netAssess.layerGroups.sites.eachLayer(siteCheck);
+	netAssess.layerGroups.newSites.eachLayer(siteCheck);
+  
+}
+  
+netAssess.siteCheck = function(layer) {
+
+	if(layer.feature.properties.visible == false) {
+		$(layer._icon).addClass("hidden");
+	} else {
+		$(layer._icon).removeClass("hidden");
+		if(layer.feature.properties.selected == false) {
+			$(layer._icon).removeClass("selected");
+		} else {
+			$(layer._icon).addClass("selected");
+		}
+	}
+
+}
+
+// Function that adds the popups to the site icons and adds event triggers for 
+// shiny inputs
+netAssess.initializeNewSite = function(feature, layer) {
+
+	po = "<span class = 'popup-text'><h4 class = 'popup-header'>New Site Information</h4>"
+	po = po + "<span class = 'popup-header'>Site Name</span><br />"
+	po = po + feature.properties.Name + "<br />"
+	po = po + "<span class = 'popup-header'>State</span><br />"
+	po = po + feature.properties.State + "<br />"
+	po = po + "<span class = 'popup-header'>County</span><br />"
+	po = po + feature.properties.County + "<br />"
+	po = po + "</span>"
+
+	layer.bindPopup(po, {minWidth: 150});
+
+  }
+  
+netAssess.initializeSite = function(feature, layer) {
+ 
+	po = "<span class = 'popup-text'><h4 class = 'popup-header'>Site Information</h4>"
+	po = po + "<span class = 'popup-header'>Site ID(s)</span><br />"
+	for(si in feature.properties.site_id) {
+	  po = po + feature.properties.site_id[si] + "<br />"
+	}
+	po = po + "<span class = 'popup-header'>Street Address</span><br />"
+	po = po + feature.properties.Street_Address + "<br />"
+	po = po + "<span class = 'popup-header'>Parameter Counts</span><br />"
+	po = po + "<b>Total:</b> " + feature.properties.Count + "<br />"
+	po = po + "<b>Criteria:</b> " + feature.properties.Crit_Count + "<br />"
+	po = po + "<b>HAPS:</b> " + feature.properties.HAP_Count + "<br />"
+	po = po + "<b>Met:</b> " + feature.properties.Met_Count + "<br />"
+
+	po = po + "</span>"
+
+	layer.bindPopup(po, {minWidth: 150});
+	layer.on("click", function(el) {
+		$("#monitorSelect").data("monitor", this.feature.properties.key)
+		$("#map").trigger("monitorSelect")
+	})
+
+  }
+  
+/* Call by a shiny custom message handler. Displays provided area served data */  
+netAssess.updateAreaServed = function(data) {
+
+	var areaServed = netAssess.layerGroups.areaServed;
+
+	areaServed.clearLayers()
+
+	var areaSelectStyle = {fillColor: '#666', weight: 2, opacity: 0.75, color: 'white', dashArray: '3', fillOpacity: 0.4}
+
+	for(var i = 0; i < data.length; i++) {
+
+		if(data[i].coords.length == 1) {
+			var a = L.polygon(data[i].coords[0], {id: data[i].id}).addTo(areaServed)
+		} else {
+			var a = L.multiPolygon([data[i].coords], {id: data[i].id}).addTo(areaServed)
+		}
+
+		a.setStyle(areaSelectStyle)
+			.on("mouseover", function(e) {
+				var layer = e.target;
+				layer.setStyle({
+					weight: 5,
+					color: '#666',
+					dashArray: '',
+					fillOpacity: 0.7
+				});
+				if(!L.Browser.id && !L.Browser.opera) {
+					layer.bringToFront();
+				}
+			})
+			.on("mouseout", function(e) {
+				e.target.setStyle(areaSelectStyle);
+			})
+			.on("click", function(e) {
+				var layer = e.target;
+				if(layer.hasOwnProperty("options")) {
+					$("#clickedAreaServed").data("clicked", layer.options.id)
+				} else if(layer.hasOwnProperty("_options")) {
+					$("#clickedAreaServed").data("clicked", layer._options.id)
+				}
+				netAssess.floaters.areaServed.open();
+				$("#map").trigger("areaClick")
+			})
+	}
+    
+	netAssess.loading.hide();
+
+}
+
+/* Miscellaneous Functions */
+
+// Function that resets the predefined area. Used mainly on page reload to 
+// prevent the predefined area displaying by default.
+netAssess.resetPredefinedAreaSelect = function() {
+	$('input[name=areaSelect]').attr('checked', false);
+	document.getElementById('areaSelectSelect').selectedIndex = -1;
+}
+
+
+// Reset the App
+netAssess.reset = function() {
+	loading.show();
+	resetPredefinedAreaSelect();
+	$("#expParam").select2("val", "-1")
+	$("#expParam").trigger("change");
+	netAssess.layerGroups.aoi.clearLayers();
+	netAssess.layerGroups.areaServed.clearLayers();
+	netAssess.floaters.aoi.close();
+	netAssess.floaters.areaserved.close();
+	netAssess.floaters.cormat.close();
+	netAssess.fullExtent();
+	netAssess.loading.hide();
+	$("input[name='areaServedClipping'][value='border']").prop("checked", true);
+	$("#areaServedClipping").trigger('change.radioInputBinding');
+	netAssess.layerGroups.sites.eachLayer(function(layer) {
+		layer.feature.properties.visible = false;
+		layer.feature.properties.selected = false;
+	});
+	netAssess.layerGroups.newSites.clearLayers();
+}
+  
+  // Functions for changing the state of monitoring locations
+  
+netAssess.toggleSelected = function() {
+	this.feature.properties.selected = !this.feature.properties.selected
+	$(this._icon).toggleClass("selected", this.feature.properties.selected);
+	$("#map")
+		.trigger("siteSelection")
+		.trigger("newSiteUpdate");
+}
+
+netAssess.hideMonitor = function() {
+	this.feature.properties.visible = false;
+	this.feature.properties.selected = false;
+	$(this._icon).addClass("hidden");
+	$("#map")
+		.trigger("siteSelection")
+		.trigger("siteUpdate")
+		.trigger("newSiteUpdate");
+}
+
+// Toggles the provided sidebar panel, and makes sure all others are closed.
+netAssess.toggleSidebars = function(sb) {
+	var sidebars = netAssess.controls.sidebars;
+	for(var x in sidebars) {
+		if(sidebars.hasOwnProperty(x)) {
+			if(x == sb) {
+				sidebars[sb].toggle();
+			} else {
+				sidebars[x].hide();
+			}
+		}
+	};
+}
+
+// Turn off any currently active drawing handlers
+netAssess.disableDrawing = function() {
+	draw_polygon.disable();
+	draw_rectangle.disable();
+}
+
+// Function to update and show the alert box
+netAssess.showAlert = function(heading, body) {
+	$("#alert-heading").html(heading);
+	$("#alert-body").html(body);
+	$("#alert").addClass("alert-open");
+}
+  
+/* Functions to do error checking on inputs before sending data to shiny server */
+
+netAssess.checkBasics = function(siteMax, siteMin) {
+
+	var active = true;
+	var body = "Please correct the following problems:<ul>";
+  
+	if($("#expParam").select2("val") == "-1") {
+		active = false;
+		body = body + "<li>No parameter selected</li>"
+	}
+  
+	var ss = 0;
+  
+	netAssess.layerGroups.sites.eachLayer(function(layer, feature) {
+		if(layer.feature.properties.selected && layer.feature.properties.visible) {
+			ss++;
+		}
+	})   
+  
+	if(ss == 0) {
+		active = false;
+		body = body + "<li>No monitors selected</li>";
+	} else if(ss < siteMin && siteMin != 1) {
+		active = false;
+		body = body + "<li>Too few monitors selected</li>";
+	} else if(ss > siteMax) {
+		active = false;
+		body = body + "<li>Too many monitors selected</li>";
+	}
+  
+  return {active: active, body: body};
+
+}
+
+netAssess.checkAreaServed = function(event) {
+
+	event.stopPropagation();
+	var bc = checkBasics(300, 1);
+
+	if(bc.active) {
+		loading.show();
+		$("#areaServedCalcButton").trigger(event);
+	} else {
+		bc.body = bc.body + "</ul>";
+		showAlert("Area Served Error", bc.body)
+	}
+
+}
+
+netAssess.checkCorMat = function(event) {
+	var bc = checkBasics(30, 3);
+
+	var param = $("#expParam").select2("val");
+	var vp = ["44201", "88101", "88502"];
+	if(vp.indexOf(param) == -1) {
+		bc.active = false;
+		bc.body = bc.body + "<li>Correlation matrices are only available for parameter codes 44201, 88101, and 88502.</li>"
+	}
+  
+	if(bc.active) {
+		cormatFloat.open()
+	} else {
+		bc.body = bc.body + "</ul>";
+		showAlert("Correlation Matrix Error", bc.body)
+	}
+	
+}
+
+netAssess.checkReport = function(event) {
+	event.stopPropagation()
+	var active = true;
+	if(active == true) {
+		$("#downloadData").trigger(event);
+	}
+}
+
+netAssess.populateNewSiteData = function(event) {
+  
+	event.layer.addTo(newSiteSelectionLayer);
+  
+	$("#ns_lat").val(Math.round(event.layer._latlng.lat * 10000) / 10000);
+	$("#ns_lng").val(Math.round(event.layer._latlng.lng * 10000) / 10000);
+  
+	var lat = event.layer._latlng.lat;
+	var lng = event.layer._latlng.lng;
+	var url = "http://data.fcc.gov/api/block/find?latitude=" + lat + "&longitude=" + lng + "&showall=false&format=jsonp&callback=?"
+	$.getJSON(url, function(wd) {
+    
+		$("#ns_state").val(wd.State.name);
+		$("#ns_county").val(wd.County.name);
+		newSiteFloat.open();
+
+	})
+
+}
+
+netAssess.addNewSite = function() {
+	netAssess.layerGroups.newSiteSelection.eachLayer(function(layer) {
+		var gj = layer.toGeoJSON();
+		var props = {County: $("#ns_county").val(), State: $("#ns_state").val(), 
+			Name: $("#ns_name").val(), Params: $("#new_site_parameters").val(),
+			key: netAssess.data.newSiteCounter
+		}
+		netAssess.data.newSiteCounter++
+		props.selected = false;
+		props.visible = props.Params.indexOf($("#expParam").val()) != -1;
+		gj.properties = props;
+		netAssess.layerGroups.newSites.addData(gj)
+		netAssess.layerGroups.newSites.eachLayer(netAssess.siteCheck);
+	})
+	$("#map").trigger("newSiteUpdate");
+	netAssess.layerGroups.newSiteSelection.clearLayers();
+	netAssess.floaters.newSite.close();
+}
