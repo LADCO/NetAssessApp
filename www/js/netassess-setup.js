@@ -53,8 +53,10 @@ var netAssess = {
 	}
 };
 
+netAssess.resizeMap();
+
 netAssess.layerGroups = {
-	newSiteSelectionLayer: L.layerGroup(),
+	newSiteSelection: L.layerGroup(),
 	areaServed: L.featureGroup(null),
 	aoi: L.featureGroup(),
 	sites: L.geoJson(null, {
@@ -85,7 +87,7 @@ netAssess.layerGroups = {
 
 netAssess.mapControls = {
 	fullExtent: function() {
-		netAssess.map.fitBounds(us.bounds);
+		netAssess.map.fitBounds(netAssess.data.us_bounds);
 	}
 }
 
@@ -101,7 +103,7 @@ netAssess.map = L.map('map', {
 	zoomControl: false,
 	maxZoom: 12, 
 	minZoom: 3
-}).fitBounds(netAssess.data.us_bounds);
+}).fitBounds(L.latLngBounds([24.4, -124.8], [49.4, -66.9]));
   
 netAssess.draw = {
 	polygon: new L.Draw.Polygon(netAssess.map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#0033ff'}}),
@@ -137,7 +139,7 @@ netAssess.setAOI = function(e) {
 		alert("Unknown Input to checkAOI function")
 	}
 
-	displaySites();
+	netAssess.displaySites();
 
 	var aoiPolygons = {};
 
@@ -259,8 +261,8 @@ netAssess.updateVisibleMonitors = function(data) {
   // and 'selected' properties
 netAssess.displaySites = function() {
 
-	netAssess.layerGroups.sites.eachLayer(siteCheck);
-	netAssess.layerGroups.newSites.eachLayer(siteCheck);
+	netAssess.layerGroups.sites.eachLayer(netAssess.siteCheck);
+	netAssess.layerGroups.newSites.eachLayer(netAssess.siteCheck);
   
 }
   
@@ -382,16 +384,16 @@ netAssess.resetPredefinedAreaSelect = function() {
 
 // Reset the App
 netAssess.reset = function() {
-	loading.show();
-	resetPredefinedAreaSelect();
+	netAssess.loading.show();
+	netAssess.resetPredefinedAreaSelect();
 	$("#expParam").select2("val", "-1")
 	$("#expParam").trigger("change");
 	netAssess.layerGroups.aoi.clearLayers();
 	netAssess.layerGroups.areaServed.clearLayers();
 	netAssess.floaters.aoi.close();
-	netAssess.floaters.areaserved.close();
+	netAssess.floaters.areaServed.close();
 	netAssess.floaters.cormat.close();
-	netAssess.fullExtent();
+	netAssess.mapControls.fullExtent();
 	netAssess.loading.hide();
 	$("input[name='areaServedClipping'][value='border']").prop("checked", true);
 	$("#areaServedClipping").trigger('change.radioInputBinding');
@@ -438,8 +440,8 @@ netAssess.toggleSidebars = function(sb) {
 
 // Turn off any currently active drawing handlers
 netAssess.disableDrawing = function() {
-	draw_polygon.disable();
-	draw_rectangle.disable();
+	netAssess.draw.polygon.disable();
+	netAssess.draw.rectangle.disable();
 }
 
 // Function to update and show the alert box

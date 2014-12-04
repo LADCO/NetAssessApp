@@ -1,54 +1,54 @@
 	// Ensures that if the window is resized, the map will resize with it
 	$(window).resize(function() {
-		resizeMap();
+		netAssess.resizeMap();
 	})
 
 	// Menubar buttons
-	$("#full_extent").on("click", fullExtent);
-	$("#aoi_button").on("click", aoiFloat.open);
-	$("#cormatButton").on("click", checkCorMat);
-	$("#resetApp").on("click", resetApp)
+	$("#full_extent").on("click", netAssess.mapControls.fullExtent);
+	$("#aoi_button").on("click", netAssess.floaters.aoi.open);
+	$("#cormatButton").on("click", netAssess.checkCorMat);
+	$("#resetApp").on("click", netAssess.reset)
 	$("#areaSelectZoom, #aoiZoom").on("click", function() {
-		map.fitBounds(aoi.getBounds())
+		netAssess.map.fitBounds(netAssess.layerGroups.aoi.getBounds())
 	})
-	$("#areaServedCalcButton").on("click", checkAreaServed);
-	$("#expParam").on("change", loading.show)
+	$("#areaServedCalcButton").on("click", netAssess.checkAreaServed);
+	$("#expParam").on("change", netAssess.loading.show)
 
-	map.on('draw:created', function(e) {
+	netAssess.map.on('draw:created', function(e) {
 		if(e.layerType != "marker") {
-			aoiFloat.open();
-			setAOI(e)
-			resetPredefinedAreaSelect()
+			netAssess.floaters.aoi.open();
+			netAssess.setAOI(e)
+			netAssess.resetPredefinedAreaSelect()
 		} else {
-			populateNewSiteData(e);
+			netAssess.populateNewSiteData(e);
 		}
 	})
 
 	$("#draw_polygon").on('click', function() {
-		disableDrawing();
-		aoiFloat.minimize();
-		draw_polygon.enable()
+		netAssess.disableDrawing();
+		netAssess.floaters.aoi.minimize();
+		netAssess.draw.polygon.enable()
 	});
 	  
 	$("#draw_rectangle").on('click', function() {
-		disableDrawing();
-		aoiFloat.minimize();
-		draw_rectangle.enable()
+		netAssess.disableDrawing();
+		netAssess.floaters.aoi.minimize();
+		netAssess.draw.rectangle.enable()
 	});
   
-	$("#cancel_draw").on('click', disableDrawing);
+	$("#cancel_draw").on('click', netAssess.disableDrawing);
   
 	$("#alert-close").on('click', function(e) {
 		$("#alert").removeClass("alert-open")
 	})
 
 	$("#new_site_button").on('click', function(e) {
-		newSiteSelectionLayer.clearLayers()
-		draw_new_site.enable();
+		netAssess.layerGroups.newSiteSelection.clearLayers()
+		netAssess.draw.new_site.enable();
 	})
 
 	$("#new_site_add").on('click', function(e) {
-		addNewSite();
+		netAssess.addNewSite();
 	})
 
 	$("#bookmarks").on("click", function() {
@@ -61,7 +61,7 @@
   
 	// Helps ensure that the layer remain in a more logical order (z-index) 
 	// when the user adds/removes them with the layer control
-	map.on("overlayadd", function(event) {
+	netAssess.map.on("overlayadd", function(event) {
 		if(event.name == "Ozone Exceedence Probability") {
 			event.layer.bringToBack();
 		} else if(event.name == "PM<sub>2.5</sub> Exceedence Probability") {
@@ -69,6 +69,6 @@
 		} else if(event.name == "AreaServed") {
 			event.layer.bringToFront();
 		} else if(event.name == "Area of Interest") {
-			areaServed.bringToFront();
+			netAssess.layerGroups.areaServed.bringToFront();
 		}
 	})

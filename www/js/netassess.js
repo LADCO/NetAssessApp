@@ -3,10 +3,11 @@ $.ajax({
 	dataType: "json",
 	url: "data/sites.geojson",
 	success: function(data) {
-		
+
 		// Add visibility and selected status properties
 		var site_data = data;
-		for(var i = 0; i < site_data.features.length; i++) {
+		console.log(data)
+    for(var i = 0; i < site_data.features.length; i++) {
 			site_data.features[i].properties.visible = false;
 			site_data.features[i].properties.selected = false;
 		};
@@ -16,8 +17,8 @@ $.ajax({
 		
 		// Add the layers control
 		L.control.layers(netAssess.basemaps, 
-						{"Area of Interest": aoi, 
-						 "Area Served": areaServed, 
+						{"Area of Interest": netAssess.layerGroups.aoi, 
+						 "Area Served": netAssess.layerGroups.areaServed, 
 						 "Ozone Exceedence Probability": netAssess.overlays.o375ppb, 
 						 "PM<sub>2.5</sub> Exceedence Probability": netAssess.overlays.pm25
 						}, 
@@ -38,7 +39,6 @@ $("#areaSelectSelect").select2({width: "80%"});
 $("#new_site_parameters").select2({width: "100%", placeholder: "Click to Select Parameters"});
 
 /* Add layers to map */
-
  // Sets the initial basemap to "Gray"
 netAssess.basemaps["Gray"].addTo(netAssess.map);
 netAssess.map.addLayer(netAssess.layerGroups.sites);
@@ -55,14 +55,14 @@ for(var sb in netAssess.controls.sidebars) {
 };
 
 // Adds buttons for controlling sidebars
-L.easyButton("fa-cogs", function() {toggleSidebars("settings");}, "Settings");
-L.easyButton("fa-question", function() {toggleSidebars("help");}, "Help");
-L.easyButton("fa-info", function() {toggleSidebars("about");}, "About"); 
+L.easyButton("fa-cogs", function() {toggleSidebars("settings");}, "Settings", netAssess.map);
+L.easyButton("fa-question", function() {toggleSidebars("help");}, "Help", netAssess.map);
+L.easyButton("fa-info", function() {toggleSidebars("about");}, "About", netAssess.map); 
 
 // Adds a scale to the map
 L.control.scale().addTo(netAssess.map);
  
 /* Make sure that everything starts "clean" */
-resetApp();
-resizeMap();
+netAssess.reset();
+netAssess.resizeMap();
 netAssess.floaters.legend.open();
