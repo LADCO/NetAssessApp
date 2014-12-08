@@ -209,11 +209,39 @@ shinyServer(function(input, output, session) {
 
   polygons <- reactive({
     if(input$areaServedCalcButton > 0) {
+
       ss <- isolate(selectedSites())
       nss <- selectedNewSites()[, c("Key", "Latitude", "Longitude")]
       ss <- rbind(ss, nss)
       
       sn <- isolate(selectedNeighbors())
+      
+      # Update this variable to reflect the probability columns present in the tracts dataset
+      probability.columns <- c("ozone_prob_75", "pm_prob_35")
+      
+      prob.bin <- function(values) {
+        
+        value = max(values, na.rm = TRUE)
+        
+        if(value < 0.2) {
+          x <- "<20%"
+        } else if(value <= 0.4) {
+          x <- "20%-40%"
+        } else if(value <= 0.6) {
+          x <- "40%-60%"
+        } else if(value <= 0.8) {
+          x <- "60%-80%"
+        } else if(value <= 0.9) {
+          x <- "80%-90%"
+        } else if(value <= 1) {
+          x <- ">90%"
+        } else {
+          x <- "NA"
+        }
+        
+        return(x)
+        
+      }
       
       if(!is.null(ss)) {
         if(nrow(ss) <= 400 & nrow(sn) >= 2) {
@@ -225,17 +253,22 @@ shinyServer(function(input, output, session) {
             } else {
               b <- areaOfInterest()
             }
-
             v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
           }
           v <- subset(v, id %in% ss$Key)
+          print(3)
           ov <- over(tracts, v)
-          t <- cbind(tracts@data, ov)
+          t <- cbind(as.data.frame(tracts), ov)
           t <- t[!is.na(t$id), ]
-          d <- aggregate(t[, 3:47], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
+          test <<- t
+          vest <<- v
+          d <- aggregate(t[, sapply(seq(ncol(t)), function(i) {is.integer(t[, i])})], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
+          d2 <- aggregate(t[, probability.columns], by = list(as.character(t$id)), FUN = prob.bin)
           proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
-          area <- areaPolygons(v, CRS("+init=epsg:2163"))        
+          area <- areaPolygons(v, CRS("+init=epsg:2163")) 
+          print(5)
           v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
+          v@data <- merge(v@data, d2, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
           #ids <- sapply(v@data$id, function(i) {strsplit(i, " ")[[1]][1]})
           #v@data$id <- ids
@@ -245,6 +278,7 @@ shinyServer(function(input, output, session) {
       } else {
         v <- NULL
       }
+
       return(v)
     }
   })

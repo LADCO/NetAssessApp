@@ -5,7 +5,7 @@ voronoi <- function(ids, lats, longs, boundary) {
   # Create a SpatialPointsDataFrame
   points <- SpatialPointsDataFrame(list(longs, lats), data.frame(ids))
   # Extract the coordinates from the SpatialPointsDataFrame
-  crds <- points@coords
+  crds <- coordinates(points)
   # If a boundary files was provided, use that to calculate a bounding box when
   # calculating the voronoi polygons vertices
   if(!missing(boundary)) {
@@ -42,7 +42,7 @@ voronoi <- function(ids, lats, longs, boundary) {
   pid <- sapply(slot(SP, "polygons"), function(x) slot(x, "ID"))
   pid2 <- as.numeric(sapply(pid, function(x) unlist(strsplit(x, " "))[1]))
   points <- points[points$ids %in% pid2, ]
-  crds <- points@coords
+  crds <- coordinates(points)
   voronoi <- SpatialPolygonsDataFrame(SP, data=data.frame(pnt_x=crds[,1],
                                                           pnt_y = crds[,2], id = pid2, row.names=pid, stringsAsFactors = FALSE))
   # Return the SpatialPolygonsDataFrameObject
