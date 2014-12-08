@@ -69,19 +69,55 @@ netAssess.layerGroups = {
 			];
 			return mark;
 		},
-		onEachFeature: netAssess.initializeSite
+		onEachFeature: function(feature, layer) {
+ 
+      po = "<span class = 'popup-text'><h4 class = 'popup-header'>Site Information</h4>"
+    	po = po + "<span class = 'popup-header'>Site ID(s)</span><br />"
+    	for(si in feature.properties.site_id) {
+    	  po = po + feature.properties.site_id[si] + "<br />"
+    	}
+    	po = po + "<span class = 'popup-header'>Street Address</span><br />"
+    	po = po + feature.properties.Street_Address + "<br />"
+    	po = po + "<span class = 'popup-header'>Parameter Counts</span><br />"
+    	po = po + "<b>Total:</b> " + feature.properties.Count + "<br />"
+    	po = po + "<b>Criteria:</b> " + feature.properties.Crit_Count + "<br />"
+    	po = po + "<b>HAPS:</b> " + feature.properties.HAP_Count + "<br />"
+    	po = po + "<b>Met:</b> " + feature.properties.Met_Count + "<br />"
+    
+    	po = po + "</span>"
+    
+    	layer.bindPopup(po, {minWidth: 150});
+    	layer.on("click", function(el) {
+    		$("#monitorSelect").data("monitor", this.feature.properties.key)
+    		$("#map").trigger("monitorSelect")
+    	})
+    
+    }
 	}),
 	newSites: L.geoJson(null, {
 		pointToLayer: function(feature, latlon) {
 			var mark = new L.marker(latlon, {contextmenu: true, icon: netAssess.icons.newSite});
 			mark.options.contextmenuItems = [
-				{text: "Toggle Selected", index: 0, callback: toggleSelected, context: mark},
-				{text: "Delete Monitor", index: 1, callback: hideMonitor, context: mark},
+				{text: "Toggle Selected", index: 0, callback: netAssess.toggleSelected, context: mark},
+				{text: "Delete Monitor", index: 1, callback: netAssess.hideMonitor, context: mark},
 				{separator: true, index: 2}
 			];
 			return mark;
 		},
-		onEachFeature: netAssess.initializeNewSite
+		onEachFeature: function(feature, layer) {
+
+      po = "<span class = 'popup-text'><h4 class = 'popup-header'>New Site Information</h4>"
+    	po = po + "<span class = 'popup-header'>Site Name</span><br />"
+    	po = po + feature.properties.Name + "<br />"
+    	po = po + "<span class = 'popup-header'>State</span><br />"
+    	po = po + feature.properties.State + "<br />"
+    	po = po + "<span class = 'popup-header'>County</span><br />"
+    	po = po + feature.properties.County + "<br />"
+    	po = po + "</span>"
+    
+    	layer.bindPopup(po, {minWidth: 150});
+
+    }
 	})
 }
 
@@ -93,7 +129,7 @@ netAssess.mapControls = {
 
 // Create the map
 netAssess.map = L.map('map', {
-	contextmenu: true, 
+	contextmenu: false, 
 	contextmenuWidth: 140, 
 	contextmenuItems: [
 		{text: "Full Extent", iconCls: "fa fa-search-minus", callback: netAssess.mapControls.fullExtent},
@@ -108,7 +144,7 @@ netAssess.map = L.map('map', {
 netAssess.draw = {
 	polygon: new L.Draw.Polygon(netAssess.map, {allowInterSection: false, showArea: false, drawError: {color: '#b00b00', timeout: 1000}, shapeOptions: {color: '#0033ff'}}),
 	rectangle: new L.Draw.Rectangle(netAssess.map, {shapeOptions: {color: '#0033ff'}}),
-	new_site: new L.Draw.Marker(netAssess.map, {icon: netAssess.icons.newSiteSelector})
+	new_site: new L.Draw.Marker(netAssess.map, {icon: netAssess.icons.siteSelector})
 }
 
 // Tests visible monitoring locations to see if they fall with the defined
@@ -283,46 +319,8 @@ netAssess.siteCheck = function(layer) {
 
 // Function that adds the popups to the site icons and adds event triggers for 
 // shiny inputs
-netAssess.initializeNewSite = function(feature, layer) {
-
-	po = "<span class = 'popup-text'><h4 class = 'popup-header'>New Site Information</h4>"
-	po = po + "<span class = 'popup-header'>Site Name</span><br />"
-	po = po + feature.properties.Name + "<br />"
-	po = po + "<span class = 'popup-header'>State</span><br />"
-	po = po + feature.properties.State + "<br />"
-	po = po + "<span class = 'popup-header'>County</span><br />"
-	po = po + feature.properties.County + "<br />"
-	po = po + "</span>"
-
-	layer.bindPopup(po, {minWidth: 150});
-
-  }
-  
-netAssess.initializeSite = function(feature, layer) {
- 
-	po = "<span class = 'popup-text'><h4 class = 'popup-header'>Site Information</h4>"
-	po = po + "<span class = 'popup-header'>Site ID(s)</span><br />"
-	for(si in feature.properties.site_id) {
-	  po = po + feature.properties.site_id[si] + "<br />"
-	}
-	po = po + "<span class = 'popup-header'>Street Address</span><br />"
-	po = po + feature.properties.Street_Address + "<br />"
-	po = po + "<span class = 'popup-header'>Parameter Counts</span><br />"
-	po = po + "<b>Total:</b> " + feature.properties.Count + "<br />"
-	po = po + "<b>Criteria:</b> " + feature.properties.Crit_Count + "<br />"
-	po = po + "<b>HAPS:</b> " + feature.properties.HAP_Count + "<br />"
-	po = po + "<b>Met:</b> " + feature.properties.Met_Count + "<br />"
-
-	po = po + "</span>"
-
-	layer.bindPopup(po, {minWidth: 150});
-	layer.on("click", function(el) {
-		$("#monitorSelect").data("monitor", this.feature.properties.key)
-		$("#map").trigger("monitorSelect")
-	})
-
-  }
-  
+netAssess.initializeNewSite = 
+    
 /* Call by a shiny custom message handler. Displays provided area served data */  
 netAssess.updateAreaServed = function(data) {
 
@@ -453,84 +451,87 @@ netAssess.showAlert = function(heading, body) {
   
 /* Functions to do error checking on inputs before sending data to shiny server */
 
-netAssess.checkBasics = function(siteMax, siteMin) {
+netAssess.errorChecking = { 
+  basics: function(siteMax, siteMin) {
 
-	var active = true;
-	var body = "Please correct the following problems:<ul>";
+  	var active = true;
+  	var body = "Please correct the following problems:<ul>";
+    
+  	if($("#expParam").select2("val") == "-1") {
+  		active = false;
+  		body = body + "<li>No parameter selected</li>"
+  	}
+    
+  	var ss = 0;
+    
+  	netAssess.layerGroups.sites.eachLayer(function(layer, feature) {
+  		if(layer.feature.properties.selected && layer.feature.properties.visible) {
+  			ss++;
+  		}
+  	})   
+    
+  	if(ss == 0) {
+  		active = false;
+  		body = body + "<li>No monitors selected</li>";
+  	} else if(ss < siteMin && siteMin != 1) {
+  		active = false;
+  		body = body + "<li>Too few monitors selected</li>";
+  	} else if(ss > siteMax) {
+  		active = false;
+  		body = body + "<li>Too many monitors selected</li>";
+  	}
+    
+    return {active: active, body: body};
   
-	if($("#expParam").select2("val") == "-1") {
-		active = false;
-		body = body + "<li>No parameter selected</li>"
-	}
-  
-	var ss = 0;
-  
-	netAssess.layerGroups.sites.eachLayer(function(layer, feature) {
-		if(layer.feature.properties.selected && layer.feature.properties.visible) {
-			ss++;
-		}
-	})   
-  
-	if(ss == 0) {
-		active = false;
-		body = body + "<li>No monitors selected</li>";
-	} else if(ss < siteMin && siteMin != 1) {
-		active = false;
-		body = body + "<li>Too few monitors selected</li>";
-	} else if(ss > siteMax) {
-		active = false;
-		body = body + "<li>Too many monitors selected</li>";
-	}
-  
-  return {active: active, body: body};
+  },
+  areaServed: function(event) {
 
+  	event.stopPropagation();
+  	var bc = netAssess.errorChecking.basics(300, 1);
+  
+  	if(bc.active) {
+  		netAssess.loading.show();
+  		$("#areaServedCalcButton").trigger(event);
+  	} else {
+  		bc.body = bc.body + "</ul>";
+  		showAlert("Area Served Error", bc.body)
+  	}
+  
+  },
+
+  corMat:  function(event) {
+    
+  	var bc = netAssess.errorChecking.basics(30, 3);
+  
+  	var param = $("#expParam").select2("val");
+  	var vp = ["44201", "88101", "88502"];
+  	if(vp.indexOf(param) == -1) {
+  		bc.active = false;
+  		bc.body = bc.body + "<li>Correlation matrices are only available for parameter codes 44201, 88101, and 88502.</li>"
+  	}
+    
+  	if(bc.active) {
+  		netAssess.floaters.cormat.open()
+  	} else {
+  		bc.body = bc.body + "</ul>";
+  		showAlert("Correlation Matrix Error", bc.body)
+  	}
+  	
+  },
+  checkReport: function(event) {
+  	event.stopPropagation()
+  	var active = true;
+  	if(active == true) {
+  		$("#downloadData").trigger(event);
+  	}
+  }
 }
 
-netAssess.checkAreaServed = function(event) {
 
-	event.stopPropagation();
-	var bc = checkBasics(300, 1);
-
-	if(bc.active) {
-		loading.show();
-		$("#areaServedCalcButton").trigger(event);
-	} else {
-		bc.body = bc.body + "</ul>";
-		showAlert("Area Served Error", bc.body)
-	}
-
-}
-
-netAssess.checkCorMat = function(event) {
-	var bc = checkBasics(30, 3);
-
-	var param = $("#expParam").select2("val");
-	var vp = ["44201", "88101", "88502"];
-	if(vp.indexOf(param) == -1) {
-		bc.active = false;
-		bc.body = bc.body + "<li>Correlation matrices are only available for parameter codes 44201, 88101, and 88502.</li>"
-	}
-  
-	if(bc.active) {
-		cormatFloat.open()
-	} else {
-		bc.body = bc.body + "</ul>";
-		showAlert("Correlation Matrix Error", bc.body)
-	}
-	
-}
-
-netAssess.checkReport = function(event) {
-	event.stopPropagation()
-	var active = true;
-	if(active == true) {
-		$("#downloadData").trigger(event);
-	}
-}
 
 netAssess.populateNewSiteData = function(event) {
   
-	event.layer.addTo(newSiteSelectionLayer);
+	event.layer.addTo(netAssess.layerGroups.newSiteSelection);
   
 	$("#ns_lat").val(Math.round(event.layer._latlng.lat * 10000) / 10000);
 	$("#ns_lng").val(Math.round(event.layer._latlng.lng * 10000) / 10000);
@@ -542,7 +543,7 @@ netAssess.populateNewSiteData = function(event) {
     
 		$("#ns_state").val(wd.State.name);
 		$("#ns_county").val(wd.County.name);
-		newSiteFloat.open();
+		netAssess.floaters.newSite.open();
 
 	})
 

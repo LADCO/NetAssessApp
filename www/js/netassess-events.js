@@ -6,12 +6,12 @@
 	// Menubar buttons
 	$("#full_extent").on("click", netAssess.mapControls.fullExtent);
 	$("#aoi_button").on("click", netAssess.floaters.aoi.open);
-	$("#cormatButton").on("click", netAssess.checkCorMat);
+	$("#cormatButton").on("click", netAssess.errorChecking.corMat);
 	$("#resetApp").on("click", netAssess.reset)
 	$("#areaSelectZoom, #aoiZoom").on("click", function() {
 		netAssess.map.fitBounds(netAssess.layerGroups.aoi.getBounds())
 	})
-	$("#areaServedCalcButton").on("click", netAssess.checkAreaServed);
+	$("#areaServedCalcButton").on("click", netAssess.errorChecking.areaServed);
 	$("#expParam").on("change", netAssess.loading.show)
 
 	netAssess.map.on('draw:created', function(e) {

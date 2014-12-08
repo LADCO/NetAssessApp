@@ -66,3 +66,16 @@ L.control.scale().addTo(netAssess.map);
 netAssess.reset();
 netAssess.resizeMap();
 netAssess.floaters.legend.open();
+
+netAssess.ee = function() {
+  var esri_img = $("div.esri-leaflet-logo img").attr("src");
+  $("div.esri-leaflet-logo img")
+    .on("mouseover", function() {
+      $(this).attr("src", "images/pbe.png")
+    })
+    .on("mouseout", function() {
+      $(this).attr("src", esri_img);
+    })
+}
+netAssess.map.on("baselayerchange", netAssess.ee)
+netAssess.ee()

@@ -533,3 +533,10 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
 .leaflet-container img.leaflet-image-layer {
   max-width: none !important;
 }
+
+#easter {
+  position: absolute;
+  z-index: 20;
+  right: 2px;
+  bottom: 15px;
+}
