@@ -88,6 +88,10 @@
       $floater.toggleClass("minimized").removeClass("open").removeClass("closed");
     }
     
+    this.updateTitle = function(title) {
+      $floater.find(".float-handle").text(title)
+    }
+    
     return this;
     
   };

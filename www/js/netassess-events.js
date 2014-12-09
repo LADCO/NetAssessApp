@@ -72,3 +72,10 @@
 			netAssess.layerGroups.areaServed.bringToFront();
 		}
 	})
+  
+  
+  $("#agePlot, #racePlot")
+    .on("click", function(event) {
+      $("#big-chart").attr("src", $(this).find("img").attr("src"))
+      netAssess.floaters.popup.open();
+    })

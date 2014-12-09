@@ -223,14 +223,14 @@ shinyServer(function(input, output, session) {
         
         value = max(values, na.rm = TRUE)
         
-        if(value < 0.2) {
-          x <- "<20%"
-        } else if(value <= 0.4) {
-          x <- "20%-40%"
-        } else if(value <= 0.6) {
-          x <- "40%-60%"
+        if(value < 0.25) {
+          x <- "<25%"
+        } else if(value <= 0.5) {
+          x <- "25%-50%"
+        } else if(value <= 0.7) {
+          x <- "50%-70%"
         } else if(value <= 0.8) {
-          x <- "60%-80%"
+          x <- "70%-80%"
         } else if(value <= 0.9) {
           x <- "80%-90%"
         } else if(value <= 1) {
@@ -256,7 +256,7 @@ shinyServer(function(input, output, session) {
             v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
           }
           v <- subset(v, id %in% ss$Key)
-          print(3)
+
           ov <- over(tracts, v)
           t <- cbind(as.data.frame(tracts), ov)
           t <- t[!is.na(t$id), ]
@@ -266,7 +266,7 @@ shinyServer(function(input, output, session) {
           d2 <- aggregate(t[, probability.columns], by = list(as.character(t$id)), FUN = prob.bin)
           proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
           area <- areaPolygons(v, CRS("+init=epsg:2163")) 
-          print(5)
+
           v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, d2, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
@@ -346,7 +346,9 @@ shinyServer(function(input, output, session) {
     polygons <- polygons()
     if(!is.null(polygons)) {
       data <- polygons@data
-      txt <- paste(format(data$area[data$id == input$clickedAreaServed], big.mark = ","), "square km")
+      km2 <- as.numeric(data$area[data$id == input$clickedAreaServed])
+      mi2 <- round(km2 * 0.38610215854, 0)
+      txt <- paste0("<b>Area</b>: ", format(mi2, big.mark = ","), "mi<sup>2</sup> (", format(km2, big.mark = ","), "km<sup>2</sup>)")
     } else {
       txt <- ""
     }
@@ -358,11 +360,15 @@ shinyServer(function(input, output, session) {
     polygons <- polygons()
     if(!is.null(polygons)) {
       data <- polygons@data
-      txt <- paste(format(data$total[data$id == input$clickedAreaServed], big.mark = ","), "Total Population")
+      txt <- paste("<b>Total Population</b>:", format(data$total[data$id == input$clickedAreaServed], big.mark = ","))
     } else {
       txt <- ""
     }
     return(txt)
+  })
+
+  observe({
+    session$sendCustomMessage(type = "areaServedMonitorUpdate", areaServedMonitor())
   })
 
   output$agePlot <- renderPlot({
@@ -371,11 +377,59 @@ shinyServer(function(input, output, session) {
 
     if(!is.null(input$clickedAreaServed)) {
       
-      gg <- agePyramid(polygons()@data, input$clickedAreaServed)
+      title <- paste0("Area Served by ", areaServedMonitor())
+      gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title) 
       suppressWarnings(print(gg))
       
     }
-  }, width = 400, height = 450)
+  }, width = 525, height = 600)
+
+  output$naaqsProb <- renderText({
+
+    if(!is.null(input$expParam)) {
+      data <- as.data.frame(polygons())
+      data <- data[data$id == input$clickedAreaServed, ]
+      prob <- "Not Available"
+      if(input$expParam == 44201) {
+        prob <- paste0("<b>Maximum Probability</b>: ", data$ozone_prob_75[1])
+      } else if(input$expParam %in% c(88101, 88502)) {
+        prob <- paste0("<b>Maximum Probability</b>: ", data$pm_prob_35[1])
+      }
+      return(prob)
+    }
+  })
+
+  output$racePlot <- renderPlot({
+    
+    input$clickedAreaServed
+    
+    if(!is.null(input$clickedAreaServed)) {
+      
+      data <- as.data.frame(polygons())
+      data <- data[data$id == input$clickedAreaServed,  c("white", "black", "native", "asian", "islander", "other", "multiple")]
+      
+      data <- data.frame(label = c("White", "African American", "Native American", "Asian", "Native Hawaiian/Pacific Islander", "Other", "Two or More"),
+                        count = unlist(data))
+      
+      
+      rat <- max(data$count)/min(data$count)
+      
+      title <- paste0("Area Served by ", areaServedMonitor())
+      
+      plt <- ggplot(data, aes(x = label, y = count)) + 
+        geom_bar(stat = "identity", fill = "turquoise3" ) +
+        labs(x = "Race", y = "Population") + 
+        theme(axis.text.x = element_text(angle = 15, hjust = 1)) + ggtitle(title) 
+      
+      if(rat > 100) {
+        plt <- plt + scale_y_log10()
+      }
+      
+      plt
+      
+    }
+    
+  }, width = 525, height = 600)
 
   output$corplot <- renderPlot({
     

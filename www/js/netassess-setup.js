@@ -45,8 +45,9 @@ var netAssess = {
 		areaServed: new $.floater("#areainfo", {title: "Area Served Information", top: "50px", right: "50px"}),
 		aoi: new $.floater("#aoi", {title: "Area of Interest"}),
 		legend: new $.floater("#legend", {title: "Legend", close: false, width: '400px', height: "250px", right: "50px", bottom: "50px"}),
-		newSite: new $.floater("#new_site", {title: "Add New Site", width: '400px'})
-	},
+		newSite: new $.floater("#new_site", {title: "Add New Site", width: '400px'}),
+    popup: new $.floater("#popup", {title: "Popup", width: "500px", left: "200px", minimize: false})
+  },
 	resizeMap: function() {
 		document.getElementById("map").style.width = window.innerWidth + "px";
 		document.getElementById("map").style.height = (window.innerHeight - 40) + "px";
@@ -71,18 +72,23 @@ netAssess.layerGroups = {
 		},
 		onEachFeature: function(feature, layer) {
  
-      po = "<span class = 'popup-text'><h4 class = 'popup-header'>Site Information</h4>"
-    	po = po + "<span class = 'popup-header'>Site ID(s)</span><br />"
+      po = "<span class = 'popup-text'><h4 class = 'header'>Site Information</h4>"
+      po = po + "<center><table class = 'popup-table'><tr>"
+      
+    	po = po + "<td>Site ID(s)</td><td>"
     	for(si in feature.properties.site_id) {
     	  po = po + feature.properties.site_id[si] + "<br />"
     	}
-    	po = po + "<span class = 'popup-header'>Street Address</span><br />"
-    	po = po + feature.properties.Street_Address + "<br />"
-    	po = po + "<span class = 'popup-header'>Parameter Counts</span><br />"
-    	po = po + "<b>Total:</b> " + feature.properties.Count + "<br />"
-    	po = po + "<b>Criteria:</b> " + feature.properties.Crit_Count + "<br />"
-    	po = po + "<b>HAPS:</b> " + feature.properties.HAP_Count + "<br />"
-    	po = po + "<b>Met:</b> " + feature.properties.Met_Count + "<br />"
+      po = po + "</td></tr>"
+      
+      po = po + "<tr><td>Street Address</td>"
+    	po = po + "<td>" + feature.properties.Street_Address + "</td></tr>"
+      po = po + "<tr><td colspan = 2 style = 'text-align: center; padding-top: 5px; border-right: none;'>Parameter Counts</td></tr>"
+      po = po + "<tr><td>Total</td><td>" + feature.properties.Count + "</td></tr>"
+    	po = po + "<tr><td>Criteria:</td><td>" + feature.properties.Crit_Count + "</td></tr>"
+    	po = po + "<tr><td>HAPS:</td><td>" + feature.properties.HAP_Count + "</td></tr>"
+    	po = po + "<tr><td>Met:</td><td>" + feature.properties.Met_Count + "</td></tr>"
+      po = po + "</table></center>"
     
     	po = po + "</span>"
     
@@ -494,7 +500,7 @@ netAssess.errorChecking = {
   		$("#areaServedCalcButton").trigger(event);
   	} else {
   		bc.body = bc.body + "</ul>";
-  		showAlert("Area Served Error", bc.body)
+  		netAssess.showAlert("Area Served Error", bc.body)
   	}
   
   },
@@ -514,7 +520,7 @@ netAssess.errorChecking = {
   		netAssess.floaters.cormat.open()
   	} else {
   		bc.body = bc.body + "</ul>";
-  		showAlert("Correlation Matrix Error", bc.body)
+  		netAssess.showAlert("Correlation Matrix Error", bc.body)
   	}
   	
   },

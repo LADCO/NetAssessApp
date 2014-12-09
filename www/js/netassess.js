@@ -6,7 +6,6 @@ $.ajax({
 
 		// Add visibility and selected status properties
 		var site_data = data;
-		console.log(data)
     for(var i = 0; i < site_data.features.length; i++) {
 			site_data.features[i].properties.visible = false;
 			site_data.features[i].properties.selected = false;

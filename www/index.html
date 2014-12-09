@@ -83,6 +83,7 @@
     <div id = "visibleSites"></div>
     <div id = "areaOfInterest"></div>
     <div id = "newSites"></div>
+    <div id = "trendChart" class = "shiny-plot-output"></div>
     
 		<div id = "map"></div>
 
@@ -166,21 +167,31 @@
   </div>
     
   <div id = "areainfo">
-    <p class = "header">Monitor</p>
-    <div id = "areaServedMonitor" class = "shiny-text-output area-info-text"></div>
-    <p class = "header">Area Served</p>
-    <div id = "areaServed" class = "shiny-text-output area-info-text"></div>
-    <p class = "header">
-      Population Served
-    </p>
-    <div id = "totalPopServed" class = "shiny-text-output area-info-text"></div>
-    <p class = 'header'>
-      Age Pyramid
-      <a class = "shiny-download-link img-download-link" id = "downloadAgePlot" title = "Download Age Plot" href = "" target = "_blank">
-          <i class = "fa fa-download img-download-icon"></i>
-      </a>
-    </p>
-    <div id="agePlot" class="shiny-plot-output" style="width: 100%; text-align: center;"></div>
+    <div class = "floater-rollup">
+      <p class = "header">Geography</p>
+      <div>
+        <div id = "areaServed" class = "shiny-html-output area-info-text"></div>
+      </div>
+    </div>
+    
+    <div class = "floater-rollup">
+      <p class = "header">Demographics <a class = "shiny-download-link img-download-link" id = "downloadAgePlot" title = "Download Age Plot" href = "" target = "_blank">
+      <i class = "fa fa-download img-download-icon"></i>
+      </a></p>
+      <div>
+        <div id = "totalPopServed" class = "shiny-html-output area-info-text"></div>
+        <div id = "agePlot"        class = "shiny-plot-output" style="width: 175px; height: 200px; text-align: center; display: inline-block; float: left;"></div>
+        <div id = "racePlot"       class = "shiny-plot-output" style="width: 175px; height: 200px; text-align: center; display: inline-block; float: right;"></div>          
+      </div>
+    </div>
+    
+    <div class = "floater-rollup">
+      <p class = "header">NAAQS Exceedence Probability</p>
+      <div>
+        <div id = "naaqsProb" class = "shiny-html-output area-info-text"></div>
+      </div>
+    </div>
+    
   </div>
     
   <div id = "cormat">
@@ -224,6 +235,11 @@
     <button style = "float: right; margin-top: 10px;" id = "new_site_add">Add Site</button>
   </div>
     
+  <div id = "popup">
+    <img id = "big-chart" style = "width: 100%;"></img>
+    <p style = "font-size: 0.75em">To save chart, right click and select <i>Save Image As</i></p>
+  </div>
+    
   <div id = "legend">
     <table>
       <tr>
@@ -264,9 +280,7 @@
     
     
   </div>
-    
-<!--  <div id = "easter"><img src = "images/pbe.png" /></div>  -->
-    
+      
   <div id = "alert">
     <div id = "alert-heading">Heading</div>
     <span id = "alert-body">Main Body of Alert</span>

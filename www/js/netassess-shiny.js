@@ -158,3 +158,7 @@ Shiny.addCustomMessageHandler("updateAreaServed", netAssess.updateAreaServed)
 
 Shiny.addCustomMessageHandler("updateVisibleMonitors", netAssess.updateVisibleMonitors)
 
+Shiny.addCustomMessageHandler("areaServedMonitorUpdate", function(data) {
+  netAssess.floaters.areaServed.updateTitle("Area Served - " + data)  
+})
+
