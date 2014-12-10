@@ -4,6 +4,12 @@ shinyServer(function(input, output, session) {
   
 #### Functions for controlling parameter selection
   
+  values <- reactiveValues(trend.png = paste0("images/temp/trend", as.integer(runif(1, 1, 100000)), ".png"))
+  
+  session$onSessionEnd <- function() {
+    file.remove(paste("www/", values$trend.png))
+  }
+  
   # Populate the parameter selection dropdown  
   updateSelectInput(session, "expParam", choices = params.list)
   updateSelectInput(session, "new_site_parameters", choices = params.list[2:length(params.list)])
@@ -378,7 +384,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$clickedAreaServed)) {
       
       title <- paste0("Area Served by ", areaServedMonitor())
-      gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title) 
+      gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title)  + theme_bw()
       suppressWarnings(print(gg))
       
     }
@@ -419,7 +425,7 @@ shinyServer(function(input, output, session) {
       plt <- ggplot(data, aes(x = label, y = count)) + 
         geom_bar(stat = "identity", fill = "turquoise3" ) +
         labs(x = "Race", y = "Population") + 
-        theme(axis.text.x = element_text(angle = 15, hjust = 1)) + ggtitle(title) 
+        theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle(title)  + theme_bw()
       
       if(rat > 100) {
         plt <- plt + scale_y_log10()
@@ -430,6 +436,58 @@ shinyServer(function(input, output, session) {
     }
     
   }, width = 525, height = 600)
+
+  observe({
+
+    site <- input$popupID
+    param <- input$expParam
+    
+    if(!is.null(site) && !is.null(param)) {
+      
+      dv <- dbGetQuery(db, paste0("SELECT dv.*, crit_lu.NAME, naaqs.STANDARD, naaqs.UNITS FROM dv JOIN crit_lu ON dv.POLLUTANT = crit_lu.CODE JOIN naaqs ON dv.DURATION = naaqs.DURATION AND dv.POLLUTANT = naaqs.POLLUTANT WHERE crit_lu.PARAMETER = ", param, " AND dv.Key = ", site))
+      
+      if(nrow(dv) > 0) {
+      
+        trendChart <- plotPNG(function() {
+  
+          pol <- dv$NAME[1]
+          site <- sprintf("%02i-%03i-%04i", dv$STATE_CODE, dv$COUNTY_CODE, dv$SITE_ID)[1]
+          units <- dv$UNITS[1]
+          
+          dv <- dv[, c("DURATION", "STANDARD", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013")] 
+          dv <- melt(dv)
+          
+          std <- dv[dv$variable == "STANDARD", c("DURATION", "value")]
+          colnames(std) <- c("DURATION", "STANDARD")
+          dv <- dv[dv$variable != "STANDARD", ]
+          colnames(dv) <- c("DURATION", "LABEL", "DV")
+          dv <- merge(dv, std, by = "DURATION")
+          dv$LABEL <- as.numeric(substr(as.character(dv$LABEL), 4, 7))
+          dv$SNAME <- paste(dv$DURATION, "Standard")
+          
+          cbPalette <- c("#E69F00", "#D55E00", "#56B4E9", "#0072B2")
+          
+          title <- paste0("Design Value Trends: ", pol, " at ", site)
+          
+          plt <- ggplot(dv, aes(x = LABEL, y = DV, colour = DURATION, ymin = 0)) + 
+            geom_hline(aes(yintercept = STANDARD, colour = SNAME), show_guide = TRUE, size = 1.5) +
+            geom_line(size = 2) +
+            geom_point(size = 5) +
+            labs(x = "Year", y = paste0("Design Value (", units, ")")) + 
+            theme_bw(base_size = 18) + scale_colour_manual(values=cbPalette) +
+            ggtitle(title)
+          
+          print(plt)
+          
+        }, width = 900, height = 450, filename = paste0("www/", values$trend.png))
+        
+        session$sendCustomMessage(type = "updateTrendChart", values$trend.png)
+        
+      }
+    
+    }
+    
+  })
 
   output$corplot <- renderPlot({
     
@@ -472,7 +530,6 @@ shinyServer(function(input, output, session) {
                                            colnames(d) <- c("State Code", "County Code", "Site ID", "Latitude", "Longitude", "Street Addres", "Area (km^2)", "Total Population", "Total Parameters Monitored", "Criteria Monitored", "HAPS Monitored", "Meteorology Monitored")
                                            write.csv(d, file, row.names = FALSE)
                                          })
-
 
 })
 

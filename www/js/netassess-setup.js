@@ -30,8 +30,8 @@ var netAssess = {
 		"Satellite - Labelled": L.layerGroup([L.esri.basemapLayer("Imagery"), L.esri.basemapLayer("ImageryLabels")])
 	},
 	overlays: {
-		o375ppb: L.imageOverlay("images/o375.png", [[24.51748, -124.76255], [49.41748, -66.86255]], {opacity: 0.45}),
-		pm25: L.imageOverlay("images/pm25.png", [[24.51748, -124.76255], [49.41748, -66.86255]], {opacity: 0.45})
+		o375ppb: L.imageOverlay("images/o375.png", [[24.51748, -124.76255], [49.38436, -66.92599]], {opacity: 0.65}),
+		pm25: L.imageOverlay("images/pm25.png", [[24.51748, -124.76255], [49.38436, -66.92599]], {opacity: 0.65})
 	},
 	controls: {
 		sidebars: {
@@ -46,7 +46,7 @@ var netAssess = {
 		aoi: new $.floater("#aoi", {title: "Area of Interest"}),
 		legend: new $.floater("#legend", {title: "Legend", close: false, width: '400px', height: "250px", right: "50px", bottom: "50px"}),
 		newSite: new $.floater("#new_site", {title: "Add New Site", width: '400px'}),
-    popup: new $.floater("#popup", {title: "Popup", width: "500px", left: "200px", minimize: false})
+    popup: new $.floater("#popup", {title: "Popup", width: "600px", left: "200px", minimize: false})
   },
 	resizeMap: function() {
 		document.getElementById("map").style.width = window.innerWidth + "px";
@@ -88,7 +88,8 @@ netAssess.layerGroups = {
     	po = po + "<tr><td>Criteria:</td><td>" + feature.properties.Crit_Count + "</td></tr>"
     	po = po + "<tr><td>HAPS:</td><td>" + feature.properties.HAP_Count + "</td></tr>"
     	po = po + "<tr><td>Met:</td><td>" + feature.properties.Met_Count + "</td></tr>"
-      po = po + "</table></center>"
+      po = po + "</table>"
+      po = po + "<div class = 'popup-trend'><img /></div></center>"
     
     	po = po + "</span>"
     
@@ -97,7 +98,7 @@ netAssess.layerGroups = {
     		$("#monitorSelect").data("monitor", this.feature.properties.key)
     		$("#map").trigger("monitorSelect")
     	})
-    
+      
     }
 	}),
 	newSites: L.geoJson(null, {

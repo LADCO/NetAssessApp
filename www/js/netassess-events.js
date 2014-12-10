@@ -79,3 +79,11 @@
       $("#big-chart").attr("src", $(this).find("img").attr("src"))
       netAssess.floaters.popup.open();
     })
+    
+  netAssess.map.on("popupopen", function(e) {
+    $(".popup-trend")
+      .on("click", function(event) {
+        $("#big-chart").attr("src", $(this).find("img").attr("src"))
+        netAssess.floaters.popup.open();
+      })
+  })

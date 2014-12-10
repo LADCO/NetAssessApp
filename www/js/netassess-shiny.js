@@ -1,5 +1,24 @@
 /* Input Bindings for custom shiny inputs */
 netAssess.shinyBindings = {};
+
+netAssess.shinyBindings.popupID = new Shiny.InputBinding();
+  $.extend(netAssess.shinyBindings.popupID, {
+    find: function(scope) {
+      return $(scope).find("#popupID")
+    },
+    getValue: function(el) {
+      return $(el).data("key")
+    },
+    subscribe: function(el, callback) {
+      netAssess.map.on("popupopen", function(e) {
+        var key = e.popup._source.feature.properties.key;
+        $(el).data("key", key);
+        callback();
+      })
+    }
+  })
+  Shiny.inputBindings.register(netAssess.shinyBindings.popupID);
+  
   // Input that informs shiny about the new monitoring locations that have been 
   // added
 netAssess.shinyBindings.newSites = new Shiny.InputBinding();
@@ -162,3 +181,6 @@ Shiny.addCustomMessageHandler("areaServedMonitorUpdate", function(data) {
   netAssess.floaters.areaServed.updateTitle("Area Served - " + data)  
 })
 
+Shiny.addCustomMessageHandler("updateTrendChart", function(data) {
+  $(".popup-trend").find("img").attr("src", data)
+})

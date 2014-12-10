@@ -565,3 +565,20 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
 .leaflet-container img.leaflet-image-layer {
   max-width: none !important;
 }
+
+#trend-chart {
+  z-index: 100;
+  width: 100px;
+  height: 100px;
+}
+
+.popup-trend {
+  margin-top: 10px;
+}
+
+.popup-trend > img{
+  width: 200px;
+  height: 100px;
+  cursor: pointer;
+  background: grey;
+}
