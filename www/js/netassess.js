@@ -18,7 +18,7 @@ $.ajax({
 		L.control.layers(netAssess.basemaps, 
 						{"Area of Interest": netAssess.layerGroups.aoi, 
 						 "Area Served": netAssess.layerGroups.areaServed, 
-						 "Ozone Exceedence Probability": netAssess.overlays.o375ppb, 
+						 "Ozone Exceedence Probability": netAssess.overlays.o3, 
 						 "PM<sub>2.5</sub> Exceedence Probability": netAssess.overlays.pm25
 						}, 
 						{position: 'topleft'})
@@ -33,7 +33,7 @@ $.ajax({
 });
 
 // Select Boxes
-$("#expParam").select2({width: "350px"});
+$("#expParam").select2({width: "300px"});
 $("#areaSelectSelect").select2({width: "80%"});
 $("#new_site_parameters").select2({width: "100%", placeholder: "Click to Select Parameters"});
 
@@ -54,9 +54,9 @@ for(var sb in netAssess.controls.sidebars) {
 };
 
 // Adds buttons for controlling sidebars
-L.easyButton("fa-cogs", function() {toggleSidebars("settings");}, "Settings", netAssess.map);
-L.easyButton("fa-question", function() {toggleSidebars("help");}, "Help", netAssess.map);
-L.easyButton("fa-info", function() {toggleSidebars("about");}, "About", netAssess.map); 
+L.easyButton("fa-cogs", function() {netAssess.toggleSidebars("settings");}, "Settings", netAssess.map);
+L.easyButton("fa-question", function() {netAssess.toggleSidebars("help");}, "Help", netAssess.map);
+L.easyButton("fa-info", function() {netAssess.toggleSidebars("about");}, "About", netAssess.map); 
 
 // Adds a scale to the map
 L.control.scale().addTo(netAssess.map);

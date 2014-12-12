@@ -30,8 +30,8 @@ var netAssess = {
 		"Satellite - Labelled": L.layerGroup([L.esri.basemapLayer("Imagery"), L.esri.basemapLayer("ImageryLabels")])
 	},
 	overlays: {
-		o375ppb: L.imageOverlay("images/o375.png", [[24.51748, -124.76255], [49.38436, -66.92599]], {opacity: 0.65}),
-		pm25: L.imageOverlay("images/pm25.png", [[24.51748, -124.76255], [49.38436, -66.92599]], {opacity: 0.65})
+		o3: L.imageOverlay("images/o3_75.png", [[24.51748, -124.76255], [49.38436, -66.92599]], {opacity: 0.65}),
+		pm25: L.imageOverlay("images/pm25_35.png", [[24.51748, -124.76255], [49.38436, -66.92599]], {opacity: 0.65})
 	},
 	controls: {
 		sidebars: {
@@ -88,9 +88,9 @@ netAssess.layerGroups = {
     	po = po + "<tr><td>Criteria:</td><td>" + feature.properties.Crit_Count + "</td></tr>"
     	po = po + "<tr><td>HAPS:</td><td>" + feature.properties.HAP_Count + "</td></tr>"
     	po = po + "<tr><td>Met:</td><td>" + feature.properties.Met_Count + "</td></tr>"
+      po = po + "<tr><td colspan = 2 style = 'text-align: center; padding-top: 5px; border-right: none;'>Design Value Trends</td></tr>"
+      po = po + "<tr><td colspan = 2 style = 'text-align: center; border-right: none;'><div class = 'popup-trend'><img /></div></center></td></tr>"
       po = po + "</table>"
-      po = po + "<div class = 'popup-trend'><img /></div></center>"
-    
     	po = po + "</span>"
     
     	layer.bindPopup(po, {minWidth: 150});
@@ -545,7 +545,7 @@ netAssess.populateNewSiteData = function(event) {
   
 	var lat = event.layer._latlng.lat;
 	var lng = event.layer._latlng.lng;
-	var url = "http://data.fcc.gov/api/block/find?latitude=" + lat + "&longitude=" + lng + "&showall=false&format=jsonp&callback=?"
+	var url = "https://data.fcc.gov/api/block/find?latitude=" + lat + "&longitude=" + lng + "&showall=false&format=jsonp&callback=?"
 	$.getJSON(url, function(wd) {
     
 		$("#ns_state").val(wd.State.name);
@@ -565,12 +565,28 @@ netAssess.addNewSite = function() {
 		}
 		netAssess.data.newSiteCounter++
 		props.selected = false;
+    if(Object.keys(netAssess.layerGroups.aoi._layers) > 0) {
+      netAssess.layerGroups.aoi.eachLayer(function(aoi_layer) {
+        if(aoi_layer.hasOwnProperty("_layers")) {
+          aoi_layer.eachLayer(function(l) {
+            if(netAssess.pip(layer._latlng, l)) {
+              props.selected = true;
+            }
+          })
+        } else {
+          if(netAssess.pip(layer._latlng, aoi_layer)) {
+            props.selected = true;
+          }        
+        }
+      })
+    }
 		props.visible = props.Params.indexOf($("#expParam").val()) != -1;
 		gj.properties = props;
 		netAssess.layerGroups.newSites.addData(gj)
 		netAssess.layerGroups.newSites.eachLayer(netAssess.siteCheck);
 	})
 	$("#map").trigger("newSiteUpdate");
+
 	netAssess.layerGroups.newSiteSelection.clearLayers();
 	netAssess.floaters.newSite.close();
 }

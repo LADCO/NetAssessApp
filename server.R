@@ -1,14 +1,10 @@
 library(shiny)
 
 shinyServer(function(input, output, session) {
-  
+#  options(shiny.trace=TRUE)
 #### Functions for controlling parameter selection
   
-  values <- reactiveValues(trend.png = paste0("images/temp/trend", as.integer(runif(1, 1, 100000)), ".png"))
-  
-  session$onSessionEnd <- function() {
-    file.remove(paste("www/", values$trend.png))
-  }
+  values <- reactiveValues();
   
   # Populate the parameter selection dropdown  
   updateSelectInput(session, "expParam", choices = params.list)
@@ -223,8 +219,7 @@ shinyServer(function(input, output, session) {
       sn <- isolate(selectedNeighbors())
       
       # Update this variable to reflect the probability columns present in the tracts dataset
-      probability.columns <- c("ozone_prob_75", "pm_prob_35")
-      
+      probability.columns <- c("ozone_prob_75", "ozone_prob_70", "ozone_prob_65", "pm_prob_35")
       prob.bin <- function(values) {
         
         value = max(values, na.rm = TRUE)
@@ -397,7 +392,14 @@ shinyServer(function(input, output, session) {
       data <- data[data$id == input$clickedAreaServed, ]
       prob <- "Not Available"
       if(input$expParam == 44201) {
-        prob <- paste0("<b>Maximum Probability</b>: ", data$ozone_prob_75[1])
+        if(input$ozoneNAAQS == "65ppb") {
+          prob <- data$ozone_prob_65[1]
+        } else if(input$ozoneNAAQS == "70ppb") {
+          prob <- data$ozone_prob_70[1]
+        } else {
+          prob <- data$ozone_prob_75[1]
+        }
+        prob <- paste0("<b>Maximum Probability</b>: ", prob)
       } else if(input$expParam %in% c(88101, 88502)) {
         prob <- paste0("<b>Maximum Probability</b>: ", data$pm_prob_35[1])
       }
@@ -437,7 +439,7 @@ shinyServer(function(input, output, session) {
     
   }, width = 525, height = 600)
 
-  observe({
+  output$trendChart <- renderPlot({
 
     site <- input$popupID
     param <- input$expParam
@@ -447,9 +449,11 @@ shinyServer(function(input, output, session) {
       dv <- dbGetQuery(db, paste0("SELECT dv.*, crit_lu.NAME, naaqs.STANDARD, naaqs.UNITS FROM dv JOIN crit_lu ON dv.POLLUTANT = crit_lu.CODE JOIN naaqs ON dv.DURATION = naaqs.DURATION AND dv.POLLUTANT = naaqs.POLLUTANT WHERE crit_lu.PARAMETER = ", param, " AND dv.Key = ", site))
       
       if(nrow(dv) > 0) {
-      
-        trendChart <- plotPNG(function() {
   
+        values$trendChart <- paste0("images/temp/trend", as.integer(runif(1,1,1000000)), ".png")
+        
+        trendChart <- plotPNG(function() {
+        
           pol <- dv$NAME[1]
           site <- sprintf("%02i-%03i-%04i", dv$STATE_CODE, dv$COUNTY_CODE, dv$SITE_ID)[1]
           units <- dv$UNITS[1]
@@ -478,16 +482,16 @@ shinyServer(function(input, output, session) {
             ggtitle(title)
           
           print(plt)
-          
-        }, width = 900, height = 450, filename = paste0("www/", values$trend.png))
         
-        session$sendCustomMessage(type = "updateTrendChart", values$trend.png)
+        }, width = 900, height = 900, filename = paste0("www/", values$trendChart))
+          
+        session$sendCustomMessage(type = "updateTrendChart", values$trendChart)
         
       }
     
     }
     
-  })
+  }, width = 900, height = 450)
 
   output$corplot <- renderPlot({
     

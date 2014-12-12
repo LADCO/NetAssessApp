@@ -87,3 +87,24 @@
         netAssess.floaters.popup.open();
       })
   })
+  
+  // Clear the plot image popup closes so it doesn't show an incorrect plot
+  netAssess.map.on("popupclose", function(e) {
+    $("#trendChart").find("img").attr("src", "");
+  });
+  
+  $("#ozoneNAAQS").on("change", function(e) {
+    switch(e.target.value) {
+      case "65ppb":
+        var o3_overlay = "images/o3_65.png";
+        break;
+      case "70ppb":
+        var o3_overlay = "images/o3_70.png";
+        break;
+      default:
+        var o3_overlay = "images/o3_75.png";
+    }
+    
+    netAssess.overlays.o3.setUrl(o3_overlay);
+    
+  })

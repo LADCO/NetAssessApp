@@ -32,9 +32,12 @@
 
     <div id = 'curtain'></div>
     
-		<div id = "menu-bar">
-			<span>NetAssess <span style = "font-size: 0.55em; font-weight: normal">v0.2a</span></span>
-			<span>Ambient Air Monitoring Network Assessment Tool</span>
+		<div id = "menu-bar" class = "small">
+    
+      <table class = "title-block">
+  			<tr><td class = "title">NetAssess <span class = "version">v0.2a</span></td></tr>
+  		  <tr><td class = "subtitle" colspan = 3>Ambient Air Monitoring Network Assessment Tool</td></tr>
+      </table>
       
       <span class = "right-items">
         <div class = "menu-bar-item">
@@ -57,9 +60,6 @@
           <i class = "fa fa-birthday-cake"></i>
         </button>
         <span class = "v-divide"></span>
-        <button class = "menu-bar-button" id = "bookmarks" title = "Bookmark Location">
-          <i class = "fa fa-bookmark"></i>
-        </button>
         <button class = "menu-bar-button" id = "aoiZoom" title = "Zoom to Area of Interest">
           <i class = "fa fa-binoculars"></i>
         </button>
@@ -86,28 +86,63 @@
     <div id = "newSites"></div>
     <div id = "popupID"></div>
     <div id = "trendChart" class = "shiny-plot-output"></div>
+    <div id = "tutorial" class = "tutorial" style = "display: none;">
+      <div class = "header">Welcome to NetAssess!</div>
+      <div class = "content"><p>This tool is meant to assist with 5-year Network Assessments as required by <a href = "http://www.ecfr.gov/cgi-bin/text-idx?SID=1c02841c6e1ad0e7e8ecaa87954ac180&node=se40.6.58_110&rgn=div8">40 CFR &#0167;58.10(d)</a>.</p><p> You can start by running through this quick tutorial, or close this box with the 'x' in the top right corner and jump right in to the tool. Refer to the <a href = '#' target='_blank'>Guidance Document</a> for more detailed information about the App.</p><button id = "startTutorial" style = "float:right">Start Tutorial</button></div>
+      <div class = "navigation">
+        <a class = 'back icon'><i class = 'fa fa-arrow-left'></i></a>
+        <a class = 'close icon'><i class = 'fa fa-close'></i></a>
+        <a class = 'next icon'><i class = 'fa fa-arrow-right'></i></a>
+      </div>
+    </div>
     
 		<div id = "map"></div>
 
 		<div id = "settings-sb" class = "sidebar">
 			<h1><i class="fa fa-cogs  fa-fw"></i>Settings</h1>
-      <p>These setting allow you to customize how the NetAssess App works</p>
-      <p class = "header">Area Served Clipping</p>
-      <p>By default, the area served tool clips the polygons it creates at the US border. You can turn off clipping entirely, or set it to clip at the area of interest with the options below</p>
-      <div id="areaServedClipping" class="control-group shiny-input-radiogroup">
-        <label class="radio inline">
-          <input type="radio" name="areaServedClipping" id="areaServedClipping1" value="none"/>
-          <span>None</span>
-        </label>
-        <label class="radio inline">
-          <input type="radio" name="areaServedClipping" id="areaServedClipping2" value="border" checked="checked"/>
-          <span>US Border</span>
-        </label>
-        <label class="radio inline">
-          <input type="radio" name="areaServedClipping" id="areaServedClipping3" value="aoi"/>
-          <span>Area of Interest</span>
-        </label>
-      </div> 
+      <p>These setting allow you to customize how the NetAssess App works. Please see the Help file for additional information about how these setting will effect the NetAssess App.</p>
+      <p class = "header">Area Served</p>
+      <p>The area served tool allows you to compile information about the area surrounding monitoring locations.</p>
+      <table class = "options-table">
+        <tr>
+          <td><label for = "areaServedClipping">Clip Area Served Polygons on: </label></td>
+          <td>
+              <select id = "areaServedClipping">
+                <option value = "none">No Clipping</option>
+                <option value = "border" selected = selected>US Border (default)</option>
+                <option value = "aoi">Area of Interest</option>
+              </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label for = "areaServedType">Area Served Type: </label></td>
+          <td>
+              <select id = "areaServedType" disabled>
+                <option value = "voronoi" selected = selected>Voronoi Polygons</option>
+                <option value = "circles">Circles</option>
+              </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label for = "circleSize">Radius of Circles: </label></td> 
+          <td><input id = "circleSize" disabled type = "text" size = 5 value = "50"/> km</td>
+        </tr>
+      </table>
+      <p class = "header">Exceedence Probability</p>
+      <p>Exceedence Probability is the probability that an area will exceed a given threshold at least one day in a year. The threshold for ozone can be adjusted below.</p>
+      <table class = "options-table">
+        <tr>
+          <td><label for = "ozoneNAAQS">Ozone Threshold: </label></td>
+          <td>
+            <select id = "ozoneNAAQS">
+              <option value = "65ppb">65 ppb</option>
+              <option value = "70ppb">70 ppb</option>
+              <option value = "75ppb" selected = selected>75 ppb</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+  
 		</div>
 		
 		<div id = "help-sb" class = "sidebar">
@@ -275,7 +310,7 @@
         <td colspan = "4" style = "text-align: left; padding-top: 5px; border-top: solid 1px black;">Exceedence Probability</td>
       </tr>
       <tr>
-        <td colspan = "4" style = "text-align: left"><img src = "images/o3legend.png" /></td>
+        <td colspan = "4" style = "text-align: left"><img src = "images/probLegend.png" /></td>
       </tr>
     </table>
     
@@ -302,8 +337,8 @@
   <script src = "js/netassess-shiny.js"></script>
 	<script src = "js/netassess.js"></script>
   <script src = "js/netassess-events.js"></script>
-
-  <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.3/leaflet-image.js'></script>
+  
+  <script src = "js/tutorial.js"></script>
 
   </body>
 

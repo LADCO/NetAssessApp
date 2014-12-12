@@ -62,7 +62,7 @@
   	position: absolute;
   	top: 0px;
   	left: 0px;
-  	height: 40px;
+/*  	height: 40px; */
   	line-height: 40px;
   	width: 100%;
   	box-shadow: 0px 3px 2px -1px rgba(44,62,80,0.5);
@@ -73,15 +73,33 @@
   
   /* Formatting for the title and subtitle */
   
-  #menu-bar > span:first-child {
+  #menu-bar .title-block {
+    display: inline-table;
+    line-height: 16px;
+    height: 40px;
+    border-collapse: collapse;
+    vertical-align: top;
+  }
+  
+  #menu-bar .title {
   	font-weight: bold;
   	font-size: 20px;
   	padding-left: 10px;
+    vertical-align: bottom;
   }
   
-  #menu-bar > span:nth-child(2) {
-  	font-size: 14px;
+  #menu-bar .version {
+    font-size: 13px;
+    font-weight: normal;
+    text-align: left;
+    padding-left: 0px;
+  }
+  
+  #menu-bar .subtitle {
+    line-height: 11px;
+  	font-size: 11px;
   	padding-left: 10px;
+    vertical-align: top;
   }
 
   .right-items {
@@ -581,4 +599,82 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
   height: 100px;
   cursor: pointer;
   background: grey;
+}
+
+.options-table {
+  width: 100%;
+}
+
+.options-table td:first-child {
+  text-align: right;
+}
+
+.options-table td:last-child {
+  text-align: left;
+  width: 200px;
+}
+
+.options-table td:last-child > select {
+  width: 100%;
+}
+
+.options-table td:last-child > input {
+  text-align: right;
+  width: 80%;
+}
+
+#tutorial {
+  box-sizing: border-box;
+  font-size: 15px;
+  position: absolute;
+  width: 400px;
+  height: 300px;
+  border-radius: 3px;
+  z-index: 10000;
+  border: solid 1px black;
+  background-color: #EFEFEF;
+  overflow: hidden;
+}
+
+#tutorial .icon {
+  color: #ddd;
+  cursor: pointer;
+}
+
+#tutorial .icon:hover{
+  color: #999;
+}
+
+#tutorial .close{
+
+}
+
+#tutorial .navigation {
+  position:absolute;
+  top: 10px;
+  right: 10px;
+}
+
+#tutorial .next {
+
+}
+#tutorial .back {
+
+}
+
+#tutorial .header {
+  font-family: 'Roboto Condensed', sans-serif;
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  width: 370px;
+}
+
+#tutorial .content {
+  position: absolute;
+  width: 370px;
+  height: 240px;
+  left: 15px;
+  top: 45px;
+  overflow-y: scroll;
 }
