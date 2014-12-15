@@ -1,8 +1,8 @@
-netAssess.tutorial = {text: [], title: [], target: [], position: [], trigger: [], slideCount: -1, left: 0, top: 0, width: 400, height: 300, active: true};
+netAssess.tutorial = {text: [], title: [], target: [], position: [], trigger: [], slideCount: -1, left: 0, top: 0, width: 400, height: 300, active: true, offset_x: 0, offset_y: 0};
 
 netAssess.tutorial.title[0] = "Parameter of Interest"
 netAssess.tutorial.target[0] = "s2id_expParam"
-netAssess.tutorial.position[0] = "below";
+netAssess.tutorial.position[0] = "left";
 netAssess.tutorial.text[0] = "The first step in the assessment process should be selecting a parameter. You do that with the parameter selection dropdown above. You can scroll through the list to find your parameter or use the search box to search by name or AQS code. Once you select a parameter the map will update to show the locations of known sites monitoring for that parameter. Begin by selecting <b>44201 - Ozone</b>."
 netAssess.tutorial.trigger[0] = function() {
   $("#tutorial").css("z-index", 6);
@@ -38,42 +38,156 @@ netAssess.tutorial.trigger[2] = function() {
   netAssess.map.on('draw:created', function(e) {
     if(netAssess.tutorial.active) {    
   		if(e.layerType != "marker") {
-  			netAssess.tutorial.close();
+  			netAssess.tutorial.advance();
   		}
     }
 	})
 }
 
+netAssess.tutorial.title[3] = "Legend";
+netAssess.tutorial.target[3] = "legend";
+netAssess.tutorial.position[3] = "above";
+netAssess.tutorial.text[3] = "The legend does what a legend does. It tells you about the symbology of the map. You can minimize it by clicking the little bar in the upper-right. To be honest, the only reason I did this slide was to make sure that placing a slide above an object works correctly.";
+netAssess.tutorial.trigger[3] = function() {
+  
+};
+
 $(document).ready(function() {
   
-  var $tut = $("#tutorial");
-  
-  var rect = document.getElementById("map").getBoundingClientRect();
-  
-  netAssess.tutorial.left = ((rect.right - rect.left) / 2) - (netAssess.tutorial.width / 2);
-  netAssess.tutorial.top = ((rect.bottom - rect.top) / 2) - (netAssess.tutorial.height / 2);
-  $tut.css({top: netAssess.tutorial.top, left: netAssess.tutorial.left, display: "block"})
-  
+  netAssess.tutorial.setPosition("map", "center");
+   
 })
 
-netAssess.tutorial.positions = {
-  below: function(target) {
-    var rect = document.getElementById(target).getBoundingClientRect();
-    var position = {
-      left: rect.left,
-      top: rect.bottom + 10
-    }
-    return position;
-  },
-  right: function(target) {
-    var rect = document.getElementById(target).getBoundingClientRect();
-    var position = {
-      left: rect.right + 10,
-      top: rect.top
-    }
-    return position;
-    
+netAssess.tutorial.setPosition = function(target, position) {
+  
+  var rect = document.getElementById(target).getBoundingClientRect();
+  var rect_center = {x: (rect.width / 2) + rect.left,
+                     y: (rect.height / 2) + rect.top
   }
+  
+  var arrowPos = {
+    "left": "",
+    "top": "",
+    "display": "none",
+    "border-left-color": "transparent",
+    "border-top-color": "transparent",
+    "border-right-color": "transparent",
+    "border-bottom-color": "transparent"
+  }
+
+  switch(position) {
+    case "center":
+      var position = {
+        top: rect_center.y - (netAssess.tutorial.height / 2),
+        left: rect_center.x - (netAssess.tutorial.width / 2),
+        display: "block"
+      }
+      arrowPos.top = "";
+      arrowPos.left = "";
+      arrowPos.display = "none";
+      var arrowBorderPos = {};
+      $.extend(arrowBorderPos, arrowPos);
+      break;
+      
+    case "above":
+      var position = {
+        top: rect.top - (netAssess.tutorial.height + 15),
+        left: rect_center.x - (netAssess.tutorial.width / 2),
+        display: "block"
+      };
+      arrowPos.top = netAssess.tutorial.height - 5;
+      arrowPos.left = netAssess.tutorial.width / 2;
+      arrowPos.display = "block";
+      arrowPos["border-top-color"] = "#EFEFEF";
+      var arrowBorderPos = {};
+      $.extend(arrowBorderPos, arrowPos);
+      arrowBorderPos.top = arrowBorderPos.top + 2.5
+      arrowBorderPos["border-top-color"] = "black";
+      break;
+      
+    case "below":
+      var position = {
+        top: rect.bottom + 15,
+        left: rect_center.x - (netAssess.tutorial.width / 2),
+        display: "block"
+      };
+      arrowPos.top = -20;
+      arrowPos.left = (netAssess.tutorial.width / 2) - 10;
+      arrowPos.display = "block";
+      arrowPos["border-bottom-color"] = "#EFEFEF";
+      var arrowBorderPos = {};
+      $.extend(arrowBorderPos, arrowPos);
+      arrowBorderPos.top = arrowBorderPos.top - 2.5
+      arrowBorderPos["border-bottom-color"] = "black";
+      break;
+      
+    case "left":
+      var position = {
+        top: rect_center.y - (netAssess.tutorial.height / 2),
+        left: rect.left - (netAssess.tutorial.width + 15),
+        display: "block"
+      }
+      arrowPos.top = (netAssess.tutorial.height / 2) - 10;
+      arrowPos.left = netAssess.tutorial.width - 5;
+      arrowPos.display = "block";
+      arrowPos["border-left-color"] = "#EFEFEF";
+      var arrowBorderPos = {};
+      $.extend(arrowBorderPos, arrowPos);
+      arrowBorderPos.left = arrowBorderPos.left + 2.5;
+      arrowBorderPos["border-left-color"] = "black";
+      break;
+      
+    case "right":
+      var position = {
+        top: rect_center.y - (netAssess.tutorial.height / 2),
+        left: rect.right + 15,
+        display: "block"
+      }
+      arrowPos.top = (netAssess.tutorial.height / 2) - 10;
+      arrowPos.left = -20;
+      arrowPos.display = "block";
+      arrowPos["border-right-color"] = "#EFEFEF";
+      var arrowBorderPos = {};
+      $.extend(arrowBorderPos, arrowPos);
+      arrowBorderPos.left = arrowBorderPos.left - 2.5;
+      arrowBorderPos["border-right-color"] = "black";
+      break;
+      
+    default:
+      console.log("Unrecognized 'position' to setPosition function.")
+  }
+  
+  var w = $(window).width();
+  var h = $(window).height();
+  
+  if(position.left < 0) {
+    var offset_x = 5 + (position.left + netAssess.tutorial.width);
+  } else if((position.left + netAssess.tutorial.width) > w) {
+    var offset_x = 5 + ((position.left + netAssess.tutorial.width) - w);
+  } else {
+    var offset_x = 0;
+  }
+  
+  position.left = parseInt(position.left - offset_x, 10) + "px";
+  arrowPos.left = parseInt(arrowPos.left + offset_x, 10) + "px";
+  arrowBorderPos.left = parseInt(arrowBorderPos.left + offset_x, 10) + "px";
+  
+  if(position.top < 0) {
+    var offset_y = 5 - position.top; 
+  } else if((position.top + netAssess.tutorial.height) > h) {
+    var offset_y = (position.top + netAssess.tutorial.height) - h;
+  } else {
+    var offset_y = 0;
+  }
+
+  position.top = parseInt(position.top + offset_y, 10) + "px";
+  arrowPos.top = parseInt(arrowPos.top - offset_y, 10) + "px";
+  arrowBorderPos.top = parseInt(arrowBorderPos.top - offset_y, 10) + "px";
+
+  var $tut = $("#tutorial");
+  $tut.css(position);
+  $tut.find(".tutorial-arrow").css(arrowPos);
+  $tut.find(".tutorial-arrow-border").css(arrowBorderPos);
   
 }
 
@@ -88,8 +202,7 @@ netAssess.tutorial.advance = function() {
   
   $tut.find(".header").html(tut.title[cnt])
   $tut.find(".content").html(tut.text[cnt])
-  var pos = tut.positions[tut.position[cnt]](tut.target[cnt])
-  $tut.css(pos);
+  tut.setPosition(tut.target[cnt], tut.position[cnt])
   tut.trigger[cnt]();
   
 }
@@ -102,5 +215,4 @@ netAssess.tutorial.close = function() {
 }
 
 $("#startTutorial").on("click", netAssess.tutorial.advance)
-$("#tutorial .close").on("click", function() {
-});
+$("#tutorial .close").on("click", netAssess.tutorial.close);

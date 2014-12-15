@@ -629,37 +629,23 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
   position: absolute;
   width: 400px;
   height: 300px;
-  border-radius: 3px;
+  border-radius: 5px;
   z-index: 10000;
-  border: solid 1px black;
+  border: solid 2px black;
   background-color: #EFEFEF;
-  overflow: hidden;
+
 }
 
-#tutorial .icon {
+#tutorial .close {
+  position:absolute;
+  top: 10px;
+  right: 10px;
   color: #ddd;
   cursor: pointer;
 }
 
-#tutorial .icon:hover{
+#tutorial .close:hover{
   color: #999;
-}
-
-#tutorial .close{
-
-}
-
-#tutorial .navigation {
-  position:absolute;
-  top: 10px;
-  right: 10px;
-}
-
-#tutorial .next {
-
-}
-#tutorial .back {
-
 }
 
 #tutorial .header {
@@ -677,4 +663,20 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
   left: 15px;
   top: 45px;
   overflow-y: scroll;
+}
+
+.tutorial-arrow-border {
+  border-style: solid;
+  border-width: 10px;
+  height: 0px;
+  width: 0px;
+  position: absolute;
+}
+
+.tutorial-arrow {
+  border-style: solid;
+  border-width: 10px;
+  height: 0px;
+  width: 0px;
+  position: absolute;
 }
