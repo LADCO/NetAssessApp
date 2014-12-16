@@ -35,7 +35,7 @@
 		<div id = "menu-bar" class = "small">
     
       <table class = "title-block">
-  			<tr><td class = "title">NetAssess <span class = "version">v0.2a</span></td></tr>
+  			<tr><td class = "title">NetAssess <span class = "version">v0.3a</span></td></tr>
   		  <tr><td class = "subtitle" colspan = 3>Ambient Air Monitoring Network Assessment Tool</td></tr>
       </table>
       
@@ -87,10 +87,15 @@
     <div id = "popupID"></div>
     <div id = "trendChart" class = "shiny-plot-output"></div>
     
-    <div id = "tutorial" class = "tutorial" style = "dispaly: none;">
+    <div id = "tutorial" class = "tutorial" style = "display: none;">
       <div class = "tutorial-body">
         <div class = "header">Welcome to NetAssess!</div>
-        <div class = "content"><p>This tool is meant to assist with 5-year Network Assessments as required by <a href = "http://www.ecfr.gov/cgi-bin/text-idx?SID=1c02841c6e1ad0e7e8ecaa87954ac180&node=se40.6.58_110&rgn=div8">40 CFR &#0167;58.10(d)</a>.</p><p> You can start by running through this quick tutorial, or close this box with the 'x' in the top right corner and jump right in to the tool. Refer to the <a href = '#' target='_blank'>Guidance Document</a> for more detailed information about the App.</p><button id = "startTutorial" style = "float:right">Start Tutorial</button></div>
+        <div class = "content"></div>
+        <div class = "tutCookie">
+          <input type = "checkbox" id = "tutGone" />
+          <label for = "tutGone">Don't show again</label>
+        </div>
+        <button id = "tutNext">Next</button>
       <div class = "navigation">
         <a class = 'close icon'><i class = 'fa fa-close'></i></a>
       </div>
@@ -138,7 +143,7 @@
         <tr>
           <td><label for = "ozoneNAAQS">Ozone Threshold: </label></td>
           <td>
-            <select id = "ozoneNAAQS">
+            <select id = "ozoneNAAQS" title = >
               <option value = "65ppb">65 ppb</option>
               <option value = "70ppb">70 ppb</option>
               <option value = "75ppb" selected = selected>75 ppb</option>
@@ -151,6 +156,18 @@
 		
 		<div id = "help-sb" class = "sidebar">
 			<h1><i class="fa fa-question  fa-fw"></i> Help</h1>
+      <p class = "header">Tour</p>
+      <p>The tour is meant to give you a basic overview of how the app should work</p>
+      <div style = "text-align: center"><button id = "openTour" style = 'text-align: center'>Open Tour</button></div>
+      <p class = "header">Navigation</p>
+      <p>There are many ways to navigate the map in Netassess:</p>
+      <ul>
+        <li><div class = "menu-bar-button" style = "background-color: #2c3e50;"><span class = "valign"><img src = "images/cont_us.png"></span>
+        </div> - Zoom out to view entire continental United States</li>
+        <li><div class = "menu-bar-button" style = "background-color: #2c3e50;"><i class = "fa fa-binoculars"></i></div> - Zoom in to your area of interest</li>
+        <li><i>double-click</i> - Double click the mouse on the map to zoom in and center on that point.</li>
+        <li><i>shift + drag</i> - Hold down <i>shift</i> while clicking and dragging to zoom in on the area covered.</li>
+      </ul>
 		</div>
 		
 		<div id = "about-sb" class = "sidebar">
@@ -159,7 +176,7 @@
       <p class = "header">Credits</p>
       <ul>
         <li><strong>Eric Bailey</strong> - Web Application, Area Served, and New Sites</li>
-        <li><strong>Nathan Byers</strong> - NAAQS Exceedence Probabilities</li>
+        <li><strong>Nathan Byers</strong> - Exceedence Probabilities</li>
         <li><strong>Cassie McMahon</strong> - Correlation Matrix</li>
         <li><strong>Amy Robinson</strong> - Removal of Bias</li>
       </ul>
@@ -208,6 +225,8 @@
   </div>
     
   <div id = "areainfo">
+    <p class = "header">Parameter</p>
+    <div id = "areaServedParameter" class = "shiny-html-output area-info-text"></div>
     <div class = "floater-rollup">
       <p class = "header">Geography</p>
       <div>
@@ -216,18 +235,16 @@
     </div>
     
     <div class = "floater-rollup">
-      <p class = "header">Demographics <a class = "shiny-download-link img-download-link" id = "downloadAgePlot" title = "Download Age Plot" href = "" target = "_blank">
-      <i class = "fa fa-download img-download-icon"></i>
-      </a></p>
-      <div>
+      <p class = "header">Demographics</p>
+      <div style = "padding-bottom: 10px;">
         <div id = "totalPopServed" class = "shiny-html-output area-info-text"></div>
         <div id = "agePlot"        class = "shiny-plot-output" style="width: 175px; height: 200px; text-align: center; display: inline-block; float: left;"></div>
         <div id = "racePlot"       class = "shiny-plot-output" style="width: 175px; height: 200px; text-align: center; display: inline-block; float: right;"></div>          
       </div>
     </div>
     
-    <div class = "floater-rollup">
-      <p class = "header">NAAQS Exceedence Probability</p>
+    <div class = "floater-rollup" id = "exProb">
+      <p class = "header">Exceedence Probability <span id = "areaServedThreshold">75ppb</span></p>
       <div>
         <div id = "naaqsProb" class = "shiny-html-output area-info-text"></div>
       </div>
@@ -238,11 +255,12 @@
   <div id = "cormat">
     <p class = "header">
       Correlation Matrix
-      <a class = "shiny-download-link img-download-link" id = "downloadCorMat" title = "Download Correlation Matrix" href = "" target = "_blank">
+      <a class = "shiny-download-link img-download-link" id = "downloadCorMat" title = "Download Correlation Matrix Data" href = "" target = "_blank">
         <i class = "fa fa-download img-download-icon"></i>
       </a>
     </p>
     <div id = "corplot" class = "shiny-plot-output" style = "width: 100%; text-align: center;"></div>
+    <p style = "font-size: 0.75em">To save chart, right click and select <i>Save Image As</i></p>
   </div>
     
   <div id = "new_site">

@@ -17,8 +17,10 @@
 	netAssess.map.on('draw:created', function(e) {
 		if(e.layerType != "marker") {
 			netAssess.floaters.aoi.open();
-			netAssess.setAOI(e)
+			netAssess.floaters.aoi.automin = false;
+      netAssess.setAOI(e)
 			netAssess.resetPredefinedAreaSelect()
+      netAssess.closeFloaters();
 		} else {
 			netAssess.populateNewSiteData(e);
 		}
@@ -26,13 +28,13 @@
 
 	$("#draw_polygon").on('click', function() {
 		netAssess.disableDrawing();
-		netAssess.floaters.aoi.minimize();
+		netAssess.floaters.aoi.automin = true;
 		netAssess.draw.polygon.enable()
 	});
 	  
 	$("#draw_rectangle").on('click', function() {
 		netAssess.disableDrawing();
-		netAssess.floaters.aoi.minimize();
+		netAssess.floaters.aoi.automin = true;
 		netAssess.draw.rectangle.enable()
 	});
   
@@ -104,7 +106,11 @@
       default:
         var o3_overlay = "images/o3_75.png";
     }
-    
+    if($("#expParam").val() == "44201") {
+      $("#areaServedThreshold").html("(" + $("#ozoneNAAQS").val() + ")");
+    }
     netAssess.overlays.o3.setUrl(o3_overlay);
     
   })
+  
+  $("#expParam").on("change", netAssess.closeFloaters)

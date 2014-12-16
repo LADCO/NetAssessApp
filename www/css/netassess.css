@@ -658,11 +658,25 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
 
 #tutorial .content {
   position: absolute;
-  width: 370px;
-  height: 240px;
+  width: 365px;
+  height: 210px;
   left: 15px;
   top: 45px;
   overflow-y: scroll;
+  text-align: justify;
+  padding-right: 5px;
+}
+
+#tutorial #tutNext {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+#tutorial .tutCookie {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
 }
 
 .tutorial-arrow-border {

@@ -43,8 +43,8 @@ cormat <- function(db, sites, parameter, output = "screen") {
   #Plot correlation matrix: width of ellipse=pearson corr;color=average absolute difference; number=distance in KM
   screen(1)
   par(plt=c(0,0.8,0,1),new=TRUE)
-  plotcorr(cor,type="lower",col=dif,diag=TRUE,cex.lab=.8,mar=c(3,0,3,1),outline=TRUE, main=paste(chart_label,"\n All Valid Pairs"))
-  text(expand.grid(y=seq(nrow(dis)),x=seq(nrow(dis), 1)),labels=dis,font=2,cex=.6,col="blue",srt=45)
+  plotcorr(cor,type="lower",col=dif,diag=TRUE,cex.lab=2, cex.main = 2.5, mar=c(3,0,3,1),outline=TRUE, main=paste(chart_label,"- All Valid Pairs"))
+  text(expand.grid(y=seq(nrow(dis)),x=seq(nrow(dis), 1)),labels=dis,font=2,cex=1.5,col="blue",srt=45)
   
   #Plot ellipse legend
   screen(2)
@@ -58,23 +58,23 @@ cormat <- function(db, sites, parameter, output = "screen") {
   
   for (i in corrlist) {
     subplot(plot(ellipse(i), axes = FALSE, type="l",xlab="",ylab=""), x=x, y=y, size=c(.15,.15)) #Something is not working with the first ellipse - it is plotting in the wrong position
-    text(x=x+.15, y = y, labels = as.character(i),cex=.8)
+    text(x=x+.15, y = y, labels = as.character(i), cex=1.5)
     y=y+.15
   }  
   
-  text(x=.05,y=.15,adj=0,labels="Pearson Correlation (r)",cex=.9,srt=90)
+  text(x=.05,y=.15,adj=0,labels="Pearson Correlation (r)",cex=1.5,srt=90)
   
   #Plot avg relative difference legend
   screen(3)
   par(plt=c(.9,1,.6,1),new=TRUE)
   gradient.rect(.1,0,.2,.9,nslices=10,col=colfunc,gradient="Y")
-  text(x=.3, y=seq(from=0, to=.8 ,by=.16), labels = c(seq(from=0,to=1,by=.2)),cex=.8)       
-  text(x =0.05, y=0,adj=0,labels="Average Relative Difference",srt=90,cex=.9)
+  text(x=.3, y=seq(from=0, to=.8 ,by=.16), labels = c(seq(from=0,to=1,by=.2)),cex=1.5)       
+  text(x =0.05, y=0,adj=0,labels="Average Relative Difference",srt=90,cex=1.5)
   
   #Paste note on distance values
   screen(4)
   par(plt=c(0,1,0,.1),new=TRUE)
-  #  text(x=.2,y=.5,labels="values in ellipse = distance in kilometers",col="blue", cex=.8,mar=c(0,0,0,0))
+  text(x=.2,y=.5,labels="values in ellipse = distance in kilometers",col="blue", cex=2.5,mar=c(0,0,0,0))
   
   close.screen(all.screens=TRUE)
   

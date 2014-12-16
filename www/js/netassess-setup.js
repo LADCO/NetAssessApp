@@ -8,7 +8,7 @@ var netAssess = {
 	data: {
 		newSiteCounter: 90001,
 		us_bounds: L.latLngBounds([24.4, -124.8], [49.4, -66.9]),
-		us_center: L.latLng([39.8333, -98.5833])
+		us_center: L.latLng([39.8333, -98.5833]),
 	},
 	loading: {
 		show: function() {
@@ -368,11 +368,20 @@ netAssess.updateAreaServed = function(data) {
 				} else if(layer.hasOwnProperty("_options")) {
 					$("#clickedAreaServed").data("clicked", layer._options.id)
 				}
-				netAssess.floaters.areaServed.open();
+        var $param = $("#expParam").val();
+        var $thresh = $("#areaServedThreshold");
+        if($param == "44201") {
+          $thresh.html("(" + $("#ozoneNAAQS").val() + ")");
+        } else if(["88101", "88502"].indexOf($param) != -1) {
+          $thresh.html("(35&mu;g/m<sup>3</sup>)");
+        } else {
+          $thresh.html("");
+        }
+        netAssess.floaters.areaServed.open();
 				$("#map").trigger("areaClick")
 			})
 	}
-    
+  
 	netAssess.loading.hide();
 
 }
@@ -498,6 +507,7 @@ netAssess.errorChecking = {
   
   	if(bc.active) {
   		netAssess.loading.show();
+      netAssess.closeFloaters();
   		$("#areaServedCalcButton").trigger(event);
   	} else {
   		bc.body = bc.body + "</ul>";
@@ -589,4 +599,10 @@ netAssess.addNewSite = function() {
 
 	netAssess.layerGroups.newSiteSelection.clearLayers();
 	netAssess.floaters.newSite.close();
+}
+
+netAssess.closeFloaters = function() {
+  netAssess.floaters.areaServed.close();
+  netAssess.floaters.popup.close();
+  netAssess.floaters.cormat.close();
 }

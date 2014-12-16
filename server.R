@@ -209,12 +209,19 @@ shinyServer(function(input, output, session) {
     
   })
 
-  polygons <- reactive({
-    if(input$areaServedCalcButton > 0) {
+  opData <- reactive({
+    d <- polygons()@data
+  })
 
-      ss <- isolate(selectedSites())
-      nss <- selectedNewSites()[, c("Key", "Latitude", "Longitude")]
-      ss <- rbind(ss, nss)
+  polygons <- reactive({
+    
+    input$areaServedCalcButton
+    
+    ss <- isolate(selectedSites())
+    nss <- isolate(selectedNewSites()[, c("Key", "Latitude", "Longitude")])
+    ss <- rbind(ss, nss)
+    print(nrow(ss))
+    if(!is.null(nrow(ss))) {
       
       sn <- isolate(selectedNeighbors())
       
@@ -316,6 +323,14 @@ shinyServer(function(input, output, session) {
     }
   })
 
+  selectedParameter <- reactive({
+    return(list(code = input$expParam, name = params$Parameter_Desc[params$Parameter_Code == input$expParam]))
+  })
+
+  output$areaServedParameter <- renderText({
+    selectedParameter()$name
+  })
+
   output$areaServedMonitor <- renderText({
     areaServedMonitor()
   })
@@ -377,13 +392,13 @@ shinyServer(function(input, output, session) {
     input$clickedAreaServed
 
     if(!is.null(input$clickedAreaServed)) {
-      
-      title <- paste0("Area Served by ", areaServedMonitor())
-      gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title)  + theme_bw()
+      p <- params$Parameter_Desc[params$Parameter_Code == input$expParam]
+      title <- paste0(p, " - Area Served by ", areaServedMonitor())
+      gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title)
       suppressWarnings(print(gg))
       
     }
-  }, width = 525, height = 600)
+  }, width = 788, height = 900)
 
   output$naaqsProb <- renderText({
 
@@ -418,28 +433,21 @@ shinyServer(function(input, output, session) {
       
       data <- data.frame(label = c("White", "African American", "Native American", "Asian", "Native Hawaiian/Pacific Islander", "Other", "Two or More"),
                         count = unlist(data))
-      
-      
-      rat <- max(data$count)/min(data$count)
-      
+            
       title <- paste0("Area Served by ", areaServedMonitor())
       
-      plt <- ggplot(data, aes(x = label, y = count)) + 
+      plt <- ggplot(data, aes(x = label, y = count)) + theme_bw(base_size = 16) + 
         geom_bar(stat = "identity", fill = "turquoise3" ) +
         labs(x = "Race", y = "Population") + 
-        theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle(title)  + theme_bw()
-      
-      if(rat > 100) {
-        plt <- plt + scale_y_log10()
-      }
+        theme(axis.text.x = element_text(angle = 20, hjust = 1)) + ggtitle(title)  
       
       plt
       
     }
     
-  }, width = 525, height = 600)
+  }, width = 788, height = 900)
 
-  output$trendChart <- renderPlot({
+  trendChart <- observe({
 
     site <- input$popupID
     param <- input$expParam
@@ -468,22 +476,24 @@ shinyServer(function(input, output, session) {
           dv <- merge(dv, std, by = "DURATION")
           dv$LABEL <- as.numeric(substr(as.character(dv$LABEL), 4, 7))
           dv$SNAME <- paste(dv$DURATION, "Standard")
+          dv$DURATION <- paste(dv$DURATION, "Design Value")
           
           cbPalette <- c("#E69F00", "#D55E00", "#56B4E9", "#0072B2")
           
           title <- paste0("Design Value Trends: ", pol, " at ", site)
           
-          plt <- ggplot(dv, aes(x = LABEL, y = DV, colour = DURATION, ymin = 0)) + 
-            geom_hline(aes(yintercept = STANDARD, colour = SNAME), show_guide = TRUE, size = 1.5) +
-            geom_line(size = 2) +
-            geom_point(size = 5) +
+          plt <- ggplot(dv, aes(x = LABEL, y = DV, colour = DURATION, ymin = 0)) + labs(colour = "") +
+            geom_hline(aes(yintercept = STANDARD, colour = SNAME), show_guide = TRUE, size = 1.25) +
+            geom_line(size = 1.5) +
+            geom_point(size = 4) +
             labs(x = "Year", y = paste0("Design Value (", units, ")")) + 
-            theme_bw(base_size = 18) + scale_colour_manual(values=cbPalette) +
+            theme_bw(base_size = 16) + theme(legend.position="bottom") + 
+            scale_colour_manual(values=cbPalette) +
             ggtitle(title)
           
           print(plt)
         
-        }, width = 900, height = 900, filename = paste0("www/", values$trendChart))
+        }, width = 900, height = 450, filename = paste0("www/", values$trendChart))
           
         session$sendCustomMessage(type = "updateTrendChart", values$trendChart)
         
@@ -491,7 +501,7 @@ shinyServer(function(input, output, session) {
     
     }
     
-  }, width = 900, height = 450)
+  })
 
   output$corplot <- renderPlot({
     
@@ -502,38 +512,34 @@ shinyServer(function(input, output, session) {
         
     if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
       return(cormat(db, sites, parameter))      
-    
     }
   
-  }, width = 1200, height = 900)
+  }, width = 1800, height = 1350)
 
-  output$downloadAgePlot <- downloadHandler(filename = function() {paste("AgePlot_", areaServedMonitor(), "_", input$expParam, ".png")},
-                                            content = function(file) {
-                                              device <- function(..., width, height) grDevices::png(..., width = 6, height = 8, res = 150, units = "in")
-                                              ggsave(file, plot = agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(bquote(atop("Age Pyramid", atop(.(paste0("Site ID: ", areaServedMonitor())), .(paste0("Parameter Code: ", input$expParam)))))), device = device)
-                                            })
-
-  output$downloadCorMat <- downloadHandler(filename = function() {paste("CorMat_", input$expParam, "_", as.integer(runif(1, 1, 999999)),".png")},
-                                           content = function(file) {
-                                             parameter <- isolate(input$expParam)
-                                             if(is.null(parameter)) {parameter = -1}
-                                             sites <- isolate(selectedSites()$Key)
-                                             if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
-                                               png(file, 1200, 900)
-                                               cormat(db, sites, parameter)      
-                                               dev.off()
-                                             }
-                                           })
-
-  output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", Sys.Date(), ".csv")},
+  output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", input$expParam, "-", Sys.Date(), ".csv")},
                                          content = function(file) {
-                                           d <- polygons()@data
+                                           d <- opData()
                                            d$area <- unlist(d$area)
                                            d <- merge(d, sites(), by.x = "id", by.y = "Key", all.x = TRUE, all.y = FALSE)
                                            d <- d[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "area", "total", "Count", "Crit_Count", "HAP_Count", "Met_Count")]
                                            colnames(d) <- c("State Code", "County Code", "Site ID", "Latitude", "Longitude", "Street Addres", "Area (km^2)", "Total Population", "Total Parameters Monitored", "Criteria Monitored", "HAPS Monitored", "Meteorology Monitored")
                                            write.csv(d, file, row.names = FALSE)
                                          })
+
+  output$downloadCorMat <- downloadHandler(filename = function() {paste0("cormat-", input$expParam, "-", Sys.Date(), ".csv")},
+                                           content = function(file) {
+                                             parameter <- isolate(input$expParam)
+                                             sites <- isolate(selectedSites()$Key)
+                                             sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
+                                             q <- dbGetQuery(db, sql)
+                                             sites <- unique(c(q$site1, q$site2))
+                                             sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
+                                             sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
+                                             q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
+                                             q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
+                                             colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Dif", "Distance (km)")
+                                             write.csv(q, file, row.names = FALSE)
+                                           })
 
 })
 
