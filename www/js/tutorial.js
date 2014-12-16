@@ -27,6 +27,15 @@ netAssess.tutorial.makeSlide("Area of Interest",
 netAssess.tutorial.makeSlide("Area of Interest",
                              "You can also select a predefined area such as a state, CBSA, or CSA. <ol><li>Click the cicle to the left of the Area Type you want.</li><li>The dropdown will update to reflect you choice.</li><li>Use the dropdown to select the specific area you are interested in.</li></ol> You can scroll through the list to locate your area, or use the text box to filter your choices.", "areaSelect", "right")
 
+netAssess.tutorial.makeSlide("Correlation Matrix",
+                             "The correlation matrix gives you information about how concentrations at monitors within your area of interest compare to one-another. This tool currently only works with <b>44201 - OZONE</b>, <b>88101 - PM2.5 - LOCAL CONDITIONS</b>, and <b>88502 - ACCEPTABLE PM2.5 AQI & SPECIATION MASS</b>", "cormatButton", "below")
+                             
+netAssess.tutorial.makeSlide("Area Served",
+                             "Area Served provides information about the area surrounding monitors in you area of interest. Clicking the button will calculate the area served by each monitor and draw polygons on the map representing those areas. You can then click on a polygon to get more information about that area.", "areaServedCalcButton", "below")
+                             
+netAssess.tutorial.makeSlide("Conclusion",
+                             "This is the end of the tour for now. More will be added in the near future.",
+                             "map", "center")
 
 $(document).ready(function() {
   
