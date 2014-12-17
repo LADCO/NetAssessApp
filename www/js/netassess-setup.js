@@ -45,7 +45,7 @@ var netAssess = {
 		areaServed: new $.floater("#areainfo", {title: "Area Served Information", top: "50px", right: "50px"}),
 		aoi: new $.floater("#aoi", {title: "Area of Interest"}),
 		legend: new $.floater("#legend", {title: "Legend", close: false, width: '400px', height: "250px", right: "50px", bottom: "50px"}),
-		newSite: new $.floater("#new_site", {title: "Add New Site", width: '400px'}),
+		newSite: new $.floater("#new_site", {title: "Add New Site", width: '400px', close: false, minimize: false}),
     popup: new $.floater("#popup", {title: "Popup", width: "600px", left: "200px", minimize: false})
   },
 	resizeMap: function() {
@@ -113,15 +113,21 @@ netAssess.layerGroups = {
 		},
 		onEachFeature: function(feature, layer) {
 
-      po = "<span class = 'popup-text'><h4 class = 'popup-header'>New Site Information</h4>"
-    	po = po + "<span class = 'popup-header'>Site Name</span><br />"
-    	po = po + feature.properties.Name + "<br />"
-    	po = po + "<span class = 'popup-header'>State</span><br />"
-    	po = po + feature.properties.State + "<br />"
-    	po = po + "<span class = 'popup-header'>County</span><br />"
-    	po = po + feature.properties.County + "<br />"
-    	po = po + "</span>"
-    
+      po = "<span class = 'popup-text'><h4 class = 'header'>New Site Information</h4>"
+      po = po + "<center><table class = 'popup-table'><tr>"
+      
+      po = po + "<td>Site ID</td><td>" + feature.properties.Name + "</td></tr>"
+      po = po + "<tr><td>County</td><td>" + feature.properties.County + "</td></tr>"
+      po = po + "<tr><td>State</td><td>" + feature.properties.State + "</td></tr>"
+
+      po = po + "<tr><td>Parameters</td><td>"
+      for(var i = 0; i < feature.properties.Params.length; i++) {
+        po = po + feature.properties.Params[i] + "<br />"
+      }
+      po = po + "</td></tr>"
+
+      po = po + "</table></span>"
+  
     	layer.bindPopup(po, {minWidth: 150});
 
     }
@@ -326,7 +332,7 @@ netAssess.siteCheck = function(layer) {
 
 // Function that adds the popups to the site icons and adds event triggers for 
 // shiny inputs
-netAssess.initializeNewSite = 
+// netAssess.initializeNewSite = 
     
 /* Call by a shiny custom message handler. Displays provided area served data */  
 netAssess.updateAreaServed = function(data) {
@@ -536,9 +542,22 @@ netAssess.errorChecking = {
   	
   },
   checkReport: function(event) {
-  	event.stopPropagation()
-  	var active = true;
-  	if(active == true) {
+    var active = true;
+    var bc = netAssess.errorChecking.basics(30000, 1); 
+  	
+    if(!bc.active) {
+      active = false;
+      bc.body = bc.body + "</ul>";
+      netAssess.showAlert("Data Download Error", bc.body)
+    } /*else {
+      if(Object.keys(netAssess.layerGroups.areaServed._layers).length == 0) {
+        bc.body = bc.body + "<li>Area Served must be run before downloading data.</li></ul>"
+        netAssess.showAlert("Data Download Error", bc.body)
+        active = false;
+    	}
+    }*/
+    
+    if(active) {
   		$("#downloadData").trigger(event);
   	}
   }
@@ -560,10 +579,16 @@ netAssess.populateNewSiteData = function(event) {
     
 		$("#ns_state").val(wd.State.name);
 		$("#ns_county").val(wd.County.name);
+    $("#ns_census").val(wd.Block.FIPS.substring(0,11));
 		netAssess.floaters.newSite.open();
 
 	})
 
+}
+
+netAssess.cancelNewSite = function() {
+  netAssess.layerGroups.newSiteSelection.clearLayers();
+  netAssess.floaters.newSite.close();
 }
 
 netAssess.addNewSite = function() {
@@ -571,7 +596,7 @@ netAssess.addNewSite = function() {
 		var gj = layer.toGeoJSON();
 		var props = {County: $("#ns_county").val(), State: $("#ns_state").val(), 
 			Name: $("#ns_name").val(), Params: $("#new_site_parameters").val(),
-			key: netAssess.data.newSiteCounter
+      Tract: $("#ns_census").val(),	key: netAssess.data.newSiteCounter
 		}
 		netAssess.data.newSiteCounter++
 		props.selected = false;

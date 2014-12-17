@@ -623,6 +623,10 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
   width: 80%;
 }
 
+#downloadData {
+  z-index: 1;
+}
+
 #tutorial {
   box-sizing: border-box;
   font-size: 15px;

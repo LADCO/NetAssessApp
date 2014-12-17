@@ -209,10 +209,6 @@ shinyServer(function(input, output, session) {
     
   })
 
-  opData <- reactive({
-    d <- polygons()@data
-  })
-
   polygons <- reactive({
     
     input$areaServedCalcButton
@@ -220,7 +216,6 @@ shinyServer(function(input, output, session) {
     ss <- isolate(selectedSites())
     nss <- isolate(selectedNewSites()[, c("Key", "Latitude", "Longitude")])
     ss <- rbind(ss, nss)
-    print(nrow(ss))
     if(!is.null(nrow(ss))) {
       
       sn <- isolate(selectedNeighbors())
@@ -516,28 +511,58 @@ shinyServer(function(input, output, session) {
   
   }, width = 1800, height = 1350)
 
-  output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", input$expParam, "-", Sys.Date(), ".csv")},
+  cormatData <- reactive({
+    parameter <- isolate(input$expParam)
+    sites <- isolate(selectedSites()$Key)
+    sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
+    q <- dbGetQuery(db, sql)
+    sites <- unique(c(q$site1, q$site2))
+    sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
+    sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
+    q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
+    q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
+    colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Dif", "Distance (km)")  
+    return(q)
+  })
+
+  output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", input$expParam, "-", Sys.Date(), ".zip")},
                                          content = function(file) {
-                                           d <- opData()
-                                           d$area <- unlist(d$area)
-                                           d <- merge(d, sites(), by.x = "id", by.y = "Key", all.x = TRUE, all.y = FALSE)
-                                           d <- d[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "area", "total", "Count", "Crit_Count", "HAP_Count", "Met_Count")]
-                                           colnames(d) <- c("State Code", "County Code", "Site ID", "Latitude", "Longitude", "Street Addres", "Area (km^2)", "Total Population", "Total Parameters Monitored", "Criteria Monitored", "HAPS Monitored", "Meteorology Monitored")
-                                           write.csv(d, file, row.names = FALSE)
-                                         })
+                                            files <- c()
+                                            td <- tempdir()
+                                            setwd(tempdir())
+
+                                            # Sites Data
+                                            fn <- suppressWarnings(normalizePath(paste(td, "sites.csv", sep = "/")))
+                                            d <- sites()[sites()$Key %in% input$selectedSites, ]
+                                            write.csv(d, file = fn)
+                                            files <- c(files, fn)
+                                            
+                                            # Correlation Data
+                                            fn <- suppressWarnings(normalizePath(paste(td, "correlation.csv", sep = "/")))
+                                            write.csv(cormatData(), file = fn)
+                                            files <- c(files, fn)
+                                            
+                                            # Area Served Data (if available)
+                                            if(!is.null(polygons())) {
+                                              fn <- suppressWarnings(normalizePath(paste(td, "areaServed.csv", sep = "/")))
+                                              d <- polygons()@data
+                                              d$area <- unlist(d$area)
+                                              write.csv(d, file = fn)
+                                              files <- c(files, fn)
+                                            }
+                                            
+                                            zip(file, files, flags="")   
+                                         
+                                            if (file.exists(paste0(file, ".zip")))
+                                              file.rename(paste0(file, ".zip"), file)
+                                            
+                                            
+                                         },
+                                         contentType = "application/zip")
 
   output$downloadCorMat <- downloadHandler(filename = function() {paste0("cormat-", input$expParam, "-", Sys.Date(), ".csv")},
                                            content = function(file) {
-                                             parameter <- isolate(input$expParam)
-                                             sites <- isolate(selectedSites()$Key)
-                                             sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
-                                             q <- dbGetQuery(db, sql)
-                                             sites <- unique(c(q$site1, q$site2))
-                                             sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
-                                             sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
-                                             q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
-                                             q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
-                                             colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Dif", "Distance (km)")
+                                             q <- cormatData()
                                              write.csv(q, file, row.names = FALSE)
                                            })
 

@@ -125,4 +125,6 @@ areaPolygons<- function(spPoly, proj4string = NULL) {
   return(areas)
 }
 
-
+triggerEvent <- function(session, target, event) {
+  session$sendCustomMessage(type = "triggerEvent", list(target = target, event = event))
+}

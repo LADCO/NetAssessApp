@@ -5,6 +5,8 @@
     var $floater = $(id);
     var $this = this;
     
+    this.floater = $floater;
+    
     opt = $.extend({title: "Floater", cursor: "move", close: true, minimize: true, resize: false, width: 400, top: "50px", left: "50px"}, opt);
     
     $floater.css({width: opt.width});
@@ -69,7 +71,7 @@
       }
       min.on("click", function() { $floater.toggleClass("minimized").removeClass("open").removeClass("closed");})
     }
-        
+    
     if(opt.close == true) {
       var clo = $floater.append("<a class = 'close'><i class = 'fa fa-close'></i></a>").find(".close");
       clo.on("click", function() {$floater.addClass("closed").removeClass("open").removeClass("on-top").removeClass("minimized");})
@@ -92,6 +94,14 @@
       $floater.find(".float-handle").text(title)
     }
     
+/*    this.on = function(event, callback) {
+      $floater.on(event, callback);
+    }
+    
+    this.off = function(event) {
+      $floater.off(event);
+    } 
+  */
     return this;
     
   };

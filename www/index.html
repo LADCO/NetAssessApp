@@ -67,9 +67,9 @@
           <span class = "valign"><img src = "images/cont_us.png"></span>
         </button>
         <span class = "v-divide"></span>
-        <a class = "menu-bar-button shiny-download-link" id = "downloadData" title = "Download Data Table" href = "" target = "_blank">
+        <button class = "menu-bar-button" id = "downloadButton" title = "Download Data Table">
           <span class = "valign"><img src = "images/csv.png" /></span>
-        </a>
+        </button>
         <span class = "v-divide"></span>
         <button class = "menu-bar-button" id = "resetApp" title = "Reset App">
           <i class = "fa fa-undo"></i>
@@ -86,7 +86,7 @@
     <div id = "newSites"></div>
     <div id = "popupID"></div>
     <div id = "trendChart" class = "shiny-plot-output"></div>
-    
+    <a class = "shiny-download-link" id = "downloadData" href = "" target = "_blank">Hi :)</a>
     <div id = "tutorial" class = "tutorial" style = "display: none;">
       <div class = "tutorial-body">
         <div class = "header">Welcome to NetAssess!</div>
@@ -150,8 +150,7 @@
             </select>
           </td>
         </tr>
-      </table>
-  
+      </table> 
 		</div>
 		
 		<div id = "help-sb" class = "sidebar">
@@ -288,10 +287,15 @@
         <td><label for = "ns_county">County</label></td>
         <td><input type = "text" name = "ns_county" id = "ns_county" /></td>
       </tr>
+      <tr>
+        <td><label for = "ns_census">Census Tract</label></td>
+        <td><input type = "text" name = "ns_census" id = "ns_census" /></td>
+      </tr>
     </table>
     <p class = "header" style = "margin-bottom: 10px;">Parameters</p>
     <select id = "new_site_parameters" multiple size = 4></select>
     <button style = "float: right; margin-top: 10px;" id = "new_site_add">Add Site</button>
+    <button style = "float: right; margin-top: 10px;" id = "cancel_site_add">Cancel</button>
   </div>
     
   <div id = "popup">

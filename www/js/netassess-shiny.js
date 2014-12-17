@@ -184,3 +184,7 @@ Shiny.addCustomMessageHandler("areaServedMonitorUpdate", function(data) {
 Shiny.addCustomMessageHandler("updateTrendChart", function(data) {
   $(".popup-trend").find("img").attr("src", data)
 })
+
+Shiny.addCustomMessageHandler("triggerEvent", function(data) {
+  $(data.target).trigger(data.event);
+})

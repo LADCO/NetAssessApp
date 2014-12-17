@@ -14,10 +14,16 @@ netAssess.tutorial.makeSlide("Welcome to NetAssess!",
                              "This tool is meant to assist with 5-year Network Assessments as required by <a href = 'http://www.ecfr.gov/cgi-bin/text-idx?SID=1c02841c6e1ad0e7e8ecaa87954ac180&node=se40.6.58_110&rgn=div8'>40 CFR &#0167;58.10(d)</a>.<p> You can start by running through this quick tour, or close this box with the 'x' in the top right corner and jump right in to the tool. Refer to the <a href = '#' target='_blank'>Guidance Document</a> for more detailed information about the App.</p>", "map", "center")
                              
 netAssess.tutorial.makeSlide("Parameter of Interest",
-                             "The first step in the assessment process should be selecting a parameter. You do that with the parameter selection dropdown to the right. You can scroll through the list to find your parameter or use the search box to search by name or AQS code. Once you select a parameter the map will update to show the locations of known sites monitoring for that parameter.", "s2id_expParam", "left")
+                             "The first step in the assessment process should be selecting a parameter. You do that with the parameter selection dropdown to the right. You can scroll through the list to find your parameter or use the search box to search by name or AQS code. Once you select a parameter the map will update to show the locations of known sites monitoring for that parameter. We will select <b>44201 - OZONE</b>", "s2id_expParam", "left")
                              
 netAssess.tutorial.makeSlide("Area of Interest",
-                             "Next you will need to select an Area of Interest. This allows you to focus your analysis on a specific area of the country. You can open the <b>Area of Interest Dialog</b> by clicking the <i class = 'fa fa-crosshairs'></i> button above.", "aoi_button", "below")
+                             "Next you will need to select an Area of Interest. This allows you to focus your analysis on a specific area of the country. You can open the <b>Area of Interest Dialog</b> by clicking the <i class = 'fa fa-crosshairs'></i> button above. ", "aoi_button", "below",
+                             function() { 
+                                if($("#expParam").select2("val") != "44201") {
+                                  $("#expParam").select2("val", "44201")
+                                  $("#expParam").trigger("change");
+                                }
+                             });
 
 netAssess.tutorial.makeSlide("Area of Interest",
                              "From the Area of Interest dialog you can select an area of interest in several ways.",
@@ -25,13 +31,26 @@ netAssess.tutorial.makeSlide("Area of Interest",
 netAssess.tutorial.makeSlide("Area of Interest",
                              "You can draw an area free-hand, from the 'Select a geography area'.<table style = 'padding-top: 5px'><tr><td style = 'vertical-align: top'><img src='images/glyphicons_096_vector_path_polygon.png'></td><td style = 'padding-left: 5px'>Allows you to draw a many sided polygon by clicking the map where vertices should be. Click the location of your first vertex to close the polygon and finalize the shape.</td></tr><tr><td style = 'vertical-align: top'><img src='images/glyphicons_094_vector_path_square.png'></td><td style = 'padding-left: 5px'>Allows you to define a rectangular area by clicking a dragging over the area you are interested in on the map.</td></tr><tr><td style = 'vertical-align: top'><img src='images/glyphicons_197_remove.png'></td><td style = 'padding-left: 5px'>If you start a drawing and change you mind, this allows you to cancel the drawing.</td></table>", "cancel_draw", "right")
 netAssess.tutorial.makeSlide("Area of Interest",
-                             "You can also select a predefined area such as a state, CBSA, or CSA. <ol><li>Click the cicle to the left of the Area Type you want.</li><li>The dropdown will update to reflect you choice.</li><li>Use the dropdown to select the specific area you are interested in.</li></ol> You can scroll through the list to locate your area, or use the text box to filter your choices.", "areaSelect", "right")
+                             "You can also select a predefined area such as a state, CBSA, or CSA. <ol><li>Click the cicle to the left of the Area Type you want.</li><li>The dropdown will update to reflect you choice.</li><li>Use the dropdown to select the specific area you are interested in.</li></ol> You can scroll through the list to locate your area, or use the text box to filter your choices. We will select the state of <b>North Dakota</b>.", "areaSelect", "right")
 
 netAssess.tutorial.makeSlide("Correlation Matrix",
-                             "The correlation matrix gives you information about how concentrations at monitors within your area of interest compare to one-another. This tool currently only works with <b>44201 - OZONE</b>, <b>88101 - PM2.5 - LOCAL CONDITIONS</b>, and <b>88502 - ACCEPTABLE PM2.5 AQI & SPECIATION MASS</b>", "cormatButton", "below")
-                             
+                             "The correlation matrix gives you information about how concentrations at monitors within your area of interest compare to one another. This tool currently only works with <b>44201 - OZONE</b>, <b>88101 - PM2.5 - LOCAL CONDITIONS</b>, and <b>88502 - ACCEPTABLE PM2.5 AQI & SPECIATION MASS</b>", "cormatButton", "below",
+                             function() {
+                              $("[name='areaSelect'][value='State']").trigger("click");
+                              setTimeout(function() {
+                                $("#areaSelectSelect").select2("val", "38");
+                                $("#areaSelectSelect").trigger("change");
+                              }, 500)
+                             })
+netAssess.tutorial.makeSlide("Correlation Matrix",
+                             "Each monitor-monitor comparison is represented by an ellipse. The eccentricity (flatness) of the ellipse represents the correlation between the monitors. (Flatter equals more correlation), the color of the ellipse represents the average relative difference between the monitors, and the number inside the ellipse is the distance, in kilometers, between the two monitors.",
+                             "cormat", "right", function() {
+                                $("#cormatButton").trigger("click");
+                             })
 netAssess.tutorial.makeSlide("Area Served",
-                             "Area Served provides information about the area surrounding monitors in you area of interest. Clicking the button will calculate the area served by each monitor and draw polygons on the map representing those areas. You can then click on a polygon to get more information about that area.", "areaServedCalcButton", "below")
+                             "Area Served provides information about the area surrounding monitors in you area of interest. Clicking the button will calculate the area served by each monitor and draw polygons on the map representing those areas. You can then click on a polygon to get more information about that area.", "areaServedCalcButton", "below", function() {
+                             netAssess.floaters.cormat.close();
+                             })
                              
 netAssess.tutorial.makeSlide("Conclusion",
                              "This is the end of the tour for now. More will be added in the near future.",
