@@ -64,9 +64,11 @@ netAssess.layerGroups = {
 		pointToLayer: function(feature, latlon) {
 			var mark = new L.marker(latlon, {contextmenu: true, icon: netAssess.icons.existingSite});
 			mark.options.contextmenuItems = [
-				{text: "Toggle Selected", index: 0, callback: netAssess.toggleSelected, context: mark},
+				{text: "Select Monitor", index: 0, callback: netAssess.toggleSelected, context: mark},
 				{text: "Hide Monitor", index: 1, callback: netAssess.hideMonitor, context: mark},
-				{separator: true, index: 2}
+				{separator: true, index: 2},
+        {text: "View Correlations", index: 3, callback: netAssess.errorChecking.corMap, context: mark},
+        {text: "Hide Correlations", index: 4, callback: function() {netAssess.layerGroups.correlations.clearLayers()}}
 			];
 			return mark;
 		},
@@ -105,7 +107,7 @@ netAssess.layerGroups = {
 		pointToLayer: function(feature, latlon) {
 			var mark = new L.marker(latlon, {contextmenu: true, icon: netAssess.icons.newSite});
 			mark.options.contextmenuItems = [
-				{text: "Toggle Selected", index: 0, callback: netAssess.toggleSelected, context: mark},
+				{text: "Select Monitor", index: 0, callback: netAssess.toggleSelected, context: mark},
 				{text: "Delete Monitor", index: 1, callback: netAssess.hideMonitor, context: mark},
 				{separator: true, index: 2}
 			];
@@ -131,7 +133,8 @@ netAssess.layerGroups = {
     	layer.bindPopup(po, {minWidth: 150});
 
     }
-	})
+	}),
+  correlations: L.featureGroup(null)
 }
 
 netAssess.mapControls = {
@@ -142,7 +145,7 @@ netAssess.mapControls = {
 
 // Create the map
 netAssess.map = L.map('map', {
-	contextmenu: false, 
+	contextmenu: true, 
 	contextmenuWidth: 140, 
 	contextmenuItems: [
 		{text: "Full Extent", iconCls: "fa fa-search-minus", callback: netAssess.mapControls.fullExtent},
@@ -427,7 +430,13 @@ netAssess.reset = function() {
   // Functions for changing the state of monitoring locations
   
 netAssess.toggleSelected = function() {
-	this.feature.properties.selected = !this.feature.properties.selected
+  var sel = !this.feature.properties.selected;
+	this.feature.properties.selected = sel;
+  if(sel) {
+    this.options.contextmenuItems[0].text = "Deselect Monitor"
+  } else {
+    this.options.contextmenuItems[0].text = "Select Monitor"
+  }
 	$(this._icon).toggleClass("selected", this.feature.properties.selected);
 	$("#map")
 		.trigger("siteSelection")
@@ -560,10 +569,36 @@ netAssess.errorChecking = {
     if(active) {
   		$("#downloadData").trigger(event);
   	}
+  },
+  corMap: function(event){
+    
+    if(this.feature.properties.selected == false) {
+      this.feature.properties.selected == true;
+      $(this._icon).toggleClass("selected", this.feature.properties.selected);
+    	$("#map")
+		    .trigger("siteSelection")
+		    .trigger("newSiteUpdate");
+
+    }
+    
+    var bc = netAssess.errorChecking.basics(30, 3);
+  
+  	var param = $("#expParam").select2("val");
+  	var vp = ["44201", "88101", "88502"];
+  	if(vp.indexOf(param) == -1) {
+  		bc.active = false;
+  		bc.body = bc.body + "<li>Correlation maps are only available for parameter codes 44201, 88101, and 88502.</li>"
+  	}
+    
+  	if(bc.active) {
+      $("#correlations").trigger("viewCor", this)
+  	} else {
+  		bc.body = bc.body + "</ul>";
+  		netAssess.showAlert("Correlation Map Error", bc.body)
+  	}
+
   }
 }
-
-
 
 netAssess.populateNewSiteData = function(event) {
   
@@ -630,4 +665,27 @@ netAssess.closeFloaters = function() {
   netAssess.floaters.areaServed.close();
   netAssess.floaters.popup.close();
   netAssess.floaters.cormat.close();
+}
+
+netAssess.corColor = function(cor) {
+    
+  if(cor <= 0.6) {
+    col = "#00FF00";
+    bor = "#008800";
+  } else if(cor <= 0.7) {
+    col = "#CCFF00";
+    bor = "#44CC00";
+  } else if(cor <= 0.8) {
+    col = "#FFFF00";
+    bor = "#CCCC00";
+  } else if(cor <= 0.9) {
+    col = "#FFCC00";
+    bor = "#CC4400";
+  } else {
+    col = "#FF0000";
+    bor = "#CC0000";
+  }
+  
+  return {fill: col, border: bor};
+  
 }

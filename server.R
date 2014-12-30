@@ -59,7 +59,7 @@ shinyServer(function(input, output, session) {
     }
     session$sendCustomMessage(type="updateVisibleMonitors", keys)
   })
-
+  
 #### Functions for controlling the Area of Interest Selection
 
   # Observer to update predefined area select input based on Area Type
@@ -382,6 +382,26 @@ shinyServer(function(input, output, session) {
     session$sendCustomMessage(type = "areaServedMonitorUpdate", areaServedMonitor())
   })
 
+  observe({
+    site <- input$correlations
+    parameter <- isolate(input$expParam)
+    sites <- isolate(selectedSites()$Key)
+    if(!is.null(parameter)) {
+      sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ") AND (site1 = ", site, " OR site2 = ", site, ")")
+      q <- dbGetQuery(db, sql)
+      q$site1 <- sapply(seq(nrow(q)), function(i) {
+        if(q$site1[i] == site) {
+          return(q$site2[i])
+        } else {
+          return(q$site1[i])
+        }
+      })
+      q <- q[, c("site1", "cor")]
+      colnames(q) <- c("site", "cor")
+      session$sendCustomMessage(type = "showMapCorrelations", q)
+    }
+  })
+
   output$agePlot <- renderPlot({
     
     input$clickedAreaServed
@@ -512,17 +532,19 @@ shinyServer(function(input, output, session) {
   }, width = 1800, height = 1350)
 
   cormatData <- reactive({
-    parameter <- isolate(input$expParam)
-    sites <- isolate(selectedSites()$Key)
-    sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
-    q <- dbGetQuery(db, sql)
-    sites <- unique(c(q$site1, q$site2))
-    sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
-    sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
-    q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
-    q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
-    colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Dif", "Distance (km)")  
-    return(q)
+    if(input$expParam != "-1" && !is.null(selectedSites())) {
+      parameter <- isolate(input$expParam)
+      sites <- isolate(selectedSites()$Key)
+      sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
+      q <- dbGetQuery(db, sql)
+      sites <- unique(c(q$site1, q$site2))
+      sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
+      sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
+      q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
+      q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
+      colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Dif", "Distance (km)")  
+      return(q)
+    }
   })
 
   output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", input$expParam, "-", Sys.Date(), ".zip")},

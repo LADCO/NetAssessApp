@@ -62,7 +62,7 @@ cormat <- function(db, sites, parameter, output = "screen") {
     y=y+.15
   }  
   
-  text(x=.05,y=.15,adj=0,labels="Pearson Correlation (r)",cex=1.5,srt=90)
+  text(x=.05,y=.15,adj=0,labels="Pearson Correlation (r^2)",cex=1.5,srt=90)
   
   #Plot avg relative difference legend
   screen(3)

@@ -1,6 +1,23 @@
 /* Input Bindings for custom shiny inputs */
 netAssess.shinyBindings = {};
 
+netAssess.shinyBindings.correlations = new Shiny.InputBinding();
+  $.extend(netAssess.shinyBindings.correlations, {
+    find: function(scope) {
+      return $(scope).find("#correlations");
+    },
+    getValue: function(el) {
+      return $(el).data("site")
+    },
+    subscribe: function(el, callback) {
+      $(el).on("viewCor", function(e, trigger) {
+        $(el).data("site", trigger.feature.properties.key);
+        callback()
+      })
+    }
+  })
+  Shiny.inputBindings.register(netAssess.shinyBindings.correlations);
+
 netAssess.shinyBindings.popupID = new Shiny.InputBinding();
   $.extend(netAssess.shinyBindings.popupID, {
     find: function(scope) {
@@ -187,4 +204,24 @@ Shiny.addCustomMessageHandler("updateTrendChart", function(data) {
 
 Shiny.addCustomMessageHandler("triggerEvent", function(data) {
   $(data.target).trigger(data.event);
+})
+
+Shiny.addCustomMessageHandler("showMapCorrelations", function(data) {
+  netAssess.layerGroups.correlations.clearLayers();
+  netAssess.layerGroups.sites.eachLayer(function(layer) {
+    for(var i = 0; i < layer.feature.properties.key.length; i++) {
+      var index = data.site.indexOf(layer.feature.properties.key[i]);
+      if(index != -1) {
+        var cor = data.cor[index];
+        var ll = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
+        var col = netAssess.corColor(cor);
+        netAssess.layerGroups.correlations.addLayer(L.circleMarker(ll, 
+                                                    {color: col.border,
+                                                    weight: 1.5,
+                                                    fillColor: col.fill, 
+                                                    radius: 10,
+                                                    fillOpacity: 0.5}));
+      }
+    }
+  })
 })

@@ -45,6 +45,7 @@ netAssess.map.addLayer(netAssess.layerGroups.newSites);
 netAssess.map.addLayer(netAssess.layerGroups.newSiteSelection);
 netAssess.map.addLayer(netAssess.layerGroups.aoi);
 netAssess.layerGroups.areaServed.addTo(netAssess.map);
+netAssess.layerGroups.correlations.addTo(netAssess.map);
 
 // Add the sidebars to the map
 for(var sb in netAssess.controls.sidebars) {

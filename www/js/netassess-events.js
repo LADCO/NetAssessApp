@@ -10,13 +10,13 @@
   $("#downloadButton").on("click", netAssess.errorChecking.checkReport)
 	$("#resetApp").on("click", netAssess.reset)
 	$("#areaSelectZoom, #aoiZoom").on("click", function() {
-		netAssess.map.fitBounds(netAssess.layerGroups.aoi.getBounds())
+		netAssess.map.fitBounds(netAssess.layerGroups.aoi.getBounds());
 	})
 	$("#areaServedCalcButton").on("click", netAssess.errorChecking.areaServed);
 	$("#expParam").on("change", netAssess.loading.show)
   $("#cancel_site_add").on("click", function() {
     netAssess.cancelNewSite();
-  })
+  });
 	netAssess.map.on('draw:created', function(e) {
 		if(e.layerType != "marker") {
 			netAssess.floaters.aoi.open();
