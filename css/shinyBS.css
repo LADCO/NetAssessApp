@@ -1,0 +1,124 @@
+body { padding-top: 50px; }
+
+.bs-bg-color {
+	background-color: #2C3E50;
+}
+
+.bs-bg-pattern {
+	background-image: repeating-linear-gradient(315deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px); /**/
+}
+
+.bs-color {
+	color: #2C3E50;
+}
+
+.navbar-brand {
+	color: white;
+	font-size: 30px;
+	font-weight: 400;
+}
+
+.navbar-shinybs {
+	border-radius: 0px;
+}
+
+.navbar-shinybs button.navbar-toggle {
+	background-color: rgba(255,255,255,0.2);
+	border-color: rgba(0,0,0,0.1)
+}
+
+.navbar-shinybs .navbar-toggle .icon-bar {
+    background-color: white;
+}
+
+.navbar-shinybs a {
+	color: white;
+}
+.navbar-shinybs a:not(.navbar-brand) {
+	text-transform: uppercase;
+}
+
+.navbar-shinybs li.active a , .navbar-shinybs a:hover:not(.navbar-brand) , .navbar-shinybs a:focus{
+	background-color: rgba(0,0,0,0.2) !important;
+}
+
+div.highlight {
+	padding-top: 10px;
+	padding-bottom: 15px;
+}
+
+footer {
+	font-size: 10px;
+	margin-top: 75px;
+	text-align: center;
+}
+
+i.main-icon {
+	padding-right: 10px;
+}
+
+.group {
+	padding-left: 20px;
+	padding-top: 50px;
+	margin-top: -50px;
+}
+
+.group h2 {
+	margin-left: -20px;
+}
+
+.subgroup h3 {
+	margin-left: -20px;
+}
+
+.subgroup {
+	padding-left: 20px;
+}
+
+/*
+	Side navigation styles
+*/
+
+.fixed {
+    position: fixed;
+}
+
+.sbs-sidebar {
+    padding-left: 20px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+code {
+	color: #888;
+	background-color: #F0F0F0;
+
+}
+
+
+/* all links */
+.sbs-sidebar .nav>li>a {
+    color: #999;
+    padding: 4px 20px;
+    font-size: 13px;
+    font-weight: 400;
+	border-left: 2px solid transparent;
+}
+
+/* nested links */
+.sbs-sidebar .nav .nav>li>a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 30px;
+    font-size: 12px;
+}
+
+/* active & hover links */
+.sbs-sidebar .nav>.active>a, 
+.sbs-sidebar .nav>li>a:hover, 
+.sbs-sidebar .nav>li>a:focus {
+    color: #2C3E50;                 
+    text-decoration: none;          
+    background-color: transparent;  
+    border-left: 2px solid #2C3E50; 
+}

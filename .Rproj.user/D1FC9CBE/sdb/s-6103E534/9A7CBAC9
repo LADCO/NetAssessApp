@@ -1,0 +1,16 @@
+{
+    "contents" : "var mapBoundsBinding = new Shiny.InputBinding();\n$.extend(mapBoundsBinding, {\n  find: function(scope) {\n    return $(scope).find(\"#mapBounds\")\n  },\n  getValue: function(el) {\n    return {bounds: map.getBounds(), zoom: map.getZoom()};\n  },\n  setValue: function(el, value) {\n    map.fitBounds(value);\n  },\n  subscribe: function(el, callback) {\n    map.on(\"moveend zoomend\", function(e) {\n      callback();\n    })\n  },\n  getRatePolicy: function() {\n    return {policy: 'debounce', delay: 3000};\n  },\n  unsubscribe: function(el) {\n    $(el).off(\"viewreset\");\n  }\n})\nShiny.inputBindings.register(mapBoundsBinding);\n\n\n\nShiny.addCustomMessageHandler(\"addOverlay\", \n  function(data) {\n    if(data.type == \"points\") {\n      var x = 5\n    }\n    \n  }\n);\n\nShiny.addCustomMessageHandler(\"displayArea\",\n  function(data) {\n\tif(data.coords.length == 1) {\n\t\tvar x = L.polygon(data.coords[0]);\n\t} else if(data.coords.length > 1) {\n\t\tvar x = L.multiPolygon(data.coords);\n\t}\n\taoi.clearLayers();\n\taoi.addLayer(x);\n\t\n\to3mon.eachLayer(checkAttributes, data.properties);\n\tpm25mon.eachLayer(checkAttributes, data.properties);\n\t\n  }\n);\n\nShiny.addCustomMessageHandler(\"showMonitors\", \n  function(data) {\n    if(!$.isArray(data)) {\n      data = [data];\n    }\n    for(var key in sites._layers) {\n      if(sites._layers.hasOwnProperty(key)) {\n        var el = sites._layers[key].feature;\n        var inc = false;\n        for(var i = 0; i < el.properties.key.length; i++) {\n          var val = el.properties.key[i]\n          if(data.indexOf(val) != -1) {\n            inc = true;\n          }\n        }\n        $($(sites._layers[key])[0]._icon).toggleClass(\"hidden\", !inc)\n      }\n    }\n    areaServed.clearLayers()\n  }\n)\n\nShiny.addCustomMessageHandler(\"showArea\", \n  function(data) {\n    \n    for(var i = 0; i < data.length; i++) {\n      if(data[i].length == 1) {\n        L.polygon(data[i][0]).addTo(areaServed)\n          .setStyle(areaSelectStyle)\n          .on(\"mouseover\", highlightAreaServed)\n          .on(\"mouseout\", unhighlightAreaServed)\n      } else {\n        L.multiPolygon([data[i]]).addTo(areaServed)\n          .setStyle(areaSelectStyle)\n          .on(\"mouseover\", highlightAreaServed)\n          .on(\"mouseout\", unhighlightAreaServed)\n      }\n    }\n\n  }\n)\n\n\n\n\nfunction checkAttributes(layer) {\n\n\tif(layer.feature.properties[this.type + \"_CODE\"] == this.id) {\n\t\t$(layer._icon).addClass(\"selected\");\n\t\tlayer.feature.properties.selected = true;\n\t} else {\n\t\t$(layer._icon).removeClass(\"selected\");\n\t\tlayer.feature.properties.selected = false;\n\t}\n\n}",
+    "created" : 1413571340120.000,
+    "dirty" : false,
+    "encoding" : "ISO8859-1",
+    "folds" : "",
+    "hash" : "1991107535",
+    "id" : "9A7CBAC9",
+    "lastKnownWriteTime" : 1413571390,
+    "path" : "C:/R/NetAssessApp/www/js/netassess-shiny.js",
+    "project_path" : "www/js/netassess-shiny.js",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "js"
+}
