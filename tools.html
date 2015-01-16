@@ -157,6 +157,8 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 ## 5 1001020100    32.48    -86.49 72.5 69.00 68.40 67.10     ozone 2011</code></pre>
 						<p>Here is R code for fitting the extreme value distribution and calculating the probability for a threshold of 70 ppb:</p>
 						<pre class="r"><code>
+library(ismev)
+library(evd)
 data &lt;- data[, paste0(&quot;r&quot;, 1:4)]
 fit &lt;- rlarg.fit(data, show = FALSE)
 prob &lt;- pgev(q = 70, loc = fit$mle[1], scale = fit$mle[2], shape = fit$mle[3],
