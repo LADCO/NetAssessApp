@@ -1,6 +1,10 @@
 (function($) {
 
   $.floater = function(id, opt) {
+    return new $.Floater(id, opt);
+  }
+
+  $.Floater = function(id, opt) {
     
     var $floater = $(id);
     var $this = this;
@@ -21,11 +25,6 @@
       $floater.css({left: opt.left});
     }
 
-    if(opt.hasOwnProperty("bottom")) {
-      $floater.css({bottom: opt.bottom});
-    } else {
-      $floater.css({top: opt.top});
-    }
     if(opt.resize) {
       $floater.css({resize: "horizontal"});
     }
@@ -69,7 +68,10 @@
       } else {
         min.css({right: "5px"})
       }
-      min.on("click", function() { $floater.toggleClass("minimized").removeClass("open").removeClass("closed");})
+      min.on("click", function() { 
+        $floater.toggleClass("minimized").removeClass("open").removeClass("closed");
+        $this.checkBottom();
+      })
     }
     
     if(opt.close == true) {
@@ -77,9 +79,19 @@
       clo.on("click", function() {$floater.addClass("closed").removeClass("open").removeClass("on-top").removeClass("minimized");})
     }
     
+    this.checkBottom = function() {
+      var h = $floater[0].offsetHeight;
+      var p = $floater.offset();
+      var sh = window.innerHeight;
+      if(h + p.top > sh) {
+        $floater.css({top: (sh - (h + 10)) + "px"})
+      }    
+    }
+    
     this.open = function() {
       $(".float-panel").removeClass("on-top");
       $floater.addClass("open on-top").removeClass("closed").removeClass("minimized");
+      $this.checkBottom();
     }
     
     this.close = function() {
@@ -94,14 +106,19 @@
       $floater.find(".float-handle").text(title)
     }
     
-/*    this.on = function(event, callback) {
-      $floater.on(event, callback);
+    if(opt.hasOwnProperty("bottom")) {
+      if(opt.hasOwnProperty("height")) {
+        $floater.css({bottom: opt.bottom});
+      } else {
+        var h = $floater[0].offsetHeight;
+        var sh = window.innerHeight;
+        var t = sh - (h + parseInt(opt.bottom, 10));
+        $floater.css({top: t + "px"})
+      }
+    } else {
+      $floater.css({top: opt.top});
     }
     
-    this.off = function(event) {
-      $floater.off(event);
-    } 
-  */
     return this;
     
   };

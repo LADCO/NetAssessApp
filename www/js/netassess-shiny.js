@@ -1,227 +1,112 @@
-/* Input Bindings for custom shiny inputs */
 netAssess.shinyBindings = {};
-
-netAssess.shinyBindings.correlations = new Shiny.InputBinding();
-  $.extend(netAssess.shinyBindings.correlations, {
+netAssess.shinyBindings.customAnchor = new Shiny.InputBinding();
+  $.extend(netAssess.shinyBindings.customAnchor, {
     find: function(scope) {
-      return $(scope).find("#correlations");
+      return $(scope).find(".shiny-custom-anchor");
     },
     getValue: function(el) {
-      return $(el).data("site")
-    },
-    subscribe: function(el, callback) {
-      $(el).on("viewCor", function(e, trigger) {
-        $(el).data("site", trigger.feature.properties.key);
-        callback()
-      })
-    }
-  })
-  Shiny.inputBindings.register(netAssess.shinyBindings.correlations);
-
-netAssess.shinyBindings.popupID = new Shiny.InputBinding();
-  $.extend(netAssess.shinyBindings.popupID, {
-    find: function(scope) {
-      return $(scope).find("#popupID")
-    },
-    getValue: function(el) {
-      return $(el).data("key")
-    },
-    subscribe: function(el, callback) {
-      netAssess.map.on("popupopen", function(e) {
-        var key = e.popup._source.feature.properties.key;
-        $(el).data("key", key);
-        callback();
-      })
-    }
-  })
-  Shiny.inputBindings.register(netAssess.shinyBindings.popupID);
-  
-  // Input that informs shiny about the new monitoring locations that have been 
-  // added
-netAssess.shinyBindings.newSites = new Shiny.InputBinding();
-  $.extend(netAssess.shinyBindings.newSites, {
-    find: function(scope) {
-      return $(scope).find("#newSites")
-    },
-    getValue: function(el) {
-      if(newSites != null) {
-        var new_sites = [];
-        netAssess.layerGroups.newSites.eachLayer(function(layer) {
-          
-          new_sites.push({lat: layer.feature.geometry.coordinates[1],
-                          lng: layer.feature.geometry.coordinates[0],
-                          name: layer.feature.properties.Name,
-                          params: layer.feature.properties.Params,
-                          visible: layer.feature.properties.visible,
-                          selected: layer.feature.properties.selected,
-                          key: layer.feature.properties.key});
-                          
-        })
-        return {data: new_sites};
-      }
-    },
-    subscribe: function(el, callback) {
-      $("#map").on("newSiteUpdate", callback);
-    },
-    unsubscribe: function(el) {
-      $("#map").off("newSiteUpdate");
-    }
-  })
-  Shiny.inputBindings.register(netAssess.shinyBindings.newSites);
-
-  // Input that informs shiny about the monitoring locations that have been 
-  // selected.
-netAssess.shinyBindings.selectedSites = new Shiny.InputBinding()
-  $.extend(netAssess.shinyBindings.selectedSites, {
-    find: function(scope) {
-      return $(scope).find("#selectedSites")
-    },
-    getValue: function(el) {
-      if(netAssess.layerGroups.sites != null) {
-        var selSites = [];
-        netAssess.layerGroups.sites.eachLayer(function(layer) {
-            if(layer.feature.properties.selected & layer.feature.properties.visible) {
-                selSites.push(layer.feature.properties.key)
-            }
-        })
-        return selSites;
-      }
-    },
-    subscribe: function(el, callback) {
-      $("#map").on("siteSelection", callback);
-    },
-    unsubscribe: function(el) {
-      $("#map").off("siteSelection");
-    }  
-  })
-  Shiny.inputBindings.register(netAssess.shinyBindings.selectedSites);
-  
-  // Input that informs shiny about currently visible monitoring locations. This
-  // really complicated things but was necessary to allow users to remove a 
-  // monitor within an area of interest that they didn't want to affect analysis
-netAssess.shinyBindings.visibleSites = new Shiny.InputBinding();
-  $.extend(netAssess.shinyBindings.visibleSites, {
-    find: function(scope) {
-      return $(scope).find("#visibleSites");
-    },
-    getValue: function(el) {
-      var vs = [];
-      netAssess.layerGroups.sites.eachLayer(function(layer) {
-        if(layer.feature.properties.visible) vs.push(layer.feature.properties.key)
-      })
-      return vs;
-    },
-    subscribe: function(el, callback) {
-      $("#map").on("siteUpdate", callback);
-    },
-    unsubscribe: function(el) {
-      $("#map").off("siteUpdate");
-    }
-  });
-  Shiny.inputBindings.register(netAssess.shinyBindings.visibleSites);
-  
-  // Input that updates when an area served polygon is clicked. Allows shiny to
-  // provide demographic and geographic information about that area, including
-  // the age pyramid plot.
-netAssess.shinyBindings.clickedAreaServed = new Shiny.InputBinding()
-  $.extend(netAssess.shinyBindings.clickedAreaServed, {
-    find: function(scope) {
-      return $(scope).find("#clickedAreaServed");
-    },
-    getValue: function(el) {
-      return $(el).data("clicked");
-    },
-    subscribe: function(el, callback) {
-      $("#map").on("areaClick", callback);
-    },
-    unsubscribe: function(el) {
-      $("#map").off("areaClick");
-    }
-  })
-  Shiny.inputBindings.register(netAssess.shinyBindings.clickedAreaServed);
-  
-  // Input that updates when a monitoring location is selected. This was used
-  // when the demographic/geographic data was handled differently. Still here
-  // in case I need it later.
-netAssess.shinyBindings.monSelect = new Shiny.InputBinding();
-  $.extend(netAssess.shinyBindings.monSelect, {
-    find: function(scope) {
-      return $(scope).find("#monitorSelect")
-    },
-    getValue: function(el) {
-      return $(el).data("monitor");
+      return $(el).data("anchorData");
     },
     setValue: function(el, value) {
-      $(el).data("monitor", value)
+      $(el).data("anchorData", value)
+      $(el).trigger("anchorupdate");
     },
     subscribe: function(el, callback) {
-      $("#map").on("monitorSelect", function(el) {
-        callback();
-      })
+      $(el).on("anchorupdate", callback)
     },
     unsubscribe: function(el) {
-      $(el).off("click.netassess")
+      $(el).off("anchorupdate")
+    },
+    initialize: function(el) {
+      el.updateAnchor = function(data) {
+        $(this).data("shinyInputBinding").setValue(this, data);
+      }    
     }
+    
   })
-  Shiny.inputBindings.register(netAssess.shinyBindings.monSelect);
+Shiny.inputBindings.register(netAssess.shinyBindings.customAnchor);
 
-// Binding to let shiny know what the currently selected area of interest is. 
-// Used for clipping area served polygons.
-netAssess.shinyBindings.areaOfInterest = new Shiny.InputBinding();
-  $.extend(netAssess.shinyBindings.areaOfInterest, {
-    find: function(scope) {
-      return $(scope).find("#areaOfInterest")
-    },
-    getValue: function(el) {
-      return $(el).data("aoi")
-    },
-    subscribe: function(el, callback) {
-      $("#map").on("aoiChange", function(el) {
-        callback();
-      })
-    },
-    unsubscribe: function(el) {
-      $("#map").off("aoiChange");
+Shiny.addCustomMessageHandler("updateVisibleMonitors", function(data) {
+  netAssess.layerGroups.sites.setVisibleSites(data);
+})
+
+Shiny.addCustomMessageHandler("displayPredefinedArea", function(data) {
+  
+  var x = L.featureGroup(null);
+  for(var i = 0; i < data.coords.length; i++) {
+    L.polygon(data.coords[i], {fill: false}).addTo(x)
+  }
+
+	netAssess.draw.disable();
+	netAssess.setAOI(x);
+  
+});
+
+Shiny.addCustomMessageHandler("updateAreaServed", function(data) {
+
+  var areaServed = netAssess.layerGroups.areaServed;
+  areaServed.clearLayers();
+  
+  var areaSelectStyle = {fillColor: '#666', weight: 2, opacity: 0.75, color: 'white', dashArray: '3', fillOpacity: 0.4}
+  
+  for(var i = 0; i < data.length; i++) {
+
+    if(data[i].coords.length == 1) {
+      var a = L.polygon(data[i].coords[0], {id: data[i].id}).addTo(areaServed)
+    } else {
+      var a = L.multiPolygon([data[i].coords], {id: data[i].id}).addTo(areaServed)
     }
-  })
-  Shiny.inputBindings.register(netAssess.shinyBindings.areaOfInterest);
 
-/* Custom Message Handlers */
+  	a.setStyle(areaSelectStyle)
+			.on("mouseover", function(e) {
+				var layer = e.target;
+				layer.setStyle({
+					weight: 5,
+					color: '#666',
+					dashArray: '',
+					fillOpacity: 0.7
+				});
+				if(!L.Browser.id && !L.Browser.opera) {
+					layer.bringToFront();
+          netAssess.layerGroups.sites.bringToFront();
+          netAssess.layerGroups.newSites.bringToFront();
+				}
+			})
+			.on("mouseout", function(e) {
+				e.target.setStyle(areaSelectStyle);
+			})
+			.on("click", function(e) {
+				var layer = e.target;
+				if(layer.hasOwnProperty("options")) {
+          document.getElementById("clickedAreaServed").updateAnchor(layer.options.id);
+				} else if(layer.hasOwnProperty("_options")) {
+          document.getElementById("clickedAreaServed").updateAnchor(layer._options.id);
+				}
+        var $param = $("#paramOfInterest").val();
+        var $thresh = $("#areaServedThreshold");
+        if($param == "44201") {
+          $thresh.html("(" + $("#ozoneNAAQS").val() + ")");
+        } else if(["88101", "88502"].indexOf($param) != -1) {
+          $thresh.html("(35&mu;g/m<sup>3</sup>)");
+        } else {
+          $thresh.html("");
+        }
+        netAssess.floaters.areaServed.open();
+				$("#map").trigger("areaClick")
+			})
+      
+    netAssess.layerGroups.sites.bringToFront();
+    netAssess.layerGroups.newSites.bringToFront();
+    netAssess.loading.hide();
+      
+  }
 
-Shiny.addCustomMessageHandler("displayPredefinedArea", netAssess.setPredefinedArea);
-
-Shiny.addCustomMessageHandler("updateAreaServed", netAssess.updateAreaServed)
-
-Shiny.addCustomMessageHandler("updateVisibleMonitors", netAssess.updateVisibleMonitors)
-
-Shiny.addCustomMessageHandler("areaServedMonitorUpdate", function(data) {
-  netAssess.floaters.areaServed.updateTitle("Area Served - " + data)  
 })
 
 Shiny.addCustomMessageHandler("updateTrendChart", function(data) {
   $(".popup-trend").find("img").attr("src", data)
 })
 
-Shiny.addCustomMessageHandler("triggerEvent", function(data) {
-  $(data.target).trigger(data.event);
-})
-
-Shiny.addCustomMessageHandler("showMapCorrelations", function(data) {
-  netAssess.layerGroups.correlations.clearLayers();
-  netAssess.layerGroups.sites.eachLayer(function(layer) {
-    for(var i = 0; i < layer.feature.properties.key.length; i++) {
-      var index = data.site.indexOf(layer.feature.properties.key[i]);
-      if(index != -1) {
-        var cor = data.cor[index];
-        var ll = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
-        var col = netAssess.corColor(cor);
-        netAssess.layerGroups.correlations.addLayer(L.circleMarker(ll, 
-                                                    {color: col.border,
-                                                    weight: 1.5,
-                                                    fillColor: col.fill, 
-                                                    radius: 10,
-                                                    fillOpacity: 0.5}));
-      }
-    }
-  })
+Shiny.addCustomMessageHandler("biasLayer", function(data) {
+  netAssess.data.biasLayers.push(data);
 })

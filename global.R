@@ -11,6 +11,7 @@ library(Hmisc)    # cormat
 source("R/voronoi.R")
 source("R/agePyramid.R")
 source("R/cormatdb.R")
+
 load("data/tracts.rda")
 load("data/usborder.rda")
 
@@ -18,14 +19,20 @@ options(stringsAsFactors = FALSE)
 
 db <- dbConnect(SQLite(), dbname = "data/netassess.sqlite")
 
+# Create the list object for populating the state dropdown on the area of
+# interest floater
 states <- unique(dbGetQuery(db, "SELECT CODE, NAME FROM states"))
 state.list <- states$CODE
 names(state.list) <- states$NAME
 
+# Create the list object for populating the CBSA dropdown on the area of
+# interest floater
 cbsa <- dbGetQuery(db, "SELECT CODE, NAME FROM cbsas")
 cbsa.list <- cbsa$CODE
 names(cbsa.list) <- cbsa$NAME
 
+# Create the list object for populating the CSA dropdown on the area of interest
+# floater
 csa <- dbGetQuery(db, "SELECT CODE, NAME FROM csas")
 csa.list <- csa$CODE
 names(csa.list) <- csa$NAME
@@ -34,6 +41,9 @@ params <- dbGetQuery(db, "SELECT Parameter_Code, Parameter_Desc FROM params")
 params.list <- params$Parameter_Code
 names(params.list) <- paste(params$Parameter_Code, params$Parameter_Desc, sep = " - ")
 params.list <- c("Choose Parameter of Interest" = -1, params.list)
+
+o3bias <- dbGetQuery(db, "SELECT Key, n, bias_mean, bias_min, bias_max, relbias_mean, relbias_min, relbias_max, Parameter FROM rembias WHERE Parameter = '44201'")
+pmbias <- dbGetQuery(db, "SELECT Key, n, bias_mean, bias_min, bias_max, relbias_mean, relbias_min, relbias_max, Parameter FROM rembias WHERE Parameter IN ('88101', '88502')")
 
 createSites <- function() {
   
@@ -51,7 +61,7 @@ createSites <- function() {
     n <- paste0('"', names(o), '"')
     p <- sapply(o, function(x) {
       if((substr(x, 1, 1) == "[" & substr(x, nchar(x), nchar(x)) == "]") |
-         (substr(x, 1, 1) == "{" & substr(x, nchar(x), nchar(x)) == "}")) {
+           (substr(x, 1, 1) == "{" & substr(x, nchar(x), nchar(x)) == "}")) {
         op <- x
       } else {
         op <- paste0('"', x, '"')
@@ -82,19 +92,19 @@ createSites <- function() {
     }
     key <- jsonArray(key)
     site_id <- jsonArray(site_id, TRUE)
-
+    
     properties <- c(key = key, site_id = site_id, as.list(s[r, c("State_Code", "County_Code", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count")]))
     properties$Street_Address <- gsub("'", "&#039;", properties$Street_Address, fixed = TRUE)
     properties$Street_Address <- gsub('"', "&quot;", properties$Street_Address, fixed = TRUE)
     properties <- jsonObject(properties)
     geometry <- jsonObject(list(type = "Point", coordinates = jsonArray(c(s$Longitude[r], s$Latitude[r]))))
-
+    
     return(jsonObject(list(type = "Feature", geometry = geometry, properties = properties)))
     
   })
   
   write(jsonObject(list(type = "FeatureCollection", features = jsonArray(sites))), file = "www/data/sites.geojson")
-
+  
 }
 
 createSites()
@@ -117,7 +127,7 @@ areaPolygons<- function(spPoly, proj4string = NULL) {
   spP <<- spP
   areas <- lapply(spP@polygons, function(x) {
     list(round(x@area * 3.86101e-7, 0), unlist(strsplit(x@ID, " "))[[1]])
-    }
+  }
   )
   
   areas <- do.call(rbind, areas)
@@ -125,6 +135,3 @@ areaPolygons<- function(spPoly, proj4string = NULL) {
   return(areas)
 }
 
-triggerEvent <- function(session, target, event) {
-  session$sendCustomMessage(type = "triggerEvent", list(target = target, event = event))
-}

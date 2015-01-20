@@ -1,114 +1,79 @@
-<!doctype html>
-
 <html>
-
-	<head>
-
-		<meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  
+  <head>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>NetAssess</title>  
+    
     <script type="application/shiny-singletons"></script>
-	
-		<title>NetAssess</title>
-
+    
     <script src="shared/jquery.js" type="text/javascript"></script>
     <script src="shared/shiny.js" type="text/javascript"></script>
     
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700|Roboto+Condensed:400,700' rel='stylesheet' type='text/css'>
-		
-		<link type = "text/css" rel = "stylesheet" href = "shared/shiny.css" />
-		
+    
+    <link type = "text/css" rel = "stylesheet" href = "shared/shiny.css" />
+  	
+<!--    <link type = "text/css" rel = "stylesheet" href = "css/bootstrap.min.css" />
+    <link type = "text/css" rel = "stylesheet" href = "css/bootstrap-theme.min.css" /> -->
 		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.contextmenu.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.draw.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/L.Control.Sidebar.css" />
 		<link type = "text/css" rel = "stylesheet" href = "css/font-awesome.min.css" />
     <link type = "text/css" rel = "stylesheet" href = "css/select2.css" />
-
-		<link type = "text/css" rel = "stylesheet" href = "css/netassess.css" />
-
-	</head>
-
-	<body class = "loading">
-
-    <div id = 'curtain'></div>
+    <link type = "text/css" rel = "stylesheet" href = "css/floaters.css" />
     
-		<div id = "menu-bar" class = "small">
+    <link type = "text/css" rel = "stylesheet" href = "css/netassess.css" />
     
-      <table class = "title-block">
-  			<tr><td class = "title">NetAssess <span class = "version">v0.3a</span></td></tr>
-  		  <tr><td class = "subtitle" colspan = 3>Ambient Air Monitoring Network Assessment Tool</td></tr>
+  </head>
+  
+  <body>
+  
+<!-- Top menubar that contains title, and most interaction controls-->
+    <div id = "menubar">
+      
+      <table id = "appTitle">
+        <tr>
+          <td class = "title">NetAssess <span class = "version">v0.5b</span></td>
+        </tr>
+        <tr>
+          <td class = "subtitle">Ambient Air Monitoring Network Assessment Tool</td>
+        </tr>
       </table>
       
-      <span class = "right-items">
+      <div id = "menuControls">
         <div class = "menu-bar-item">
-          <select id="expParam"></select>
+          <select id = "paramOfInterest"></select>
         </div>
-        <button class = "menu-bar-button" id = "aoi_button" title = "Set Area of Interest">
-          <i class = "fa fa-crosshairs"></i>
-        </button>
-        <button class = "menu-bar-button" id = "new_site_button" title = "Add New Site">
+        <div id = "aoiButton" class = "menu-bar-item menu-bar-button" title = "Set Area of Interest">
+          <i class = "fa fa-crosshairs"> </i>
+        </div>
+        <div id = "newSiteButton" class = "menu-bar-item menu-bar-button" title = "Add New Site">
           <i class = "fa fa-plus-circle"></i>
-        </button>
-        <span class = "v-divide"></span>
-        <button class = "menu-bar-button action-button" id = "cormatButton" title = "Calculate Correlations">
-          <span style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -5px;">&rho;</span>
-        </button>
-        <button class = "menu-bar-button action-button" id = "areaServedCalcButton" title = "Calculate Area Served">
-          <span class = "valign"><img src = "images/area_served.png" /></span>
-        </button>
-        <button class = "menu-bar-button" id = "removebias" title = "Remove Bias">
-          <i class = "fa fa-birthday-cake"></i>
-        </button>
-        <span class = "v-divide"></span>
-        <button class = "menu-bar-button" id = "aoiZoom" title = "Zoom to Area of Interest">
-          <i class = "fa fa-binoculars"></i>
-        </button>
-        <button class = "menu-bar-button" id = "full_extent" title = "Zoom to Continental US">
-          <span class = "valign"><img src = "images/cont_us.png"></span>
-        </button>
-        <span class = "v-divide"></span>
-        <button class = "menu-bar-button" id = "downloadButton" title = "Download Data Table">
-          <span class = "valign"><img src = "images/csv.png" /></span>
-        </button>
-        <span class = "v-divide"></span>
-        <button class = "menu-bar-button" id = "resetApp" title = "Reset App">
-          <i class = "fa fa-undo"></i>
-        </button>
-      </span>
-		</div>
-    <!-- These divs serve as anchors to bind custom shiny inputs. I haven't
-         found a better way to do this -->
-    <div id = "monitorSelect"></div>
-    <div id = "selectedSites"></div>
-    <div id = "clickedAreaServed"></div>
-    <div id = "visibleSites"></div>
-    <div id = "areaOfInterest"></div>
-    <div id = "newSites"></div>
-    <div id = "popupID"></div>
-    <div id = "correlations"></div>
-    <div id = "trendChart" class = "shiny-plot-output"></div>
-    <a class = "shiny-download-link" id = "downloadData" href = "" target = "_blank">Hi :)</a>
-    <div id = "tutorial" class = "tutorial" style = "display: none;">
-      <div class = "tutorial-body">
-        <div class = "header">Welcome to NetAssess!</div>
-        <div class = "content"></div>
-        <div class = "tutCookie">
-          <input type = "checkbox" id = "tutGone" />
-          <label for = "tutGone">Don't show again</label>
         </div>
-        <button id = "tutNext">Next</button>
-      <div class = "navigation">
-        <a class = 'close icon'><i class = 'fa fa-close'></i></a>
+        <div id = "areaServedButton" class = "menu-bar-item menu-bar-button action-button" title = "Calculate Area Served">
+          <img src = "images/area_served.png" />
+        </div>
+        <div id = "cormatButton" class = "menu-bar-item menu-bar-button action-button" title = "View Correlation Matrix">
+          <span class = "fa" style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -4px;">&rho;</span>
+        </div>
+        <div id = "aoiZoomButton" class = "menu-bar-item menu-bar-button" title = "Zoom to Area of Interest">
+          <i class = "fa fa-binoculars"></i>
+        </div>
+        <div id = "fullExtentButton" class = "menu-bar-item menu-bar-button" title = "Zoom to Continental US">
+          <img src = "images/cont_us.png" />
+        </div>
+        <div id = "downloadDataButton" class = "menu-bar-item menu-bar-button action-button" title = "Download Data">
+          <i class = "fa fa-download"></i>
+        </div>
       </div>
-        
-      </div>
-      <div class = "tutorial-arrow-border"></div>
-      <div class = "tutorial-arrow"></div>  
+      
     </div>
-        
-		<div id = "map"></div>
+    
+<!-- SIDEBARS -->
 
-		<div id = "settings-sb" class = "sidebar">
+  	<div id = "settings-sb" class = "sidebar">
 			<h1><i class="fa fa-cogs  fa-fw"></i>Settings</h1>
       <p>These setting allow you to customize how the NetAssess App works. Please see the Help file for additional information about how these setting will effect the NetAssess App.</p>
       <p class = "header">Area Served</p>
@@ -153,61 +118,28 @@
         </tr>
       </table> 
 		</div>
-		
-		<div id = "help-sb" class = "sidebar">
-			<h1><i class="fa fa-question  fa-fw"></i> Help</h1>
-      <p class = "header">Tour</p>
-      <p>The tour is meant to give you a basic overview of how the app should work</p>
-      <div style = "text-align: center"><button id = "openTour" style = 'text-align: center'>Open Tour</button></div>
-      <p class = "header">Navigation</p>
-      <p>There are many ways to navigate the map in Netassess:</p>
-      <ul>
-        <li><div class = "menu-bar-button" style = "background-color: #2c3e50;"><span class = "valign"><img src = "images/cont_us.png"></span>
-        </div> - Zoom out to view entire continental United States</li>
-        <li><div class = "menu-bar-button" style = "background-color: #2c3e50;"><i class = "fa fa-binoculars"></i></div> - Zoom in to your area of interest</li>
-        <li><i>double-click</i> - Double click the mouse on the map to zoom in and center on that point.</li>
-        <li><i>shift + drag</i> - Hold down <i>shift</i> while clicking and dragging to zoom in on the area covered.</li>
-      </ul>
-		</div>
-		
-		<div id = "about-sb" class = "sidebar">
-			<h1><i class="fa fa-info  fa-fw"></i> About</h1>
-      The NetAssess app was developed by a <a href = "http://www.ladco.org/" target="_blank">LADCO</a> workgroup consisting of people from Indiana, Minnesota, and Michigan. It is an update of and improvement to the <a href = "http://www.epa.gov/ttnamti1/network-assessment.html" target="_blank">original Network Assessment tools</a> developed by Mike Rizzo for the 2010 5-year Network Assessment. This tool is open source and all source code is available on <a href = "https://github.com/LADCO/NetAssessApp" target="_blank">GitHub</a>.
-      <p class = "header">Credits</p>
-      <ul>
-        <li><strong>Eric Bailey</strong> - Web Application, Area Served, and New Sites</li>
-        <li><strong>Nathan Byers</strong> - Exceedence Probabilities</li>
-        <li><strong>Cassie McMahon</strong> - Correlation Matrix</li>
-        <li><strong>Amy Robinson</strong> - Removal of Bias</li>
-      </ul>
-      <p>Special thanks to Donna Kenski for facilitating the creation of this tool.</p>
-      
-      <p class = "header">Software</p>
-      <p>Many different open source software solutions were used to create this application. Please contact <a href = "mailto:ebailey@idem.in.gov">Eric Bailey</a> if you have any questions about how any of this software was used.</p>
-      <ul>
-        <li><a href = "http://www.r-project.org/" target="_blank">R</a></li>
-        <li><a href = "http://shiny.rstudio.com" target="_blank">Shiny</a></li>
-        <li><a href = "http://leafletjs.com/" target="_blank">Leaflet</a></li>
-        <li>...</li>
-      </ul>
-		</div>
-		
-    <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
+
     
-    <div id = "aoi">
-      <p class = "header">Select a geography</p>
-			<p>Use the buttons below to define your own area of interest:</p>
-			<div class = "na-draw-buttons">
-				<button id = "draw_polygon" class = "na-draw-button" title = "Define a Polygon"><img src = "images/glyphicons_096_vector_path_polygon.png" /></button>
-				<button id = "draw_rectangle" class = "na-draw-button" title = "Define a Rectangle"><img src = "images/glyphicons_094_vector_path_square.png" /></button>
-  			<button id = "cancel_draw" class = "na-draw-button" title = "Cancel Drawing"><img src = "images/glyphicons_197_remove.png" /></button>
-			</div>
-			<p class = "header">Select predefined area</p>
-			<p>Select an area type with the radio buttons, then select a specific area from the dropdown menu:</p>
-			<div class = "na-select-area">
-				<div id="areaSelect" class="control-group shiny-input-radiogroup">
+<!-- FLOATERS -->
+
+    <div id = "aoiFloater">
+      <p class = "header">Draw an Area of Interest</p>
+      <p>Use the buttons below to define your own area of interest:</p>
+      <div class = "draw-buttons">
+        <button id = "drawPolygonButton" class = "draw-button" title = "Draw a polygon"><img src = "images/glyphicons_096_vector_path_polygon.png" /></button>
+        <button id = "drawRectangleButton" class = "draw-button" title = "Draw a rectangle"><img src = "images/glyphicons_094_vector_path_square.png" /></button>
+        <button id = "cancelDrawButton" class = "draw-button" title = "Cancel drawing"><img src = "images/glyphicons_197_remove.png" /></button>
+      </div>
+      <div class = "header">Select Predefined Area</div>
+      <p>Select and area type with the radio buttons, then select a specific area from the dropdown menu:</p>
+      <div class = "area-select">
+  			<div id="areaSelect" class="control-group shiny-input-radiogroup">
 				  <label class="control-label" for="areaSelect"><strong>Area Type:</strong></label>
-				  <label class="radio inline">
+				  <label class="radio inline" style = "display: none;">
+					<input type="radio" name="areaSelect" id="areaSelect0" value="None"/>
+					<span></span>
+				  </label>
+          <label class="radio inline">
 					<input type="radio" name="areaSelect" id="areaSelect1" value="State"/>
 					<span>State</span>
 				  </label>
@@ -219,154 +151,228 @@
 					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA" />
 					<span>CSA</span>
 				  </label>
-          <select id="areaSelectSelect"></select><button id = "areaSelectZoom" style = "height: 30px; width: 30px; margin-left: 10px;"><i class="fa fa-binoculars"></i></button>
+          <select id="areaSelectSelect"></select><button id = "areaSelectZoomButton" style = "height: 30px; width: 30px; margin-left: 10px;"><i class="fa fa-binoculars"></i></button>
         </div>
+      </div>
     </div>
-  </div>
     
-  <div id = "areainfo">
-    <p class = "header">Parameter</p>
-    <div id = "areaServedParameter" class = "shiny-html-output area-info-text"></div>
-    <div class = "floater-rollup">
+    <div id = "newSiteFloater">
+      <table style = "margin-top: 15px;">
+        <tr>
+          <td><label for = "nsName">Site Name</label></td>
+          <td><input type = "text" name = "nsName" id = "nsName" /></td>
+        </tr>
+      </table>
+      <p class = "header">Location</p>
+      <table>
+        <tr>
+          <td><label for = "nsLat">Latitude</label></td>
+          <td><input type = "text" name = "nsLat" id = "nsLat" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsLng">Longitude</label></td>
+          <td><input type = "text" name = "nsLng" id = "nsLng" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsState">State</label></td>
+          <td><input type = "text" name = "nsState" id = "nsState" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsCounty">County</label></td>
+          <td><input type = "text" name = "nsCounty" id = "nsCounty" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsCensus">Census Tract</label></td>
+          <td><input type = "text" name = "nsCensus" id = "nsCensus" /></td>
+        </tr>
+      </table>
+      
+      <p class = "header" style = "margin-bottom: 10px;">Parameters</p>
+      
+      <select id = "newSiteParameters" multiple size = 4></select>
+      
+      <button style = "float: right; margin-top: 10px;" id = "newSiteAddButton">Add Site</button>
+      <button style = "float: right; margin-top: 10px;" id = "cancelSiteAddButton">Cancel</button>
+      
+    </div>
+        
+    <div id = "areaServedFloater">
+      <p class = "header">Monitor</p>
+      <div id = "areaServedMonitor" class = "shiny-html-output area-info-text"></div>
+      <p class = "header">Parameter</p>
+      <div id = "areaServedParameter" class = "shiny-html-output area-info-text"></div>
       <p class = "header">Geography</p>
-      <div>
-        <div id = "areaServed" class = "shiny-html-output area-info-text"></div>
-      </div>
-    </div>
-    
-    <div class = "floater-rollup">
+      <div id = "areaServedArea" class = "shiny-html-output area-info-text"></div>
       <p class = "header">Demographics</p>
-      <div style = "padding-bottom: 10px;">
-        <div id = "totalPopServed" class = "shiny-html-output area-info-text"></div>
-        <div id = "agePlot"        class = "shiny-plot-output" style="width: 175px; height: 200px; text-align: center; display: inline-block; float: left;"></div>
-        <div id = "racePlot"       class = "shiny-plot-output" style="width: 175px; height: 200px; text-align: center; display: inline-block; float: right;"></div>          
-      </div>
+      <div id = "areaServedPopulation" class = "shiny-html-output area-info-text"></div>
+      <div id = "areaServedAgePlot" class = "shiny-plot-output" style = "width: 175px; height: 200px; text-align: center; display: inline-block; float: left"></div>
+      <div id = "areaServedRacePlot" class = "shiny-plot-output" style = "width: 175px; height: 200px; text-align: center; display: inline-block; float: right"></div>
+      <p class = "header">Exceedence Probability <span id = "areaServedThreshold">75ppb</span></p> 
+      <div id = "naaqsProb" class = "shiny-html-output area-info-text"></div>
+    </div>
+        
+    <div id = "cormatFloater">
+      <div id = "cormatChart" class = "shiny-plot-output" style = 'width: 100%; margin-top: 15px;'></div>
+      <p style = "font-size: 0.65em;">To save chart, right-click and select <i>Save Image as</i></p>
     </div>
     
-    <div class = "floater-rollup" id = "exProb">
-      <p class = "header">Exceedence Probability <span id = "areaServedThreshold">75ppb</span></p>
-      <div>
-        <div id = "naaqsProb" class = "shiny-html-output area-info-text"></div>
-      </div>
+    <div id = "popupFloater">
+      <img id = "bigChart" style = 'width: 100%; margin-top: 15px;' />
+      <p style = "font-size: 0.65em;">To save chart, right-click and select <i>Save Image as</i></p>
     </div>
     
-  </div>
-    
-  <div id = "cormat">
-    <p class = "header">
-      Correlation Matrix
-      <a class = "shiny-download-link img-download-link" id = "downloadCorMat" title = "Download Correlation Matrix Data" href = "" target = "_blank">
-        <i class = "fa fa-download img-download-icon"></i>
-      </a>
-    </p>
-    <div id = "corplot" class = "shiny-plot-output" style = "width: 100%; text-align: center;"></div>
-    <p style = "font-size: 0.75em">To save chart, right click and select <i>Save Image As</i></p>
-  </div>
-    
-  <div id = "new_site">
-    <table>
-      <tr>
-        <td><label for = "ns_name">Site Name</label></td>
-        <td><input type = "text" name = "ns_name" id = "ns_name" /></td>
-      </tr>
-    </table>
-    <p class = "header">Location</p>
-    <table>
-      <tr>
-        <td><label for = "ns_lat">Latitude</label></td>
-        <td><input type = "text" name = "ns_lat" id = "ns_lat" /></td>
-      </tr>
-      <tr>
-        <td><label for = "ns_lng">Longitude</label></td>
-        <td><input type = "text" name = "ns_lng" id = "ns_lng" /></td>
-      </tr>
-      <tr>
-        <td><label for = "ns_state">State</label></td>
-        <td><input type = "text" name = "ns_state" id = "ns_state" /></td>
-      </tr>
-      <tr>
-        <td><label for = "ns_county">County</label></td>
-        <td><input type = "text" name = "ns_county" id = "ns_county" /></td>
-      </tr>
-      <tr>
-        <td><label for = "ns_census">Census Tract</label></td>
-        <td><input type = "text" name = "ns_census" id = "ns_census" /></td>
-      </tr>
-    </table>
-    <p class = "header" style = "margin-bottom: 10px;">Parameters</p>
-    <select id = "new_site_parameters" multiple size = 4></select>
-    <button style = "float: right; margin-top: 10px;" id = "new_site_add">Add Site</button>
-    <button style = "float: right; margin-top: 10px;" id = "cancel_site_add">Cancel</button>
-  </div>
-    
-  <div id = "popup">
-    <img id = "big-chart" style = "width: 100%;"></img>
-    <p style = "font-size: 0.75em">To save chart, right click and select <i>Save Image As</i></p>
-  </div>
-    
-  <div id = "legend">
-    <table>
-      <tr>
-        <td style = "text-align: center"><div class = "site-icon" style = "display: inline-block; margin-top: auto !important; margin-left: auto !important;"></div></td>
-        <td>Existing Site</td>
-        <td><div class = "site-icon selected" style = "display: inline-block; margin-top: auto !important; margin-left: auto !important;"></div></td>
-        <td>Existing Site (selected)</td>
-      </tr>
-      <tr>
-        <td><div class = "new-site-icon" style = "display: inline-block; margin-top: auto !important; margin-left: auto !important;"></div></td>
-        <td>New Site</td>
-        <td><div class = "new-site-icon selected" style = "display: inline-block; margin-top: auto !important; margin-left: auto !important;"></div></td>
-        <td>New Site (selected)</td>
-      </tr>
-      <tr>
-        <td>
-          <svg width = "25" height = "25">
-            <rect x = "5" y = "5" width = "16" height = "16" fill-opacity="0.2" fill="#0033ff" stroke-width="4" stroke-opacity="0.5" stroke="#0033ff" stroke-linecap="round" stroke-linejoin="round"></rect>
-          </svg>
-        </td>
-        <td>Area of Interest</td>
-        <td>
-          <svg width = "25" height = "25">
-            <rect x = "5" y = "5" width = "16" height = "16" fill-opacity="0.4" fill="#666" stroke-width="2" stroke-opacity="0.75" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3"></rect>
-          </svg>
-        </td>
-        <td>Area Served Polygon</td>
-      </tr>
-      
-      <tr>
-        <td colspan = "4" style = "text-align: left; padding-top: 5px; border-top: solid 1px black;">Exceedence Probability</td>
-      </tr>
-      <tr>
-        <td colspan = "4" style = "text-align: left"><img src = "images/probLegend.png" /></td>
-      </tr>
-    </table>
-    
-    
-    
-  </div>
-      
-  <div id = "alert">
-    <div id = "alert-heading">Heading</div>
-    <span id = "alert-body">Main Body of Alert</span>
-    <a id = 'alert-close'><i class = 'fa fa-close'></i></a>
-  </div>
-<!--  <script>L_PREFER_CANVAS = true;</script> -->
-  <script src = "js/leaflet.js"></script>
-	<script src = "js/esri-leaflet.js"></script>
-	<script src = "js/leaflet.draw.js"></script>
-	<script src = "js/leaflet.contextmenu.js"></script>
-	<script src = "js/L.Control.Sidebar.js"></script>
-	<script src = "js/easy-button.js"></script>
-	<script src = "js/select2.min.js"></script>
-  <script src = "js/floaters.js"></script>
-  
-  <script src = "js/netassess-setup.js"></script>
-  <script src = "js/netassess-shiny.js"></script>
-	<script src = "js/netassess.js"></script>
-  <script src = "js/netassess-events.js"></script>
-  
-  <script src = "js/tutorial.js"></script>
+    <div id = "legendFloater" style = "padding-bottom: 5px;">
+      <table style = "margin-top: 10px;">
+        <tr>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="4" cx = 12 cy = 12 fill-opacity="0.67" fill="#800000" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>Existing Site</td>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="5" cx = 12 cy = 12 fill-opacity="0.67" fill="#FF4040" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>Existing Site (selected)</td>
+        </tr>
+        <tr>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="4" cx = 12 cy = 12 fill-opacity="0.67" fill="#008000" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>New Site</td>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="5" cx = 12 cy = 12 fill-opacity="0.67" fill="#40FF40" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>New Site (selected)</td>
+        </tr>
+        <tr>
+          <td>
+            <svg width = "24" height = "24">
+              <rect x = "5" y = "5" width = "16" height = "16" fill-opacity="0.2" fill="#0033ff" stroke-width="4" stroke-opacity="0.5" stroke="#0033ff" stroke-linecap="round" stroke-linejoin="round"></rect>
+            </svg>
+          </td>
+          <td>Area of Interest</td>
+          <td>
+            <svg width = "25" height = "25">
+              <rect x = "5" y = "5" width = "16" height = "16" fill-opacity="0.4" fill="#666" stroke-width="2" stroke-opacity="0.75" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3"></rect>
+            </svg>
+          </td>
+          <td>Area Served Polygon</td>
+        </tr>
+        <tr id = "probLegend" style = 'display: none'>
+          <td colspan = "4" style = "text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;">
+            Exceedence Probability
+            <img src = "images/probLegend.png" />  
+          </td>
+        </tr>
 
+        <tr id = "biasLegend" style = "display: none">
+          <td colspan = "4" style = 'text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;'>
+            Removal Bias
+            <svg xmlns="http://www.w3.org/2000/svg" width = "100%" height = 40 style = "font-size: 12px;">
+              <linearGradient x1="0%" y1="0%" x2="100%" y2="0%" id="biasgrad">
+                <stop stop-color="rgba(0, 0, 255, 0.5)" offset="0"/>
+                <stop stop-color="rgba(255, 255, 255, 0.5)" offset="0.5"/>
+                <stop stop-color="rgba(255, 0, 0, 0.5)" offset="1"/>
+              </linearGradient>
+              <rect width="100%" height="20" fill="url(#biasgrad)" style = "stroke: black; stroke-width: 1.5px; shape-rendering: crispEdges"/>
+              <text x = 0 y = 35 text-anchor = "start">Negative Bias</text>
+              <text x = "50%" y = 35 text-anchor = "middle">No Bias</text>
+              <text x = "100%" y = 35 text-anchor = "end">Positive Bias</text>
+            </svg>
+          </td>
+        </tr>
+      </table>
+    </div>
+    
+    <div id = "downloadFloater">
+      <p>Click the icon next to the data type you want to download.</p>
+      <table border = 0 style = "margin: 10 auto;">
+        <tr class = "disabled" style = "border-top: solid black 1px;">
+          <td>
+            <a id = "sitesDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Site Data
+          </td>
+        </tr>
+        <tr class = "disabled">
+          <td>
+            <a id = "areaServedDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Area Served Data
+          </td>
+        </tr>
+        <tr class = "disabled">
+          <td>
+            <a id = "correlationDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Correlation Data
+          </td>
+        </tr>
+        <tr class = "disabled">
+          <td>
+            <a id = "removalBiasDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Removal Bias Data
+          </td>
+        </tr>
+      </table>
+    </div>
+        
+<!-- The div that leaflet uses to display the map -->
+    <div id = "map" class = "closed"></div>
+    
+    <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
+    <div id = "alert">
+      <div id = "alert-heading"></div>
+      <span id = "alert-body"></span>
+      <a id = 'alert-close'><i class = 'fa fa-close'></i></a>
+    </div>
+    
+<!-- Custom Input Anchors for shiny -->
+    <div id = "selectedSites" class = "shiny-custom-anchor"></div>
+    <div id = "visibleSites" class = "shiny-custom-anchor"></div>
+    <div id = "newSites" class = "shiny-custom-anchor"></div>
+    <div id = "areaOfInterest" class = "shiny-custom-anchor"></div>
+    <div id = "visibleNewSites" class = "shiny-custom-anchor"></div>
+    <div id = "selectedNewSites" class = "shiny-custom-anchor"></div>
+    <div id = "clickedAreaServed" class = "shiny-custom-anchor"></div>
+    <div id = "popupID" class = "shiny-custom-anchor"></div>
+    
+<!-- Persistent img for shiny to send the trend graphs to -->
+    <div id = "trendGraph" class = "shiny-plot-output" style = "background: red; width: 100px; height: 100px; z-index: 100;"></div>
+    
   </body>
-
+  
+  <script>var netAssess = {}</script>
+  <script src = "js/leaflet.js"></script>
+  <script src = "js/esri-leaflet.js"></script>
+  <script src = "js/leaflet.draw.js"></script>
+  <script src = "js/leaflet.contextmenu.js"></script>
+  <script src = "js/easy-button.js"></script>
+  <script src = "js/L.Control.Sidebar.js"></script>
+  <script src = "js/netassess-leaflet.js"></script>
+  <script src = "js/netassess-shiny.js"></script>
+  <script src = "js/floaters.js"></script>
+  <script src = "js/select2.min.js"></script>
+  <script src = "js/netassess.js"></script>
+  
 </html>

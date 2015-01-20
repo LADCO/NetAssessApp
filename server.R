@@ -1,70 +1,106 @@
 library(shiny)
 
 shinyServer(function(input, output, session) {
-#  options(shiny.trace=TRUE)
-#### Functions for controlling parameter selection
   
-  values <- reactiveValues();
+  values <- reactiveValues()
   
-  # Populate the parameter selection dropdown  
-  updateSelectInput(session, "expParam", choices = params.list)
-  updateSelectInput(session, "new_site_parameters", choices = params.list[2:length(params.list)])
+  updateSelectInput(session, "paramOfInterest", choices = params.list)
+  updateSelectInput(session, "newSiteParameters", choices = params.list[2:length(params.list)])
   
-  # Contains a list of sites based on the currently selected parameter
-  sites <- reactive({
-    if(!is.null(input$expParam)) {
-      if(input$expParam != -1) {
-        site.list <- dbGetQuery(db, paste0("SELECT sites.* FROM sites JOIN monitors ON sites.Key =  monitors.Site_Key WHERE monitors.PARAMETER = ", input$expParam))
-        return(site.list)
-      } else {return(NULL)}
-    } else {return(NULL)}
-  })
-  
-  visibleNewSites <- reactive({
-    new_sites <- input$newSites$data
-    if(length(new_sites) > 0) {
-      vns <- data.frame(stringsAsFactors = FALSE)
-      for(i in seq(length(new_sites))) {
-        n <- new_sites[[i]]
-        if(n$visible == TRUE) {
-          vns <- rbind(vns, c(n$lat, n$lng, n$key, n$selected, n$name))
-        }
+  # Produce a dataframe of sites that monitor for the selected Parameter of
+  # Interest
+  parameterSites <- reactive({
+    site.list <- NULL
+    if(!is.null(input$paramOfInterest)) {
+      if(input$paramOfInterest != -1) {
+        site.list <- dbGetQuery(db, paste0("SELECT sites.* FROM sites JOIN monitors ON sites.Key = monitors.Site_Key WHERE monitors.PARAMETER = ", input$paramOfInterest))
       }
-      
-      colnames(vns) <- c("Latitude", "Longitude", "Key", "selected", "name")
-      vns$Latitude <- as.numeric(vns$Latitude)
-      vns$Longitude <- as.numeric(vns$Longitude)
-      vns$selected <- as.logical(vns$selected)
-      return(vns)
     }
+    return(site.list)
   })
   
-  selectedNewSites <- reactive({
-    vns <- visibleNewSites()
-    return(vns[vns$selected, ])
+  newSites.df <- reactive({
+    newSites <- input$newSites
+    if(length(newSites) > 0) {
+      newdf <- data.frame()
+      for(i in seq(length(newSites))) {
+        
+        dr <- c(newSites[[i]]$key, newSites[[i]]$lat, newSites[[i]]$lng)
+        newdf <- rbind(newdf, dr)
+        
+      }
+      colnames(newdf) <- c("Key", "Latitude", "Longitude")
+      return(newdf)
+    } else {
+      return(NULL)
+    }
+    
   })
   
   visibleSites <- reactive({
+    sites <- parameterSites()
+    ss <- NULL
+    sns <- NULL
+    if(!is.null(sites)) {
+      ss <- sites[sites$Key %in% input$visibleSites, c("Key", "Latitude", "Longitude")]
+    }
+    newSites <- newSites.df()
+    if(!is.null(newSites)) {
+      sns <- newSites[newSites$Key %in% input$visibleNewSites, ]
+      ss <- rbind(ss, sns)
+    }
     
-    return(sites()[sites()$Key %in% input$visibleSites, ])
+    return(ss)
     
   })
-
-  # Send a custom message to update visible monitors based on parameter selection
+  
+  activeSites <- reactive({
+    selSites <- input$selectedSites
+    visSites <- input$visibleSites
+    actSites <- intersect(selSites, visSites)
+    return(actSites)
+  })
+  
+  activeNewSites <- reactive({
+    selSites <- input$selectedNewSites
+    visSites <- input$visibleNewSites
+    actSites <- intersect(selSites, visSites)
+    return(actSites)  
+  })
+  
+  areaOfInterest <- reactive({
+    
+    aoi <- input$areaOfInterest[[1]]
+    if(is.null(names(aoi[[1]]))) {
+      polygons <- lapply(aoi, function(p) {
+        m <- matrix(as.numeric(do.call(rbind, p)), ncol = 2)
+        m <- rbind(m, m[1, ])
+        m <- m[, c(2, 1)]
+        Polygon(coords = m, hole = FALSE)
+      })
+    } else {
+      m <- matrix(as.numeric(do.call(rbind, aoi)), ncol = 2)
+      m <- rbind(m, m[1, ])
+      m <- m[, c(2, 1)]
+      polygons <- list(Polygon(coords = m, hole = FALSE))
+    }
+    polygons <- SpatialPolygons(list(Polygons(polygons, "aoi")))
+    aoi <<- polygons
+    return(polygons)
+    
+  })
+  
+  # Send a custom messages to display sites that monitor the selected parameter
   observe({
-    if(!is.null(sites())) {
-      keys <- unique(sites()$Key)
+    if(!is.null(parameterSites())) {
+      keys <- unique(parameterSites()$Key)
     } else {
       keys <- list()
     }
-    session$sendCustomMessage(type="updateVisibleMonitors", keys)
+    session$sendCustomMessage(type = "updateVisibleMonitors", keys)
   })
   
-#### Functions for controlling the Area of Interest Selection
-
-  # Observer to update predefined area select input based on Area Type
   observe({
-    
     if(!is.null(input$areaSelect)) {
       
       if(input$areaSelect=="State") {
@@ -76,98 +112,84 @@ shinyServer(function(input, output, session) {
       } else {
         choices = c("")
       }
-      
-      updateSelectInput(session, "areaSelectSelect", choices = choices)
+
+      updateSelectInput(session, "areaSelectSelect", choices = choices)    
       
     }
-    
   })
-
-  # Send the geometry for a predefined area selection
+  
   observe({
-    
-    if(!is.null(input$areaSelectSelect)) {
-      
+
+    if(!is.null(input$areaSelectSelect) && input$areaSelectSelect != "") {
       type <- toupper(isolate(input$areaSelect))
-      
       src <- switch(type, STATE = "states", CBSA = "cbsas", CSA = "csas")
-      
       q <- paste0("SELECT GEOMETRY FROM ", src, " WHERE CODE = '", input$areaSelectSelect, "'")
-      
       coords <- eval(parse(text = dbGetQuery(db, q)[1,1]))
-      
-      session$sendCustomMessage(type="displayPredefinedArea", list(properties = list(name = "test", type = type, id = input$areaSelectSelect), coords = coords))
-      
+      session$sendCustomMessage(type="displayPredefinedArea", list(properties = list(name = "test", type = type, id = input$areaSelectSelect), coords = coords))  
     }
     
   })
 
-##### Area Served Functions
+## Area Served ##
 
   selectedSites <- reactive({
-
-      sites <- sites()
-      if(!is.null(sites)) {
-        ss <- sites[sites$Key %in% input$selectedSites, c("Key", "Latitude", "Longitude")]
-        if(nrow(ss) == 0) {ss <- NULL}
-      } else {
-        ss <- NULL
-      }
-
-      return(ss)
+    
+    sites <- parameterSites()
+    ss <- NULL
+    sns <- NULL
+    if(!is.null(sites)) {
+      ss <- sites[sites$Key %in% activeSites(), c("Key", "Latitude", "Longitude")]
+    }
+    newSites <- newSites.df()
+    if(!is.null(newSites)) {
+      sns <- newSites[newSites$Key %in% activeNewSites(), ]
+      ss <- rbind(ss, sns)
+    }
+    
+    return(ss)
     
   })
 
   selectedNeighbors <- reactive({
-
+    
     ss <- selectedSites()
-    ss <<- ss
-    nss <- selectedNewSites()[, c("Key", "Latitude", "Longitude")]
-    nss <<- nss
-    sss <- isolate(visibleSites()[, c("Key", "Latitude", "Longitude")])
-    sss <<- sites
-    newsites <- isolate(visibleNewSites()[, c("Key", "Latitude", "Longitude")])
-    newsites <<- newsites
-    
-    ss <- rbind(ss, nss)
-    sites <- rbind(sss, newsites)
 
+    all.sites <- visibleSites()
     
-    
-    if(!is.null(ss)) {
-        
+    if(!is.null(ss) && nrow(ss) != 0) {
+      
       us.lats <- c(24.4, 49.4)
       us.lngs <- c(-124.8, -66.9)
-      
+
       lats <- range(ss$Latitude)
       lngs <- range(ss$Longitude)
-      
+
       lat.rng <- max(abs(lats[2] - lats[1]), 1)
       lng.rng <- max(abs(lngs[2] - lngs[1]), 1)
-          
+
       gtG <- FALSE
       
       while(!gtG) {
         
         lats.test <- c(lats[1] - lat.rng, lats[2] + lat.rng)
         lngs.test <- c(lngs[1] - lng.rng, lngs[2] + lng.rng)
-        
+
         # Test if us border has been reach in any cardinal direction
         bounds <- list(north = lats.test[2] >= us.lats[2],
                        south = lats.test[1] <= us.lats[1],
                        east =  lngs.test[2] >= us.lngs[2],
                        west =  lngs.test[1] <= us.lngs[1])
 
-        neighbors <- unique(sites[sites$Latitude >= lats.test[1] & 
-                                  sites$Latitude <= lats.test[2] & 
-                                  sites$Longitude >= lngs.test[1] & 
-                                  sites$Longitude <= lngs.test[2], ])
+        neighbors <- unique(all.sites[all.sites$Latitude >= lats.test[1] & 
+                                    all.sites$Latitude <= lats.test[2] & 
+                                    all.sites$Longitude >= lngs.test[1] & 
+                                    all.sites$Longitude <= lngs.test[2], ])
 
         if(!bounds$north) {
           n <- neighbors[neighbors$Latitude > lats[2], ]
           bounds$north <- (sum(n$Longitude > lngs[2]) > 0 &
-                           sum(n$Longitude < lngs[1]) > 0 &
-                           sum(n$Longitude < lngs[2] & n$Longitude > lngs[1]) > 0)
+                             sum(n$Longitude < lngs[1]) > 0 &
+                             sum(n$Longitude < lngs[2] & n$Longitude > lngs[1]) > 0)
         }
         if(!bounds$south) {
           n <- neighbors[neighbors$Latitude < lats[1], ]
@@ -178,8 +200,8 @@ shinyServer(function(input, output, session) {
         if(!bounds$east) {
           n <- neighbors[neighbors$Longitude > lngs[2], ]
           bounds$east <- (sum(n$Latitude > lats[2]) > 0 &
-                             sum(n$Latitude < lats[1]) > 0 &
-                             sum(n$Latitude < lats[2] & n$Latitude > lats[1]) > 0)
+                            sum(n$Latitude < lats[1]) > 0 &
+                            sum(n$Latitude < lats[2] & n$Latitude > lats[1]) > 0)
         }
         if(!bounds$west) {
           n <- neighbors[neighbors$Longitude < lngs[1], ]
@@ -187,14 +209,14 @@ shinyServer(function(input, output, session) {
                             sum(n$Latitude < lats[1]) > 0 &
                             sum(n$Latitude < lats[2] & n$Latitude > lats[1]) > 0)
         }
-        
+
         gtG <- bounds$north & bounds$south & bounds$east & bounds$west
-              
+        
         lat.rng <- lat.rng * 2
         lng.rng <- lng.rng * 2
         
       }
-      
+
       neighbors <- neighbors[!duplicated(neighbors[, c("Latitude", "Longitude")]), ]
       v <- deldir(neighbors$Longitude, neighbors$Latitude)
       x <- v$delsgs
@@ -202,24 +224,22 @@ shinyServer(function(input, output, session) {
       x$ind2 <- neighbors$Key[x$ind2]
       x <- x[x$ind1 %in% ss$Key | x$ind2 %in% ss$Key, ]
       x <- unique(c(x$ind1, x$ind2))
-    
       return(neighbors[neighbors$Key %in% x, ])
-    
+            
     }
     
   })
 
   polygons <- reactive({
     
-    input$areaServedCalcButton
+    input$areaServedButton
     
     ss <- isolate(selectedSites())
-    nss <- isolate(selectedNewSites()[, c("Key", "Latitude", "Longitude")])
-    ss <- rbind(ss, nss)
-    if(!is.null(nrow(ss))) {
+
+    if(!is.null(ss) && nrow(ss) != 0) {
       
       sn <- isolate(selectedNeighbors())
-      
+
       # Update this variable to reflect the probability columns present in the tracts dataset
       probability.columns <- c("ozone_prob_75", "ozone_prob_70", "ozone_prob_65", "pm_prob_35")
       prob.bin <- function(values) {
@@ -246,20 +266,21 @@ shinyServer(function(input, output, session) {
         
       }
       
-      if(!is.null(ss)) {
+      if(!is.null(ss) && nrow(ss) != 0) {
         if(nrow(ss) <= 400 & nrow(sn) >= 2) {
-          if(input$areaServedClipping == "none") {
-            v <- voronoi(sn$Key, sn$Latitude, sn$Longitude)
-          } else {
-            if(input$areaServedClipping == "border") {
-              b <- usborder
-            } else {
-              b <- areaOfInterest()
-            }
-            v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
-          }
-          v <- subset(v, id %in% ss$Key)
+         if(input$areaServedClipping == "none") {
+           v <- voronoi(sn$Key, sn$Latitude, sn$Longitude)
+         } else {
+           if(input$areaServedClipping == "border") {
+             b <- usborder
+           } else {
+             b <- areaOfInterest()
+           }
+           v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
+         }
 
+          v <- subset(v, id %in% ss$Key)
+          
           ov <- over(tracts, v)
           t <- cbind(as.data.frame(tracts), ov)
           t <- t[!is.na(t$id), ]
@@ -269,7 +290,7 @@ shinyServer(function(input, output, session) {
           d2 <- aggregate(t[, probability.columns], by = list(as.character(t$id)), FUN = prob.bin)
           proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
           area <- areaPolygons(v, CRS("+init=epsg:2163")) 
-
+          
           v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, d2, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
@@ -281,79 +302,55 @@ shinyServer(function(input, output, session) {
       } else {
         v <- NULL
       }
-
+      
       return(v)
+      
     }
+  
   })
 
   observe({
+    
     if(!is.null(polygons())) {
       polygons <- polygons()
       v <- lapply(seq(nrow(polygons)), function(i) {
         list(id = unlist(strsplit(polygons@polygons[[i]]@ID, " "))[1], 
              coords = lapply(polygons@polygons[[i]]@Polygons, function(pp) {
-                coords <- pp@coords
-                apply(coords, 1, function(r) {
-                  list(lat = r[[2]], lng = r[[1]])
-                })
-              })
+               coords <- pp@coords
+               apply(coords, 1, function(r) {
+                 list(lat = r[[2]], lng = r[[1]])
+               })
+             })
         )
       })
       session$sendCustomMessage(type = "updateAreaServed", v)
     }
+    
   })
 
+  selectedParameter <- reactive({
+    return(list(code = input$paramOfInterest, name = params$Parameter_Desc[params$Parameter_Code == input$paramOfInterest]))
+  })
+  
   areaServedMonitor <- reactive({
     monkey <- as.numeric(input$clickedAreaServed)
     if(length(monkey) > 0) {
       if(monkey < 90000) {
-        sites <- isolate(sites())
+        sites <- isolate(parameterSites());
         mon <- sites[sites$Key %in% monkey, ]
         mon <- sprintf("%02i-%03i-%04i", mon$State_Code, mon$County_Code, mon$Site_ID)
       } else {
-        sites <- isolate(visibleNewSites())
-        mon <- paste(sites[sites$Key %in% monkey, "name"], "(New Site)")
+        mon <- paste(input$newSites[monkey]$properties$name, "(New Site)")
       }
       return(mon)
     }
-  })
-
-  selectedParameter <- reactive({
-    return(list(code = input$expParam, name = params$Parameter_Desc[params$Parameter_Code == input$expParam]))
   })
 
   output$areaServedParameter <- renderText({
     selectedParameter()$name
   })
 
-  output$areaServedMonitor <- renderText({
-    areaServedMonitor()
-  })
-
-  areaOfInterest <- reactive({
-    
-    aoi <- input$areaOfInterest
-    aoi <- aoi[[1]]
-    if(is.null(names(aoi[[1]]))) {
-      polygons <- lapply(aoi, function(p) {
-        m <- matrix(as.numeric(do.call(rbind, p)), ncol = 2)
-        m <- rbind(m, m[1, ])
-        m <- m[, c(2, 1)]
-        Polygon(coords = m, hole = FALSE)
-      })
-    } else {
-      m <- matrix(as.numeric(do.call(rbind, aoi)), ncol = 2)
-      m <- rbind(m, m[1, ])
-      m <- m[, c(2, 1)]
-      polygons <- list(Polygon(coords = m, hole = FALSE))
-    }
-    polygons <- SpatialPolygons(list(Polygons(polygons, "aoi")))
-    return(polygons)
-    
-  })
-
-  output$areaServed <- renderText({
-    input$clickedAreaServed
+  output$areaServedArea <- renderText({
     polygons <- polygons()
     if(!is.null(polygons)) {
       data <- polygons@data
@@ -366,7 +363,38 @@ shinyServer(function(input, output, session) {
     return(txt)
   })
 
-  output$totalPopServed <- renderText({
+  output$areaServedMonitor <- renderText({
+    areaServedMonitor()
+  })
+
+  output$naaqsProb <- renderText({
+    
+    data <- as.data.frame(polygons())
+    data <- data[data$id == input$clickedAreaServed, ]
+    
+    prob <- "Not Available"
+    
+    if(!is.null(input$paramOfInterest)) {
+    
+      if(input$paramOfInterest == 44201) {
+        if(input$ozoneNAAQS == "65ppb") {
+          prob <- data$ozone_prob_65[1]
+        } else if(input$ozoneNAAQS == "70ppb") {
+          prob <- data$ozone_prob_70[1]
+        } else {
+          prob <- data$ozone_prob_75[1]
+        }
+        prob <- paste0("<b>Maximum Probability</b>: ", prob)
+      } else if(input$paramOfInterest %in% c(88101, 88502)) {
+        prob <- paste0("<b>Maximum Probability</b>: ", data$pm_prob_35[1])
+      }
+    }
+    
+    return(prob)    
+    
+  })
+
+  output$areaServedPopulation <- renderText({
     input$clickedAreaServed
     polygons <- polygons()
     if(!is.null(polygons)) {
@@ -378,36 +406,12 @@ shinyServer(function(input, output, session) {
     return(txt)
   })
 
-  observe({
-    session$sendCustomMessage(type = "areaServedMonitorUpdate", areaServedMonitor())
-  })
-
-  observe({
-    site <- input$correlations
-    parameter <- isolate(input$expParam)
-    sites <- isolate(selectedSites()$Key)
-    if(!is.null(parameter)) {
-      sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ") AND (site1 = ", site, " OR site2 = ", site, ")")
-      q <- dbGetQuery(db, sql)
-      q$site1 <- sapply(seq(nrow(q)), function(i) {
-        if(q$site1[i] == site) {
-          return(q$site2[i])
-        } else {
-          return(q$site1[i])
-        }
-      })
-      q <- q[, c("site1", "cor")]
-      colnames(q) <- c("site", "cor")
-      session$sendCustomMessage(type = "showMapCorrelations", q)
-    }
-  })
-
-  output$agePlot <- renderPlot({
+  output$areaServedAgePlot <- renderPlot({
     
     input$clickedAreaServed
-
+    
     if(!is.null(input$clickedAreaServed)) {
-      p <- params$Parameter_Desc[params$Parameter_Code == input$expParam]
+      p <- params$Parameter_Desc[params$Parameter_Code == input$paramOfInterest]
       title <- paste0(p, " - Area Served by ", areaServedMonitor())
       gg <- agePyramid(polygons()@data, input$clickedAreaServed) + ggtitle(title)
       suppressWarnings(print(gg))
@@ -415,29 +419,7 @@ shinyServer(function(input, output, session) {
     }
   }, width = 788, height = 900)
 
-  output$naaqsProb <- renderText({
-
-    if(!is.null(input$expParam)) {
-      data <- as.data.frame(polygons())
-      data <- data[data$id == input$clickedAreaServed, ]
-      prob <- "Not Available"
-      if(input$expParam == 44201) {
-        if(input$ozoneNAAQS == "65ppb") {
-          prob <- data$ozone_prob_65[1]
-        } else if(input$ozoneNAAQS == "70ppb") {
-          prob <- data$ozone_prob_70[1]
-        } else {
-          prob <- data$ozone_prob_75[1]
-        }
-        prob <- paste0("<b>Maximum Probability</b>: ", prob)
-      } else if(input$expParam %in% c(88101, 88502)) {
-        prob <- paste0("<b>Maximum Probability</b>: ", data$pm_prob_35[1])
-      }
-      return(prob)
-    }
-  })
-
-  output$racePlot <- renderPlot({
+  output$areaServedRacePlot <- renderPlot({
     
     input$clickedAreaServed
     
@@ -447,8 +429,8 @@ shinyServer(function(input, output, session) {
       data <- data[data$id == input$clickedAreaServed,  c("white", "black", "native", "asian", "islander", "other", "multiple")]
       
       data <- data.frame(label = c("White", "African American", "Native American", "Asian", "Native Hawaiian/Pacific Islander", "Other", "Two or More"),
-                        count = unlist(data))
-            
+                         count = unlist(data))
+      
       title <- paste0("Area Served by ", areaServedMonitor())
       
       plt <- ggplot(data, aes(x = label, y = count)) + theme_bw(base_size = 16) + 
@@ -463,20 +445,20 @@ shinyServer(function(input, output, session) {
   }, width = 788, height = 900)
 
   trendChart <- observe({
-
+    
     site <- input$popupID
-    param <- input$expParam
+    param <- input$paramOfInterest
     
     if(!is.null(site) && !is.null(param)) {
       
       dv <- dbGetQuery(db, paste0("SELECT dv.*, crit_lu.NAME, naaqs.STANDARD, naaqs.UNITS FROM dv JOIN crit_lu ON dv.POLLUTANT = crit_lu.CODE JOIN naaqs ON dv.DURATION = naaqs.DURATION AND dv.POLLUTANT = naaqs.POLLUTANT WHERE crit_lu.PARAMETER = ", param, " AND dv.Key = ", site))
       
       if(nrow(dv) > 0) {
-  
+        
         values$trendChart <- paste0("images/temp/trend", as.integer(runif(1,1,1000000)), ".png")
         
         trendChart <- plotPNG(function() {
-        
+          
           pol <- dv$NAME[1]
           site <- sprintf("%02i-%03i-%04i", dv$STATE_CODE, dv$COUNTY_CODE, dv$SITE_ID)[1]
           units <- dv$UNITS[1]
@@ -507,86 +489,104 @@ shinyServer(function(input, output, session) {
             ggtitle(title)
           
           print(plt)
-        
-        }, width = 900, height = 450, filename = paste0("www/", values$trendChart))
           
+        }, width = 900, height = 450, filename = paste0("www/", values$trendChart))
+        
         session$sendCustomMessage(type = "updateTrendChart", values$trendChart)
         
       }
-    
+      
     }
+    
+    output$cormatChart <- renderPlot({
+      
+      input$cormatButton
+      parameter <- isolate(input$paramOfInterest)
+      if(is.null(parameter)) {parameter = -1}
+      sites <- isolate(activeSites())
+      if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
+        return(cormat(db, sites, parameter))      
+      }
+      
+    }, width = 1800, height = 1350)
     
   })
 
-  output$corplot <- renderPlot({
-    
-    input$cormatButton
-    parameter <- isolate(input$expParam)
-    if(is.null(parameter)) {parameter = -1}
-    sites <- isolate(selectedSites()$Key)
-        
-    if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
-      return(cormat(db, sites, parameter))      
-    }
-  
-  }, width = 1800, height = 1350)
+  output$sitesDataDownload <- downloadHandler(filename = function() {paste0("netassess-sites-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
+                                              content = function(file) {
+                                                param <- input$paramOfInterest
+                                                s <- parameterSites()[parameterSites()$Key %in% activeSites(), ]
+                                                d <- dbGetQuery(db, paste0("SELECT dv.*, crit_lu.NAME, naaqs.STANDARD, naaqs.UNITS FROM dv JOIN crit_lu ON dv.POLLUTANT = crit_lu.CODE JOIN naaqs ON dv.DURATION = naaqs.DURATION AND dv.POLLUTANT = naaqs.POLLUTANT WHERE crit_lu.PARAMETER = ", param, " AND dv.Key IN (", paste0(activeSites(), collapse = ", "), ")"))
+                                                if(nrow(d) > 0) {
+                                                  s <- merge(s, d, on="Key", all.x = TRUE, all.y = FALSE)
+                                                  s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013")]
+                                                  s$NAME <- d$NAME[1]
+                                                  s$UNITS <- d$UNITS[1]
+                                                  s$STANDARD <- d$STANDARD[1]
+                                                  colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}))
+                                                } else {
+                                                  s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count")]
+                                                  colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count")
+                                                }
+                                               
+                                                s$County_Code <- sprintf("%03i", as.integer(s$County_Code))
+                                                s$Site_ID <- sprintf("%04i", as.integer(s$Site_ID))
+                                                
+                                                write.csv(s, file, row.names = FALSE)
+                                                
+                                              })
 
-  cormatData <- reactive({
-    if(input$expParam != "-1" && !is.null(selectedSites())) {
-      parameter <- isolate(input$expParam)
-      sites <- isolate(selectedSites()$Key)
-      sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
-      q <- dbGetQuery(db, sql)
-      sites <- unique(c(q$site1, q$site2))
-      sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
-      sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
-      q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
-      q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
-      colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Dif", "Distance (km)")  
-      return(q)
-    }
-  })
+  output$correlationDataDownload <- downloadHandler(filename = function() {paste0("netassess-sites-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
+                                                    content = function(file) {
+                                                      parameter <- isolate(input$paramOfInterest)
+                                                      sites <- activeSites()
+                                                      sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
+                                                      q <- dbGetQuery(db, sql)
+                                                      sites <- unique(c(q$site1, q$site2))
+                                                      sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
+                                                      sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
+                                                      q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
+                                                      q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
+                                                      colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Diff", "Distance (km)")  
+                                                      write.csv(q, file, row.names = FALSE)
+                                                    })
 
   output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", input$expParam, "-", Sys.Date(), ".zip")},
-                                         content = function(file) {
-                                            files <- c()
-                                            td <- tempdir()
-                                            setwd(tempdir())
-
-                                            # Sites Data
-                                            fn <- suppressWarnings(normalizePath(paste(td, "sites.csv", sep = "/")))
-                                            d <- sites()[sites()$Key %in% input$selectedSites, ]
-                                            write.csv(d, file = fn)
-                                            files <- c(files, fn)
-                                            
-                                            # Correlation Data
-                                            fn <- suppressWarnings(normalizePath(paste(td, "correlation.csv", sep = "/")))
-                                            write.csv(cormatData(), file = fn)
-                                            files <- c(files, fn)
-                                            
-                                            # Area Served Data (if available)
-                                            if(!is.null(polygons())) {
-                                              fn <- suppressWarnings(normalizePath(paste(td, "areaServed.csv", sep = "/")))
-                                              d <- polygons()@data
-                                              d$area <- unlist(d$area)
-                                              write.csv(d, file = fn)
-                                              files <- c(files, fn)
-                                            }
-                                            
-                                            zip(file, files, flags="")   
+                                       content = function(file) {
+                                         files <- c()
+                                         td <- tempdir()
+                                         setwd(tempdir())
                                          
-                                            if (file.exists(paste0(file, ".zip")))
-                                              file.rename(paste0(file, ".zip"), file)
-                                            
-                                            
-                                         },
-                                         contentType = "application/zip")
+                                         # Sites Data
+                                         fn <- suppressWarnings(normalizePath(paste(td, "sites.csv", sep = "/")))
+                                         d <- sites()[sites()$Key %in% input$selectedSites, ]
+                                         write.csv(d, file = fn)
+                                         files <- c(files, fn)
+                                         
+                                         # Correlation Data
+                                         fn <- suppressWarnings(normalizePath(paste(td, "correlation.csv", sep = "/")))
+                                         write.csv(cormatData(), file = fn)
+                                         files <- c(files, fn)
+                                         
+                                         # Area Served Data (if available)
+                                         if(!is.null(polygons())) {
+                                           fn <- suppressWarnings(normalizePath(paste(td, "areaServed.csv", sep = "/")))
+                                           d <- polygons()@data
+                                           d$area <- unlist(d$area)
+                                           write.csv(d, file = fn)
+                                           files <- c(files, fn)
+                                         }
+                                         
+                                         zip(file, files, flags="")   
+                                         
+                                         if (file.exists(paste0(file, ".zip")))
+                                           file.rename(paste0(file, ".zip"), file)
+                                         
+                                         
+                                       },
+                                       contentType = "application/zip")
 
-  output$downloadCorMat <- downloadHandler(filename = function() {paste0("cormat-", input$expParam, "-", Sys.Date(), ".csv")},
-                                           content = function(file) {
-                                             q <- cormatData()
-                                             write.csv(q, file, row.names = FALSE)
-                                           })
+  session$sendCustomMessage("biasLayer", list(type = 'ozone', data = o3bias))
+  session$sendCustomMessage("biasLayer", list(type = 'pm', data = pmbias))
 
 })
-
