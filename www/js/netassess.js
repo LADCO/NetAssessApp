@@ -575,7 +575,29 @@ netAssess.addBiasLayer = function(data) {
   
 }
 
-
+$("#resetAppButton").on("click", function() {
+  var r = confirm("Are you sure you want to reset the app?")
+  if(r == true) {
+    $("#paramOfInterest").select2("val", -1);
+    $("#paramOfInterest").trigger("change");
+    netAssess.layerGroups.aoi.clearLayers();
+    netAssess.layerGroups.areaServed.clearLayers();
+    $("#areaSelect0").click();    
+    $("#alert").removeClass("alert-open")
+    var k = Object.keys(netAssess.floaters);
+    for(var i = 0; i < k.length; i++) {
+      if(k[i] != "legend") netAssess.floaters[k[i]].close()
+    }
+    netAssess.map.removeLayer(netAssess.overlays.o3);
+    netAssess.map.removeLayer(netAssess.overlays.pm25);
+    netAssess.map.removeLayer(netAssess.layerGroups.rembiasO3);
+    netAssess.map.removeLayer(netAssess.layerGroups.rembiasPM);
+    $("#ozoneNAAQS").select2("val", "75ppb");
+    $("#areaServedClipping").select2("val", "border");
+    $("#areaServedType").select2("val", "voronoi");
+    netAssess.map.setBounds(netAssess.data.us_bounds);
+  }
+})
 
 
 
