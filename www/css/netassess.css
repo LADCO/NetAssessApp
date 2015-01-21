@@ -256,6 +256,11 @@ Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
   max-width: none !important;
 }
 
+/* Fixes misaligned icons in easy buttons */
+.leaflet-bar a > i.fa {
+  line-height: 26px !important;
+}
+
 .shiny-download-link {
   text-decoration: none;
   color: #444;

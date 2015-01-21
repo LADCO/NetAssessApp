@@ -519,11 +519,21 @@ shinyServer(function(input, output, session) {
                                                 d <- dbGetQuery(db, paste0("SELECT dv.*, crit_lu.NAME, naaqs.STANDARD, naaqs.UNITS FROM dv JOIN crit_lu ON dv.POLLUTANT = crit_lu.CODE JOIN naaqs ON dv.DURATION = naaqs.DURATION AND dv.POLLUTANT = naaqs.POLLUTANT WHERE crit_lu.PARAMETER = ", param, " AND dv.Key IN (", paste0(activeSites(), collapse = ", "), ")"))
                                                 if(nrow(d) > 0) {
                                                   s <- merge(s, d, on="Key", all.x = TRUE, all.y = FALSE)
-                                                  s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013")]
-                                                  s$NAME <- d$NAME[1]
-                                                  s$UNITS <- d$UNITS[1]
-                                                  s$STANDARD <- d$STANDARD[1]
-                                                  colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}))
+                                                  if(param == "44201") {
+                                                    s <- merge(s, o3bias, on = "Key", all.x = TRUE, all.y = FALSE)
+                                                    s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013", "bias_mean", "bias_min", "bias_max", "n", "relbias_mean", "relbias_min", "relbias_max")]
+                                                    colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}), "Mean_Removal_Bias", "Min_Removal_Bias", "Max_Removal_Bias", "n_Removal_Bias", "Mean_Relative_Removal_Bias", "Min_Relative_Removal_Bias", "Max_Relative_Removal_Bias")
+                                                  } else if(param %in% c("88101", "88502")) {
+                                                    s <- merge(s, pmbias, on = "Key", all.x = TRUE, all.y = FALSE)
+                                                    s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013", "bias_mean", "bias_min", "bias_max", "n", "relbias_mean", "relbias_min", "relbias_max")]
+                                                    colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}), "Mean_Removal_Bias", "Min_Removal_Bias", "Max_Removal_Bias", "n_Removal_Bias", "Mean_Relative_Removal_Bias", "Min_Relative_Removal_Bias", "Max_Relative_Removal_Bias")
+                                                  } else {
+                                                    s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013")]
+                                                    colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}))
+                                                  }                                    
+                                                  s$Parameter <- d$NAME[1]
+                                                  s$Units <- d$UNITS[1]
+                                                  s$Standard <- d$STANDARD[1]
                                                 } else {
                                                   s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count")]
                                                   colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count")
@@ -536,7 +546,7 @@ shinyServer(function(input, output, session) {
                                                 
                                               })
 
-  output$correlationDataDownload <- downloadHandler(filename = function() {paste0("netassess-sites-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
+  output$correlationDataDownload <- downloadHandler(filename = function() {paste0("netassess-correlation-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
                                                     content = function(file) {
                                                       parameter <- isolate(input$paramOfInterest)
                                                       sites <- activeSites()
@@ -551,40 +561,12 @@ shinyServer(function(input, output, session) {
                                                       write.csv(q, file, row.names = FALSE)
                                                     })
 
-  output$downloadData <- downloadHandler(filename = function() {paste0("netassess-", input$expParam, "-", Sys.Date(), ".zip")},
-                                       content = function(file) {
-                                         files <- c()
-                                         td <- tempdir()
-                                         setwd(tempdir())
-                                         
-                                         # Sites Data
-                                         fn <- suppressWarnings(normalizePath(paste(td, "sites.csv", sep = "/")))
-                                         d <- sites()[sites()$Key %in% input$selectedSites, ]
-                                         write.csv(d, file = fn)
-                                         files <- c(files, fn)
-                                         
-                                         # Correlation Data
-                                         fn <- suppressWarnings(normalizePath(paste(td, "correlation.csv", sep = "/")))
-                                         write.csv(cormatData(), file = fn)
-                                         files <- c(files, fn)
-                                         
-                                         # Area Served Data (if available)
-                                         if(!is.null(polygons())) {
-                                           fn <- suppressWarnings(normalizePath(paste(td, "areaServed.csv", sep = "/")))
-                                           d <- polygons()@data
-                                           d$area <- unlist(d$area)
-                                           write.csv(d, file = fn)
-                                           files <- c(files, fn)
-                                         }
-                                         
-                                         zip(file, files, flags="")   
-                                         
-                                         if (file.exists(paste0(file, ".zip")))
-                                           file.rename(paste0(file, ".zip"), file)
-                                         
-                                         
-                                       },
-                                       contentType = "application/zip")
+  output$areaServedDataDownload <- downloadHandler(filename = function() {paste0("netassess-areaserved-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
+                                                   content = function(file) {
+                                                     d <- polygons()@data
+                                                     d$area <- unlist(d$area)
+                                                     write.csv(d, file = file)                             
+                                                   })
 
   session$sendCustomMessage("biasLayer", list(type = 'ozone', data = o3bias))
   session$sendCustomMessage("biasLayer", list(type = 'pm', data = pmbias))

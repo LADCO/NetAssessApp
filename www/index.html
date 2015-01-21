@@ -283,6 +283,10 @@
         <tr id = "biasLegend" style = "display: none">
           <td colspan = "4" style = 'text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;'>
             Removal Bias
+            <img src = "images/biasLegend.png" />
+            <!--
+              For some unknown reason, the gradient doesn't render when I upload to shinyapps. Workaround by screen capping the 
+              legend and using the image instead.
             <svg xmlns="http://www.w3.org/2000/svg" width = "100%" height = 40 style = "font-size: 12px;">
               <linearGradient x1="0%" y1="0%" x2="100%" y2="0%" id="biasgrad">
                 <stop stop-color="rgba(0, 0, 255, 0.5)" offset="0"/>
@@ -294,13 +298,14 @@
               <text x = "50%" y = 35 text-anchor = "middle">No Bias</text>
               <text x = "100%" y = 35 text-anchor = "end">Positive Bias</text>
             </svg>
+            -->
           </td>
         </tr>
       </table>
     </div>
     
     <div id = "downloadFloater">
-      <p>Click the icon next to the data type you want to download.</p>
+      <p style = "font-size: 0.8em; text-align: justify;">Click the icon next to the data type you want to download. Grayed out options are unavailable.</p>
       <table border = 0 style = "margin: 10 auto;">
         <tr class = "disabled" style = "border-top: solid black 1px;">
           <td>
@@ -324,14 +329,6 @@
           </td>
           <td>
             Correlation Data
-          </td>
-        </tr>
-        <tr class = "disabled">
-          <td>
-            <a id = "removalBiasDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
-          </td>
-          <td>
-            Removal Bias Data
           </td>
         </tr>
       </table>
