@@ -1,32 +1,57 @@
-cormat <- function(db, sites, parameter, output = "screen") {
+cormatData <- function(data) {
    
+  d <- data[order(data$Site_Key), ]
+  site.info <- unique(d[, c("Site_Key", "State_Code", "County_Code", "Site_ID")])
+  site.info$id <- sprintf("%02i-%03i-%04i", site.info$State_Code, site.info$County_Code, site.info$Site_ID)
+  sites <- unique(d$Site_Key) #create list of unique AQSIDs
+  k <- 1
+  tot <- length(sites) - 1
+
+  results_table <- data.frame() #create empty data frame
+  for(i in seq(tot)) {
+    for(j in seq(i+1, length(sites))) {
+      sub_data=subset(d,d$Site_Key==sites[i] | d$Site_Key==sites[j])
+      c1 <- c(sub_data$Latitude[sub_data$Site_Key == sites[i]][1], sub_data$Longitude[sub_data$Site_Key == sites[i]][1])
+      c2 <- c(sub_data$Latitude[sub_data$Site_Key == sites[j]][1], sub_data$Longitude[sub_data$Site_Key == sites[j]][1])
+      distance.km <- round(earth.dist(c1[2], c1[1], c2[2], c2[1]),0)
+      results <- list()
+      sub_data=dcast(sub_data,sub_data$Date~sub_data$Site_Key, fun.aggregate=mean, value.var = "Value")
+      results$site1 <- sites[i]
+      results$site2 <- sites[j]
+      results$cor <- round(cor(sub_data[2],sub_data[3],use="pairwise.complete.obs",method="pearson"),3)
+      results$com <- sum(complete.cases(sub_data))
+      results$dif <- mean((abs(sub_data[,2]-sub_data[,3]))/((sub_data[,2]+sub_data[,3])/2), na.rm = TRUE)
+      results$dis <- round(earth.dist(c1[2], c1[1], c2[2], c2[1]),0)
+      results_table <- rbind(results_table, results)
+    }
+  }
+
+  results_table$site1 = sapply(results_table$site1, function(site) {site.info$id[site.info$Site_Key == site]})
+  results_table$site2 = sapply(results_table$site2, function(site) {site.info$id[site.info$Site_Key == site]})
+  
+  return(results_table)
+  
+}
+  
+cormatChart <- function(cormat_data, parameter) {
+  
   chart_label <- switch(as.character(parameter),
                         "44201" = "8-Hour Daily Max Ozone Correlation Matrix",
                         "88101" = "Daily PM2.5 FRM/FEM (88101) Correlation Matrix",
                         "88502" = "Daily PM2.5 Non-FEM (88502) Correlation Matrix")
   
-  makeMatrix <- function(df, site.info) {
+  makeMatrix <- function(df) {
     val <- colnames(df)[!colnames(df) %in% c("site1", "site2")]
     cast <- dcast(df, site2~site1, fun.aggregate=mean, value.var = val)
-    rownames(cast) <- sapply(cast$site2, function(key) {site.info$id[site.info$Key == key]})
+    rownames(cast) <- cast$site2
     cast <- cast[,2:ncol(cast)]
-    colnames(cast) <- sapply(colnames(cast), function(key) {site.info$id[site.info$Key == key]})
     as.matrix(cast)
   }
   
-  # Query the database for the needed correlation data
-  sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
-  q <- dbGetQuery(db, sql)
-  
-  # Get the site ids from the database
-  sql <- paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste0(sites, collapse = ", "), ")")
-  site.info <- dbGetQuery(db, sql)
-  site.info$id <- sprintf("%02i-%03i-%04i", site.info$State_Code, site.info$County_Code, site.info$Site_ID)
-  
   # Create the matrices
-  cor <- makeMatrix(q[, c("site1", "site2", "cor")], site.info)
-  dif <- makeMatrix(q[, c("site1", "site2", "dif")], site.info)
-  dis <- t(makeMatrix(q[, c("site1", "site2", "dis")], site.info))
+  cor <- makeMatrix(cormat_data[, c("site1", "site2", "cor")])
+  dif <- makeMatrix(cormat_data[, c("site1", "site2", "dif")])
+  dis <- t(makeMatrix(cormat_data[, c("site1", "site2", "dis")]))
   dis[lower.tri(dis)] <- ""  
   dis[is.nan(dis)] == ""
   
@@ -62,7 +87,7 @@ cormat <- function(db, sites, parameter, output = "screen") {
     y=y+.15
   }  
   
-  text(x=.05,y=.15,adj=0,labels="Pearson Correlation (r^2)",cex=1.5,srt=90)
+  text(x=.05,y=.15,adj=0,labels="Pearson Correlation (r)",cex=1.5,srt=90)
   
   #Plot avg relative difference legend
   screen(3)

@@ -303,3 +303,45 @@ tr.disabled a {
   color: #999;
 }
 
+.sidebar > h1 {
+  color: #2C3E50;
+  padding-bottom: 0px;
+  border-bottom: solid 2px rgba(44,62,80,0.75);
+	box-shadow: 0px 1px 1px -1px rgba(44,62,80,0.5);
+
+}
+
+.sidebar > h1 > i {
+  font-size: 1.5em;
+}
+
+#menubarHelp tr {
+  border-bottom: solid 2px rgba(44,62,80,0.75);
+  box-shadow: 0px 1px 1px -1px rgba(44,62,80,0.5);  
+}
+
+#menubarHelp td:last-child {
+  font-size: 12px;
+  padding-left: 10px;
+  padding-top: 10px;
+}
+
+#menubarHelp td:last-child > div {
+  text-align: justify;
+  padding-top: 5px;
+}
+
+#menubarHelp td:first-child > i, #menubarHelp td:first-child > div {
+  background-color: #2C3E50;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 24px;
+  color: white;
+  text-align: center;
+}
+
+#menubarHelp td:first-child img {
+  position: relative;
+  top: 8px;
+}

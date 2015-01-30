@@ -85,7 +85,7 @@ shinyServer(function(input, output, session) {
       polygons <- list(Polygon(coords = m, hole = FALSE))
     }
     polygons <- SpatialPolygons(list(Polygons(polygons, "aoi")))
-    aoi <<- polygons
+
     return(polygons)
     
   })
@@ -284,8 +284,6 @@ shinyServer(function(input, output, session) {
           ov <- over(tracts, v)
           t <- cbind(as.data.frame(tracts), ov)
           t <- t[!is.na(t$id), ]
-          test <<- t
-          vest <<- v
           d <- aggregate(t[, sapply(seq(ncol(t)), function(i) {is.integer(t[, i])})], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
           d2 <- aggregate(t[, probability.columns], by = list(as.character(t$id)), FUN = prob.bin)
           proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
@@ -294,23 +292,156 @@ shinyServer(function(input, output, session) {
           v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, d2, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
           v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
-          #ids <- sapply(v@data$id, function(i) {strsplit(i, " ")[[1]][1]})
-          #v@data$id <- ids
         } else {
           v <- NULL
         }
       } else {
         v <- NULL
       }
-      
+
       return(v)
       
     }
   
   })
 
-  observe({
+  readings <- reactive({
     
+    input$cormatButton
+    input$rembiasButton
+    
+    # I removed the error checking from this because I think the error checking
+    # in the javascript should prevent a event being registered unless the 
+    # prerequisetes are met.
+    
+    param <- isolate(input$paramOfInterest)
+    sn <- isolate(selectedNeighbors())
+    
+    sql <- isolate({paste0("SELECT sites.Key AS Site_Key, sites.State_Code, sites.County_Code, sites.Site_ID, sites.Latitude, sites.Longitude, monitors.Key AS Monitor_Key, monitors.POC, readings.Date, readings.Value, readings.Duration_Code FROM sites JOIN monitors ON sites.Key = monitors.Site_Key JOIN readings ON monitors.Key = readings.Key WHERE monitors.Parameter = ", param, " AND sites.Key IN ('", paste0(sn$Key, collapse = "', '"), "')")})
+    q <- dbGetQuery(db, sql)
+    return(q)
+  
+  })
+
+  cormatReadings <- eventReactive(input$cormatButton, {
+
+    r <- readings()
+    if(input$paramOfInterest == "88101") {
+      if(input$pmType == "frm") {
+        r <- r[r$Duration_Code == "7", ]
+      } else if(input$pmType == "fem") {
+        r <- r[r$Duration_Code == "X", ]
+      }
+    }
+    if(nrow(r) > 0) {
+      return(r)
+    } else {
+      return(NULL)
+    }
+  })
+
+  rembiasReadings <- eventReactive(input$rembiasButton, {
+
+    return(readings())
+  })
+
+  rembias <- eventReactive(rembiasReadings(), {
+
+    data <- rembiasReadings()
+    
+    if(!is.null(data)) {
+      sN <- isolate({selectedNeighbors()})
+      sN <- sN[sN$Key %in% data$Site_Key, ]
+      sites.deldir <- deldir(sN$Longitude, sN$Latitude)
+      combos <- sites.deldir$delsgs
+      
+      combos$dist <- mapply(FUN = earth.dist, long1 = combos[, 1],
+                            lat1 = combos[, 2], long2 = combos[, 3],
+                            lat2 = combos[, 4])
+      
+      combos$ind1 <- sN$Key[combos$ind1]
+      combos$ind2 <- sN$Key[combos$ind2]
+
+      d <<- list(sN, sites.deldir, combos, activeSites = activeSites(), data)
+      
+      rb <- lapply(activeSites(), function(site) {
+        
+        site.data <- data[data$Site_Key == site, c("Date", "Value")]
+        
+        if(nrow(site.data) > 0) {
+          
+          start.date <- min(site.data$Date)
+          end.date <- max(site.data$Date)
+          
+          neighbors <- combos[combos$ind1 == site | combos$ind2 == site, ]
+          neighbors$Site_Key <- apply(neighbors, 1, function(r) {if(r['ind1'] == site) {return(r['ind2'])} else {return(r['ind1'])}})
+          neighbors <- neighbors[, c("Site_Key", "dist")]
+          neigh.data <- data[data$Site_Key %in% neighbors$Site_Key, c("Site_Key", "Date", "Value")]
+          neigh.data <- merge(neigh.data, neighbors, by = "Site_Key", all = TRUE)
+          neigh.data <- neigh.data[neigh.data$Date %in% site.data$Date, ] 
+          print(nrow(neighbors))
+
+          values <- as.matrix(dcast(neigh.data, Date~Site_Key, value.var = "Value", fun.aggregate = mean))
+          rownames(values) <- values[,1]
+          values <- values[, -1]
+          weights <- dcast(neigh.data, Date~Site_Key, value.var = "dist", fun.aggregate = mean)
+          rownames(weights) <- weights[,1]
+          weights <- weights[, -1]
+          weights <- 1/(weights^2)
+          values[is.na(values)] = 0
+          weights[is.na(weights)] = 0
+          
+          # multiply the values and weights matrices and calculate inner product using 
+          # a vector of ones to get the sums for each row 
+          summed <- (values * weights) %*% rep(1, dim(values)[2])
+
+          # calculate the sum of each row in the 
+          denom <- weights %*% rep(1, dim(values)[2])
+       
+          # if the denom vector has zeros, remove that index from denom and summed
+          rn <- rownames(summed)
+          summed <- summed[denom != 0]
+          denom <- denom[denom != 0]
+
+          # calculate inverse distance squared weighted average for each day
+          weighted.avg <- summed / denom
+          weighted.avg <- data.frame(Date = rn, Est = weighted.avg)
+
+          # get the daily values for the monitor of interest as a vector
+          daily <- merge(site.data, weighted.avg, by ="Date")
+          
+          # calculate difference between each interpolated value and the actual
+          # value for the monitor
+          daily$diff <- daily$Est - daily$Value 
+          x <- daily$Value != 0
+          relDiff <- round(100 * (daily$diff[x]/daily$Value[x]))
+          daily$diff <- signif(daily$diff, 3)
+
+          data.frame(Key = site, bias_mean = round(mean(daily$diff), 4), bias_min = min(daily$diff),
+                     bias_max = max(daily$diff), bias_sd = sd(daily$diff), bias_n = nrow(neighbors),
+                     relbias_mean = round(mean(relDiff)), relbias_min = min(relDiff),
+                     relbias_max = max(relDiff), start_date = start.date, end_date = end.date)
+          
+        }
+        
+      })
+
+      s <- do.call(rbind, rb)
+      
+      return(s)
+      
+    } else {
+      return(NULL)
+    }
+
+  })
+
+  observeEvent(rembias(), {
+    session$sendCustomMessage("rembiasUpdate", list(data = rembias()))
+  })
+
+  observe({
+
     if(!is.null(polygons())) {
       polygons <- polygons()
       v <- lapply(seq(nrow(polygons)), function(i) {
@@ -332,6 +463,9 @@ shinyServer(function(input, output, session) {
     return(list(code = input$paramOfInterest, name = params$Parameter_Desc[params$Parameter_Code == input$paramOfInterest]))
   })
   
+observe({
+  print(input$areaOfInterest)
+})
   areaServedMonitor <- reactive({
     monkey <- as.numeric(input$clickedAreaServed)
     if(length(monkey) > 0) {
@@ -345,6 +479,7 @@ shinyServer(function(input, output, session) {
       return(mon)
     }
   })
+
 
   output$areaServedParameter <- renderText({
     selectedParameter()$name
@@ -497,20 +632,50 @@ shinyServer(function(input, output, session) {
       }
       
     }
-    
-    output$cormatChart <- renderPlot({
-      
-      input$cormatButton
-      parameter <- isolate(input$paramOfInterest)
-      if(is.null(parameter)) {parameter = -1}
-      sites <- isolate(activeSites())
-      if(parameter %in% c(44201, 88101, 88502) & length(sites) > 1) {
-        return(cormat(db, sites, parameter))      
-      }
-      
-    }, width = 1800, height = 1350)
-    
   })
+
+  updateCorMatTable <- function() {
+    readings <- cormatReadings()
+    readings <- readings[readings$Site_Key %in% activeSites(), ]
+    if(!is.null(readings)) {
+      parameter <- input$paramOfInterest
+      if(is.null(parameter)) {parameter = -1}
+      sites <- activeSites()
+      data <- readings[readings$Site_Key %in% sites, ]
+      if(parameter %in% c(44201, 88101, 88502) & length(unique(data$Monitor_Key)) > 1) {
+        values$cormatTable <- cormatData(readings)
+      }
+    }
+  }
+
+  cormatDownload <- reactive({
+    input$correlationDataDownload
+    updateCorMatTable()
+    return(runif(1,1,10000))
+  })
+
+  cormatView <- reactive({
+    input$cormatButton
+    updateCorMatTable()
+    return(cormatTable())
+  })
+
+  output$cormatChart <- renderPlot({
+    
+    if(is.null(cormatTable())) {
+      if(input$cormatButton > 0) {
+        session$sendCustomMessage("showCorMat", TRUE)
+        return({
+          plot(x = 0.5, y = 0.5, col = "white", axes = FALSE, xlab = "", ylab = "")
+          text(x = 0.5, y = 0.5, cex = 4, labels = "Insufficient data avaialable")
+        })
+      }
+    } else {
+      session$sendCustomMessage("showCorMat", TRUE)
+      return(cormatChart(cormatTable(), isolate(input$paramOfInterest)))
+    }
+      
+  }, width = 1800, height = 1350)
 
   output$sitesDataDownload <- downloadHandler(filename = function() {paste0("netassess-sites-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
                                               content = function(file) {
@@ -548,16 +713,8 @@ shinyServer(function(input, output, session) {
 
   output$correlationDataDownload <- downloadHandler(filename = function() {paste0("netassess-correlation-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
                                                     content = function(file) {
-                                                      parameter <- isolate(input$paramOfInterest)
-                                                      sites <- activeSites()
-                                                      sql <- paste0("SELECT site1, site2, cor, dif, dis FROM correlation WHERE parameter = ", parameter, " AND site1 IN (", paste0(sites, collapse = ", "), ")  AND site2 IN (", paste0(sites, collapse = ", "), ")")
-                                                      q <- dbGetQuery(db, sql)
-                                                      sites <- unique(c(q$site1, q$site2))
-                                                      sites <- dbGetQuery(db, paste0("SELECT Key, State_Code, County_Code, Site_ID FROM sites WHERE Key IN (", paste(sites, collapse = ", "), ")"))
-                                                      sites$ID <- sprintf("%02i-%03i-%04i", sites$State_Code, sites$County_Code, sites$Site_ID)
-                                                      q$site1 <- sapply(q$site1, function(s) sites$ID[sites$Key == s])
-                                                      q$site2 <- sapply(q$site2, function(s) sites$ID[sites$Key == s])
-                                                      colnames(q) <- c("Site 1", "Site 2", "Correlation", "Rel. Diff", "Distance (km)")  
+                                                      q <- cormatTable()
+                                                      colnames(q) <- c("Site 1", "Site 2", "Correlation", "n", "Rel. Diff", "Distance (km)")  
                                                       write.csv(q, file, row.names = FALSE)
                                                     })
 
@@ -567,8 +724,5 @@ shinyServer(function(input, output, session) {
                                                      d$area <- unlist(d$area)
                                                      write.csv(d, file = file)                             
                                                    })
-
-  session$sendCustomMessage("biasLayer", list(type = 'ozone', data = o3bias))
-  session$sendCustomMessage("biasLayer", list(type = 'pm', data = pmbias))
 
 })

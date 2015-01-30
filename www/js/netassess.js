@@ -41,8 +41,7 @@ netAssess.overlays = {
 
 netAssess.layerGroups = {}
 netAssess.layerGroups.aoi = L.featureGroup(null);
-netAssess.layerGroups.rembiasO3 = L.featureGroup(null);
-netAssess.layerGroups.rembiasPM = L.featureGroup(null);
+netAssess.layerGroups.rembias = L.featureGroup(null);
 netAssess.layerGroups.newSiteSelection = L.layerGroup();
 netAssess.layerGroups.areaServed = L.featureGroup(null);
 netAssess.layerGroups.sites = L.siteGroup({
@@ -108,7 +107,7 @@ netAssess.floaters = {
   aoi: $.floater("#aoiFloater", {title: "Area of Interest"}),
   newSite: $.floater("#newSiteFloater", {title: "New Site", close: false, minimize: false}),
   areaServed: $.floater("#areaServedFloater", {title: "Area Served Information", top: "50px", right: "50px"}),
-  cormat: $.floater("#cormatFloater", {title: "Correlation Matrix", width: "800px", height: "640px;", top: "80px", resize: true, left: "80px"}),
+  cormat: $.floater("#cormatFloater", {title: "Correlation Matrix", width: "800px", height: "640px", top: "80px", resize: true, left: "80px"}),
   popup: $.floater("#popupFloater", {title: "Popup", width: "600px", left: "200px", resize: true, minimize: false}),
   legend: $.floater("#legendFloater", {title: "Legend", close: false, width: '400px',  right: '50px', bottom: '50px'}),
   download: $.floater("#downloadFloater", {title: "Download Data", minimize: false, width: "300px", top: "50px", left: "40%"})
@@ -169,6 +168,19 @@ netAssess.map.on('draw:created', function(e) {
 netAssess.setAOI = function(aoi) {
   netAssess.layerGroups.aoi.clearLayers();
   aoi.addTo(netAssess.layerGroups.aoi);
+  var aoiPolygons = {};
+  netAssess.layerGroups.aoi.eachLayer(function(layer) {
+    if(layer.hasOwnProperty("_layers")) {
+      layer.eachLayer(function(sublayer) {
+        var ll = sublayer.getLatLngs();
+        aoiPolygons[sublayer._leaflet_id] = ll;
+      })
+    } else {
+  		var ll = layer.getLatLngs();
+  		aoiPolygons[layer._leaflet_id] = ll;
+    }
+	})
+  document.getElementById("areaOfInterest").updateAnchor(aoiPolygons);
 }
 
 netAssess.getNewSite = function(newSite) {
@@ -240,9 +252,8 @@ L.control.layers(netAssess.basemaps,
    "Area Served": netAssess.layerGroups.areaServed,
    "Ozone Probability": netAssess.overlays.o3,
    "PM<sub>2.5</sub> Probability": netAssess.overlays.pm25,
-   "Ozone Removal Bias": netAssess.layerGroups.rembiasO3,
-   "PM<sub>2.5</sub> Removal Bias": netAssess.layerGroups.rembiasPM,
-}, {position: 'topleft'}).addTo(netAssess.map);
+   "Removal Bias": netAssess.layerGroups.rembias,
+  }, {position: 'topleft'}).addTo(netAssess.map);
 
 $.ajax({
   dataType: "json",
@@ -268,6 +279,8 @@ $("#newSiteParameters").select2({width: "100%", placeholder: "Click to Select Pa
 
 $("#paramOfInterest").on("change", function(e) {
   netAssess.layerGroups.newSites.testVisibility();
+  netAssess.layerGroups.rembias.clearLayers();
+  netAssess.layerGroups.areaServed.clearLayers();
 });
 
 $("#areaServedAgePlot, #areaServedRacePlot").on("click", function(event) {
@@ -281,6 +294,10 @@ $("#areaServedButton").on("click", function(event) {
 
 $("#cormatButton").on("click", function(event) {
   netAssess.errorChecking.cormat(event);
+})
+
+$("#rembiasButton").on("click", function(event) {
+  netAssess.errorChecking.rembias(event);
 })
 
 netAssess.errorChecking = {};
@@ -321,23 +338,43 @@ netAssess.errorChecking.basics = function(siteMax, siteMin) {
 }
 
 netAssess.errorChecking.areaServed = function(event) {
-  event.stopPropagation();
+
   var bc = netAssess.errorChecking.basics(300, 1);
   
   if(bc.active) {
     netAssess.loading.show();
     netAssess.floaters.areaServed.close();
     netAssess.floaters.popup.close();
-  	$("#areaServedButton").trigger(event);
   } else {
+    event.stopImmediatePropagation();
   	bc.body = bc.body + "</ul>";
   	netAssess.showAlert("Area Served Error", bc.body)
   }
   
 }
 
+netAssess.errorChecking.rembias = function(event) {
+  var bc = netAssess.errorChecking.basics(100, 1);
+  var param = $("#paramOfInterest").select2("val");
+  var vp = ["44201", "88101", "88502"];
+  if(vp.indexOf(param) == -1) {
+    bc.active = false;
+    bc.body = bc.body + "<li>Removal Bias estimates are only available for parameter codes 44201, 88101, and 88502.</li>"
+  }
+  
+  if(bc.active) {
+    netAssess.loading.show();
+    netAssess.layerGroups.rembias.addTo(netAssess.map);
+  } else {
+    event.stopImmediatePropagation();
+  	bc.body = bc.body + "</ul>";
+  	netAssess.showAlert("Removal Bias Error", bc.body)
+  }
+  
+}
+
 netAssess.errorChecking.cormat = function(event) {
-  event.stopPropagation();
+
   var bc = netAssess.errorChecking.basics(30, 1);
   var param = $("#paramOfInterest").select2("val");
   var vp = ["44201", "88101", "88502"];
@@ -347,9 +384,9 @@ netAssess.errorChecking.cormat = function(event) {
   }
   
   if(bc.active) {
-    $("cormatButton").trigger(event);
-    netAssess.floaters.cormat.open();
+    netAssess.loading.show();
   } else {
+    event.stopImmediatePropagation();
     bc.body = bc.body + "</ul>";
     netAssess.showAlert("Correlation Matrix Error", bc.body);
   }
@@ -423,10 +460,14 @@ netAssess.map.on("popupopen", function(e) {
 /* Scripts to setup and handle the Sidebars */
 
 netAssess.sidebars = {
-  settings: L.control.sidebar('settings-sb', {position: 'right', autoPan: false})
+  settings: L.control.sidebar('settings-sb', {position: 'right', autoPan: false}),
+  help: L.control.sidebar('help-sb', {position: 'right', autoPan: false}),
+  about: L.control.sidebar("about-sb", {position: 'right', autoPan: false})
 }
 
 L.easyButton("fa-cogs", function() {netAssess.toggleSidebars("settings");}, "Settings", netAssess.map);
+L.easyButton("fa-question", function() {netAssess.toggleSidebars("help");}, "Help", netAssess.map);
+L.easyButton("fa-info", function() {netAssess.toggleSidebars("about");}, "About", netAssess.map);
 
 // Add the sidebars to the map
 for(var sb in netAssess.sidebars) {
@@ -440,9 +481,9 @@ netAssess.toggleSidebars = function(sb) {
   for(var x in sidebars) {
     if(sidebars.hasOwnProperty(x)) {
       if(x == sb) {
-        sidebars[sb].toggle();
+        sidebars[x].toggle();
       } else {
-        sidebars[sb].hide();
+        sidebars[x].hide();
       }
     }
   }
@@ -466,55 +507,40 @@ $("#ozoneNAAQS").on("change", function(e) {
   
 })
 
-netAssess.layerGroups.aoi.on("layeradd", function(e) {
-  
-  var aoiPolygons = {};
-
-	netAssess.layerGroups.aoi.eachLayer(function(layer) {
-		var ll = layer.getLatLngs();
-		aoiPolygons[layer._leaflet_id] = ll;
-	})
-
-  document.getElementById("areaOfInterest").updateAnchor(aoiPolygons);
-  
-})
-
-
 netAssess.map.on("overlayadd", function(e) {
-  e.layer.bringToBack();
   if(e.name == "Ozone Probability" || e.name == "PM<sub>2.5</sub> Probability") {
-    $("#probLegend").css("display", "table-row")
+    e.layer.bringToBack();
+    $("#probLegend").css("display", "table-row");
     netAssess.floaters.legend.checkBottom();
-  } else if(e.name == "Ozone Removal Bias" || e.name == "PM<sub>2.5</sub> Removal Bias") {
-    $("#biasLegend").css("display", "table-row")
+  } else if(e.name == "Removal Bias") {
+    $("#biasLegend").css("display", "table-row");
     netAssess.floaters.legend.checkBottom();
+  } else {
+    e.layer.bringToBack();
   }
 })
 
 netAssess.map.on("overlayremove", function(e) {
   if(e.name == "Ozone Probability" || e.name == "PM<sub>2.5</sub> Probability") {
-    $("#probLegend").css("display", "none")
-  } else if(e.name == "Ozone Removal Bias" || e.name == "PM<sub>2.5</sub> Removal Bias") {
-    $("#biasLegend").css("display", "none")
+    $("#probLegend").css("display", "none");
+  } else if(e.name == "Removal Bias") {
+    $("#biasLegend").css("display", "none");
   }
-
 })
 
 
-netAssess.addBiasLayer = function(data) {
+netAssess.updateBiasLayer = function(data) {
   
-  var layer, style, unit
-  
-  if(data.type == "ozone") {
-    layer = netAssess.layerGroups.rembiasO3
-    unit = " ppm"
+  var layer = netAssess.layerGroups.rembias, 
+  style = {radius: 8, stroke: true, weight: 1, opacity: 1, color: "#000", fill: true, fillOpacity: 1}, 
+  param = $("#paramOfInterest").select2("val");
+  if(param == "44201") {
+    unit = "ppm"
   } else {
-    layer = netAssess.layerGroups.rembiasPM
-    unit = " &micro;g/m<sup>3</sup>"
+    unit = "&mu;g/m<sup>3</sup>"
   }
-  
-  style = {radius: 8, stroke: true, weight: 1, opacity: 1, color: "#000", fill: true, fillOpacity: 0.6}
-  
+  layer.clearLayers()
+    
   var min = Math.min.apply(Math, data.data.bias_mean)
   var max = Math.max.apply(Math, data.data.bias_mean)
   
@@ -524,7 +550,7 @@ netAssess.addBiasLayer = function(data) {
     var b = Math.abs(bias);
     var col = "#FFF";
     
-    var c = 255 - parseInt(b/max*256, 10);
+    var c = 256 - parseInt(b/max*256, 10);
     c = c.toString(16);
     if(c.length == 1) {c = "0" + c}
     
@@ -539,30 +565,43 @@ netAssess.addBiasLayer = function(data) {
   }
   
   netAssess.layerGroups.sites.eachLayer(function(site) {
+    
     if(site.keyCheck(data.data.Key)) {
+      
       for(var i = 0; i < site.properties.key.length; i++) {
         var n = data.data.Key.indexOf(site.properties.key[i])
         if(n != -1) {
           break;
         }
       }
+      
       style.fillColor = colorCalc(data.data.bias_mean[n])
       
-      var mark = L.circleMarker(site._latlng, style)
-      var po
+      var mark = L.circleMarker(site._latlng, style), po, id = ""
+
+      for(var i = 0; i < site.properties.site_id.length; i++) {
+        id = id + site.properties.site_id[i] + "<br />"
+      }
       
+      var start_date = String(data.data.start_date[n]);
+      var end_date = String(data.data.end_date[n]);
+      
+      start_date = start_date.substring(0,4) + "-" + start_date.substring(4,6) + "-" + start_date.substring(6,8);
+      end_date = end_date.substring(0,4) + "-" + end_date.substring(4,6) + "-" + end_date.substring(6,8);
+            
       po = "<span class = 'popup-text'><h4 class = 'header'>Removal Bias Information</h4>"
-      po = po + "<center><table class = 'popup-table bias'><tr>"
-      
-      po = po + "<td>Minimum Bias</td><td>" + data.data.bias_min[n] + unit + "</td></tr>"
+      po = po + "<center><table class = 'popup-table bias'>"
+      po = po + "<tr><td>Site ID</td><td>" + id + "</td></tr>"
+      po = po + "<tr><td>Minimum Bias</td><td>" + data.data.bias_min[n] + unit + "</td></tr>"
       po = po + "<tr><td>Maximum Bias</td><td>" + data.data.bias_max[n] + unit + "</td></tr>"
       po = po + "<tr><td>Mean Bias</td><td>" + data.data.bias_mean[n] + unit + "</td></tr>"
-      po = po + "<tr><td>Days Included</td><td>" + data.data.n[n] + "</tr>"
+      po = po + "<tr><td>Start Date</td><td>" + start_date + "</td></tr>"
+      po = po + "<tr><td>End Date</td><td>" + end_date + "</td></tr>"
+      po = po + "<tr><td>Neighbors Included</td><td>" + data.data.bias_n[n] + "</tr>"
       po = po + "<tr><td colspan = 2 style = 'text-align: center; padding-top: 8px; border-right: none;'>Relative Removal Bias</td></tr>"
-      po = po + "<tr><td>Min Relative Bias</td><td>" + data.data.relbias_min[n] + unit + "</td></tr>"
-      po = po + "<tr><td>Max Relative Bias</td><td>" + data.data.relbias_max[n] + unit + "</td></tr>"
-      po = po + "<tr><td>Mean Relative Bias</td><td>" + data.data.relbias_mean[n] + unit + "</td></tr>"
-
+      po = po + "<tr><td>Min Relative Bias</td><td>" + data.data.relbias_min[n] + "%</td></tr>"
+      po = po + "<tr><td>Max Relative Bias</td><td>" + data.data.relbias_max[n] + "%</td></tr>"
+      po = po + "<tr><td>Mean Relative Bias</td><td>" + data.data.relbias_mean[n] + "%</td></tr>"
 
       po = po + "</table></span>"
       
@@ -572,6 +611,8 @@ netAssess.addBiasLayer = function(data) {
       
     }
   })
+  
+  netAssess.loading.hide();
   
 }
 

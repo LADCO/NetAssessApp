@@ -70,6 +70,7 @@ Shiny.addCustomMessageHandler("updateAreaServed", function(data) {
 					layer.bringToFront();
           netAssess.layerGroups.sites.bringToFront();
           netAssess.layerGroups.newSites.bringToFront();
+          netAssess.layerGroups.rembias.bringToFront();
 				}
 			})
 			.on("mouseout", function(e) {
@@ -97,6 +98,7 @@ Shiny.addCustomMessageHandler("updateAreaServed", function(data) {
       
     netAssess.layerGroups.sites.bringToFront();
     netAssess.layerGroups.newSites.bringToFront();
+    netAssess.layerGroups.rembias.bringToFront();
     netAssess.loading.hide();
       
   }
@@ -107,6 +109,11 @@ Shiny.addCustomMessageHandler("updateTrendChart", function(data) {
   $(".popup-trend").find("img").attr("src", data)
 })
 
-Shiny.addCustomMessageHandler("biasLayer", function(data) {
-  netAssess.data.biasLayers.push(data);
+Shiny.addCustomMessageHandler("rembiasUpdate", function(data) {
+  netAssess.updateBiasLayer(data);
+})
+
+Shiny.addCustomMessageHandler("showCorMat", function(data) {
+  netAssess.loading.hide();
+  netAssess.floaters.cormat.open();
 })

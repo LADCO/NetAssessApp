@@ -23,6 +23,7 @@
 		<link type = "text/css" rel = "stylesheet" href = "css/font-awesome.min.css" />
     <link type = "text/css" rel = "stylesheet" href = "css/select2.css" />
     <link type = "text/css" rel = "stylesheet" href = "css/floaters.css" />
+    <link type = "text/css" rel = "stylesheet" href = "css/tour.css" />
     
     <link type = "text/css" rel = "stylesheet" href = "css/netassess.css" />
     
@@ -58,6 +59,9 @@
         <div id = "cormatButton" class = "menu-bar-item menu-bar-button action-button" title = "View Correlation Matrix">
           <span class = "fa" style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -4px;">&rho;</span>
         </div>
+        <div id = "rembiasButton" class = "menu-bar-item menu-bar-button action-button" title = "Calculate Removal Bias">
+          <i class = "fa fa-birthday-cake"></i>
+        </div>
         <div id = "aoiZoomButton" class = "menu-bar-item menu-bar-button" title = "Zoom to Area of Interest">
           <i class = "fa fa-binoculars"></i>
         </div>
@@ -77,7 +81,7 @@
 <!-- SIDEBARS -->
 
   	<div id = "settings-sb" class = "sidebar">
-			<h1><i class="fa fa-cogs  fa-fw"></i>Settings</h1>
+			<h1><i class="fa fa-cogs fa-fw"></i> Settings</h1>
       <p>These setting allow you to customize how the NetAssess App works. Please see the Help file for additional information about how these setting will effect the NetAssess App.</p>
       <p class = "header">Area Served</p>
       <p>The area served tool allows you to compile information about the area surrounding monitoring locations.</p>
@@ -107,12 +111,12 @@
         </tr>
       </table>
       <p class = "header">Exceedence Probability</p>
-      <p>Exceedence Probability is the probability that an area will exceed a given threshold at least one day in a year. The threshold for ozone can be adjusted below.</p>
+      <p>Exceedence Probability is the probability that an area will exceed a given threshold at least one day in a year. That threshold for ozone can be adjusted below.</p>
       <table class = "options-table">
         <tr>
           <td><label for = "ozoneNAAQS">Ozone Threshold: </label></td>
           <td>
-            <select id = "ozoneNAAQS" title = >
+            <select id = "ozoneNAAQS" title = "">
               <option value = "65ppb">65 ppb</option>
               <option value = "70ppb">70 ppb</option>
               <option value = "75ppb" selected = selected>75 ppb</option>
@@ -120,8 +124,103 @@
           </td>
         </tr>
       </table> 
+      <p class = "header">PM<sub>2.5</sub> Options</p>
+      <p>Parameter Code 88101 can contain both FRM and FEM data. Use this option to select which data to use for correlation matrices. <strong>Note:</strong> You will need to rerun your correlation matrix to see changes.</p>
+      <select id = "pmType">
+        <option value = "both">Use both FRM and FEM data</option>
+        <option value = "frm">Use only FRM data</option>
+        <option value = "fem">Use only FEM data</option>
+      </select>
 		</div>
+    
+    <div id = "help-sb" class = "sidebar">
+      <h1><i class="fa fa-question fa-fw"></i> Help</h1>
 
+      <p>The menu bar is the primary way you access the functionality of the NetAssess app. Below is an explanation of each button. For more extensive help see the <a href = "http://ladco.github.io/NetAssessApp/" target = "_blank">documentation site</a>.</p>
+      <p class = "header">Menu Bar Buttons</p>
+      <table id = "menubarHelp">
+        <tr>
+          <td><i class = "fa fa-crosshairs"></i></td>
+          <td><strong>Set Area of Interest</strong><div>Opens a dialog that allows you to define the area you want to examine. You can draw your own or select a state, CBSA, or CSA.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa fa-plus-circle"></i></td>
+          <td><strong>Add New Site</strong><div>Allows placement of new sites. Click the button, then click the location of the new site. A dialog will then appear that allows you to set information about the new site.</div></td>
+        </tr>
+        <tr>
+          <td><div><img src = "images/area_served.png" /></div></td>
+          <td><strong>Calculate Area Served</strong><div>Calculates the area closer to each monitor than any other monitor and adds those polygons to the map. You can click on the polygons to see additional information about the area.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa" style = "font-weight: bold; position: relative;">&rho;</i></td>
+          <td><strong>View Correlation Matrix</strong><div>Generates a correlation matrix that contains correlations, distance between monitors, and relative differences.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa fa-birthday-cake"></i></td>
+          <td><strong>Calculate Removal Bias</strong><div>Estimates the concentration at each monitors location based on surrounding monitors, then compares it to the actual concentrations at the monitor.</div></td>
+        </tr>     
+        <tr>
+          <td><i class = "fa fa-binoculars"></i></td>
+          <td><strong>Zoom to Area of Interest</strong><div>Zoom the map to your area of interest.</div></td>
+        </tr>     
+        <tr>
+          <td><div><img src = "images/cont_us.png" /></div></td>
+          <td><strong>Zoom to Continental US</strong><div>Zoom out to view the entire Continental United States.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa fa-download"></i></td>
+          <td><strong>Download Data</strong><div>Open a dialog that allows you to download csv files of raw data about your area of interest.</div></td>
+        </tr>     
+        <tr>
+          <td><i class = "fa fa-undo"></i></td>
+          <td><strong>Reset App</strong><div>Reset the map to its original state.</div></td>
+        </tr>     
+        
+      </table>
+      <p class = "header">Tour</p>
+      <p>View an interactive tour of the app:</p>
+      <div style = "text-align: center"><button id = "openTour" style = 'text-align: center'>Open Tour</button></div>
+
+    </div>
+    
+    <div id = "about-sb" class = "sidebar">
+      <h1><i class="fa fa-info fa-fw"></i> About</h1>
+      The NetAssess app was developed by a <a href = "http://www.ladco.org/" target="_blank">LADCO</a> workgroup consisting of people from Indiana, Minnesota, and Michigan. It is an update of and improvement to the <a href = "http://www.epa.gov/ttnamti1/network-assessment.html" target="_blank">original Network Assessment tools</a> developed by Mike Rizzo for the 2010 5-year Network Assessment. This tool is open source and all source code is available on <a href = "https://github.com/LADCO/NetAssessApp" target="_blank">GitHub</a>.
+      <p class = "header">Credits</p>
+      <ul>
+        <li><strong>Eric Bailey</strong> - Web Application, Area Served, and New Sites</li>
+        <li><strong>Nathan Byers</strong> - Exceedence Probabilities and Removal Bias</li>
+        <li><strong>Cassie McMahon</strong> - Correlation Matrix</li>
+      </ul>
+      <p>Special thanks to Donna Kenski for facilitating the creation of this tool.</p>
+      <p class = "header">Software</p>
+      <p>Many different open source software solutions were used to create this application. Please contact <a href = "mailto:ebailey@idem.in.gov">Eric Bailey</a> if you have any questions about how any of this software was used.</p>
+      <ul>
+        <li><a href = "http://www.r-project.org/" target="_blank">R</a></li>
+        <li><a href = "http://shiny.rstudio.com" target="_blank">Shiny</a></li>
+        <li><a href = "http://leafletjs.com/" target="_blank">Leaflet</a></li>
+        <li>...</li>
+      </ul>
+    </div>    
+    
+<!-- TOUR -->
+
+    <div id = "tour" class = "tour" style = "display: none;">
+      <div class = "tour-body">
+        <div class = "header">Welcome to NetAssess!</div>
+        <div class = "content"></div>
+        <div class = "tourCookie">
+          <input type = "checkbox" id = "tourGone" />
+          <label for = "tourGone">Don't show again</label>
+        </div>
+        <button id = "tourNext">Next</button>
+        <div class = "navigation">
+          <a class = 'close icon'><i class = 'fa fa-close'></i></a>
+        </div>
+      </div>
+      <div class = "tour-arrow-border"></div>
+      <div class = "tour-arrow"></div>
+    </div>    
     
 <!-- FLOATERS -->
 
@@ -374,5 +473,6 @@
   <script src = "js/floaters.js"></script>
   <script src = "js/select2.min.js"></script>
   <script src = "js/netassess.js"></script>
+  <script src = "js/tour.js"></script>
   
 </html>

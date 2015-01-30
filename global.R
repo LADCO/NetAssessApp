@@ -42,9 +42,6 @@ params.list <- params$Parameter_Code
 names(params.list) <- paste(params$Parameter_Code, params$Parameter_Desc, sep = " - ")
 params.list <- c("Choose Parameter of Interest" = -1, params.list)
 
-o3bias <- dbGetQuery(db, "SELECT Key, n, bias_mean, bias_min, bias_max, relbias_mean, relbias_min, relbias_max, Parameter FROM rembias WHERE Parameter = '44201'")
-pmbias <- dbGetQuery(db, "SELECT Key, n, bias_mean, bias_min, bias_max, relbias_mean, relbias_min, relbias_max, Parameter FROM rembias WHERE Parameter IN ('88101', '88502')")
-
 createSites <- function() {
   
   jsonArray <- function(a, quote = FALSE) {
@@ -135,3 +132,18 @@ areaPolygons<- function(spPoly, proj4string = NULL) {
   return(areas)
 }
 
+# Create function to calculate distance in kilometers between two points on the earth
+earth.dist <- function (long1, lat1, long2, lat2){
+  rad = pi/180
+  a1 = lat1 * rad
+  a2 = long1 * rad
+  b1 = lat2 * rad
+  b2 = long2 * rad
+  dlon = b2 - a2
+  dlat = b1 - a1
+  a = (sin(dlat/2))^2 + cos(a1) * cos(b1) * (sin(dlon/2))^2
+  c = 2 * atan2(sqrt(a), sqrt(1 - a))
+  R = 6378.145
+  d = R * c
+  return(d)
+}
