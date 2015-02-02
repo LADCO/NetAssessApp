@@ -113,7 +113,15 @@ Shiny.addCustomMessageHandler("rembiasUpdate", function(data) {
   netAssess.updateBiasLayer(data);
 })
 
-Shiny.addCustomMessageHandler("showCorMat", function(data) {
+Shiny.addCustomMessageHandler("showCormat", function(data) {
   netAssess.loading.hide();
   netAssess.floaters.cormat.open();
+})
+
+Shiny.addCustomMessageHandler("loading", function(data) {
+  if(data == "show") {
+    netAssess.loading.show();
+  } else {
+    netAssess.loading.hide();
+  }
 })

@@ -385,6 +385,7 @@ netAssess.errorChecking.cormat = function(event) {
   
   if(bc.active) {
     netAssess.loading.show();
+    netAssess.floaters.cormat.open()
   } else {
     event.stopImmediatePropagation();
     bc.body = bc.body + "</ul>";
