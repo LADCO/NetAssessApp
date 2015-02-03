@@ -3,6 +3,7 @@ library(shiny)
 shinyServer(function(input, output, session) {
   
   tools <- reactiveValues(cormat = "download", output = NULL)
+  values <- reactiveValues()
   
   showLoading <- function() {
     session$sendCustomMessage("loading", "show")
@@ -457,11 +458,11 @@ shinyServer(function(input, output, session) {
     
     site <- input$popupID
     param <- input$paramOfInterest
-    
+      
     if(!is.null(site) && !is.null(param)) {
       
       dv <- dbGetQuery(db, paste0("SELECT dv.*, crit_lu.NAME, naaqs.STANDARD, naaqs.UNITS FROM dv JOIN crit_lu ON dv.POLLUTANT = crit_lu.CODE JOIN naaqs ON dv.DURATION = naaqs.DURATION AND dv.POLLUTANT = naaqs.POLLUTANT WHERE crit_lu.PARAMETER = ", param, " AND dv.Key = ", site))
-      
+
       if(nrow(dv) > 0) {
         
         values$trendChart <- paste0("images/temp/trend", as.integer(runif(1,1,1000000)), ".png")
@@ -470,7 +471,21 @@ shinyServer(function(input, output, session) {
           
           pol <- dv$NAME[1]
           site <- sprintf("%02i-%03i-%04i", dv$STATE_CODE, dv$COUNTY_CODE, dv$SITE_ID)[1]
+          if(pol == "PM<sub>2.5</sub>") {
+            title <- bquote(paste("Design Value Trends: ", PM[2.5], " at ", .(site)))
+          } else if(pol == "PM<sub>10</sub>") {
+            title <- bquote(paste("Design Value Trends: ", PM[10], " at ", .(site)))
+          } else {
+            title <- paste("Design Value Trends:", pol, "at", site)
+          }
+          pol <- gsub("<sub>", "[", pol, fixed = TRUE)
+          pol <- gsub("</sub>", "]", pol, fixed = TRUE)
           units <- dv$UNITS[1]
+          if(units == "ugm3") {
+            yaxis <- expression(paste("Design Value (", mu*g/m^3, ")"))
+          } else {
+            yaxis <- paste0("Design Value (", units, ")")
+          }
           
           dv <- dv[, c("DURATION", "STANDARD", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013")] 
           dv <- melt(dv)
@@ -485,14 +500,12 @@ shinyServer(function(input, output, session) {
           dv$DURATION <- paste(dv$DURATION, "Design Value")
           
           cbPalette <- c("#E69F00", "#D55E00", "#56B4E9", "#0072B2")
-          
-          title <- paste0("Design Value Trends: ", pol, " at ", site)
-          
+                  
           plt <- ggplot(dv, aes(x = LABEL, y = DV, colour = DURATION, ymin = 0)) + labs(colour = "") +
             geom_hline(aes(yintercept = STANDARD, colour = SNAME), show_guide = TRUE, size = 1.25) +
             geom_line(size = 1.5) +
             geom_point(size = 4) +
-            labs(x = "Year", y = paste0("Design Value (", units, ")")) + 
+            labs(x = "Year", y = yaxis) + 
             theme_bw(base_size = 16) + theme(legend.position="bottom") + 
             scale_colour_manual(values=cbPalette) +
             ggtitle(title)
