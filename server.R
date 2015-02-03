@@ -721,11 +721,12 @@ shinyServer(function(input, output, session) {
 #     
 #   })
 
-  observeEvent(input$cormatButton, {
-    tools$cormat = "view"
-  })
-
   readings <- reactive({
+    
+    validate(
+      need(selectedNeighbors(), message = FALSE),
+      needParams(input$paramOfInterest, strict = TRUE)
+    )
     
     param <- input$paramOfInterest
     sn <- selectedNeighbors()
@@ -777,25 +778,27 @@ shinyServer(function(input, output, session) {
   })
 
   output$cormatChart <- renderPlot({
-
-    if(is.null(cormatTable())) {
-      if(input$cormatButton > 0) {
-        if(tools$cormat == "view") {
+  
+    validate(need(input$cormatButton, FALSE))
+    
+    input$cormatButton
+    
+    isolate({
+    
+      if(is.null(cormatTable())) {
+        if(input$cormatButton > 0) {
           session$sendCustomMessage("showCormat", TRUE)
+          return({
+            plot(x = 0.5, y = 0.5, col = "white", axes = FALSE, xlab = "", ylab = "")
+            text(x = 0.5, y = 0.5, cex = 4, labels = "Insufficient data avaialable")
+          })
         }
-        tools$cormat == "download"
-        return({
-          plot(x = 0.5, y = 0.5, col = "white", axes = FALSE, xlab = "", ylab = "")
-          text(x = 0.5, y = 0.5, cex = 4, labels = "Insufficient data avaialable")
-        })
-      }
-    } else {
-      if(tools$cormat == "view") {
-        tools$cormat == "download"
+      } else {
         session$sendCustomMessage("showCormat", TRUE)
+        return(cormatChart(cormatTable(), isolate(input$paramOfInterest)))
       }
-      return(cormatChart(cormatTable(), isolate(input$paramOfInterest)))
-    }
+    
+    })
       
   }, width = 1800, height = 1350)
 
@@ -807,9 +810,129 @@ shinyServer(function(input, output, session) {
                                                     })
 
 
+  rembiasTable <- reactive({
+    
+    r <- readings()
+    op <- NULL
+    
+    if(!is.null(r)) {
+      
+      sN <- isolate({selectedNeighbors()})
+      sN <- sN[sN$Key %in% r$Site_Key, ]
+      
+      sites.deldir <- deldir(sN$Longitude, sN$Latitude)
+      combos <- sites.deldir$delsgs
+      
+      combos$dist <- mapply(FUN = earth.dist, long1 = combos[, 1],
+                            lat1 = combos[, 2], long2 = combos[, 3],
+                            lat2 = combos[, 4])
+      
+      combos$ind1 <- sN$Key[combos$ind1]
+      combos$ind2 <- sN$Key[combos$ind2]
+      
+      d <<- list(sN, sites.deldir, combos, activeSites = activeSites(), data)
+      
+      rb <- lapply(activeSites(), function(site) {
+        
+        site.data <- r[r$Site_Key == site, c("Date", "Value")]
+        
+        if(nrow(site.data) > 0) {
+          
+          start.date <- min(site.data$Date)
+          end.date <- max(site.data$Date)
+          
+          neighbors <- combos[combos$ind1 == site | combos$ind2 == site, ]
+          neighbors$Site_Key <- apply(neighbors, 1, function(r) {if(r['ind1'] == site) {return(r['ind2'])} else {return(r['ind1'])}})
+          neighbors <- neighbors[, c("Site_Key", "dist")]
+          neigh.data <- r[r$Site_Key %in% neighbors$Site_Key, c("Site_Key", "Date", "Value")]
+          neigh.data <- merge(neigh.data, neighbors, by = "Site_Key", all = TRUE)
+          neigh.data <- neigh.data[neigh.data$Date %in% site.data$Date, ] 
+          
+          values <- as.matrix(dcast(neigh.data, Date~Site_Key, value.var = "Value", fun.aggregate = mean))
+          rownames(values) <- values[,1]
+          values <- values[, -1]
+          weights <- dcast(neigh.data, Date~Site_Key, value.var = "dist", fun.aggregate = mean)
+          rownames(weights) <- weights[,1]
+          weights <- weights[, -1]
+          weights <- 1/(weights^2)
+          values[is.na(values)] = 0
+          weights[is.na(weights)] = 0
+          
+          # multiply the values and weights matrices and calculate inner product using 
+          # a vector of ones to get the sums for each row 
+          summed <- (values * weights) %*% rep(1, dim(values)[2])
+          
+          # calculate the sum of each row in the 
+          denom <- weights %*% rep(1, dim(values)[2])
+          
+          # if the denom vector has zeros, remove that index from denom and summed
+          rn <- rownames(summed)
+          summed <- summed[denom != 0]
+          denom <- denom[denom != 0]
+          
+          # calculate inverse distance squared weighted average for each day
+          weighted.avg <- summed / denom
+          weighted.avg <- data.frame(Date = rn, Est = weighted.avg)
+          
+          # get the daily values for the monitor of interest as a vector
+          daily <- merge(site.data, weighted.avg, by ="Date")
+          
+          # calculate difference between each interpolated value and the actual
+          # value for the monitor
+          daily$diff <- daily$Est - daily$Value 
+          x <- daily$Value != 0
+          relDiff <- round(100 * (daily$diff[x]/daily$Value[x]))
+          daily$diff <- signif(daily$diff, 3)
+          
+          data.frame(Key = site, bias_mean = round(mean(daily$diff), 4), bias_min = min(daily$diff),
+                     bias_max = max(daily$diff), bias_sd = sd(daily$diff), bias_n = nrow(neighbors),
+                     relbias_mean = round(mean(relDiff)), relbias_min = min(relDiff),
+                     relbias_max = max(relDiff), start_date = start.date, end_date = end.date)
+          
+        }
+        
+      })
+      
+      s <- do.call(rbind, rb)
+      
+      if(nrow(s) == 0) {
+        s <- NULL
+      } else {
+        siteIDs <- unique(r[, c("Site_Key", "State_Code", "County_Code", "Site_ID")])
+        siteIDs$id <- sprintf("%02i-%03i-%04i", siteIDs$State_Code, siteIDs$County_Code, siteIDs$Site_ID)
+        siteIDs <- siteIDs[, c("Site_Key", "id")]
+        s <- merge(s, siteIDs, by.x = "Key", by.y = "Site_Key", all.x = TRUE, all.y = FALSE)
+      }
 
+      op <- s
+      
+    } 
+    
+    return(op)
+    
+  })
 
+  observeEvent(rembiasTable(), {
+    
+    validate(need(input$rembiasButton, FALSE))
+    
+    isolate({
+    
+      if(!is.null(rembiasTable())) {
+        session$sendCustomMessage("rembiasUpdate", list(data = rembiasTable()))  
+      }
+    
+    })
+    
+  })
 
+  output$rembiasDataDownload <- downloadHandler(filename = function() {paste0("netassess-rembias-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
+                                                    content = function(file) {
+                                                      df <- rembiasTable()
+                                                      df <- df[, c("id", "bias_mean", "bias_min", "bias_max", "bias_sd", "bias_n", "relbias_mean", "relbias_min", "relbias_max")]
+                                                      colnames(df) <- c("Site ID", "Mean Removal Bias", "Min Removal Bias", "Max Removal Bias", "Removal Bias Standard Deviation", "Neighbors Included", "Mean Relative Removal Bias (%)", "Min Relative Removal Bias (%)", "Max Relative Removal Bias (%)")
+                                                      write.csv(df, file, row.names = FALSE)
+                                                    })
 
 
 
@@ -861,18 +984,6 @@ shinyServer(function(input, output, session) {
                                                 d <- dbGetQuery(db, paste0("SELECT dv.*, crit_lu.NAME, naaqs.STANDARD, naaqs.UNITS FROM dv JOIN crit_lu ON dv.POLLUTANT = crit_lu.CODE JOIN naaqs ON dv.DURATION = naaqs.DURATION AND dv.POLLUTANT = naaqs.POLLUTANT WHERE crit_lu.PARAMETER = ", param, " AND dv.Key IN (", paste0(activeSites(), collapse = ", "), ")"))
                                                 if(nrow(d) > 0) {
                                                   s <- merge(s, d, on="Key", all.x = TRUE, all.y = FALSE)
-                                                  if(param == "44201") {
-                                                    s <- merge(s, o3bias, on = "Key", all.x = TRUE, all.y = FALSE)
-                                                    s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013", "bias_mean", "bias_min", "bias_max", "n", "relbias_mean", "relbias_min", "relbias_max")]
-                                                    colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}), "Mean_Removal_Bias", "Min_Removal_Bias", "Max_Removal_Bias", "n_Removal_Bias", "Mean_Relative_Removal_Bias", "Min_Relative_Removal_Bias", "Max_Relative_Removal_Bias")
-                                                  } else if(param %in% c("88101", "88502")) {
-                                                    s <- merge(s, pmbias, on = "Key", all.x = TRUE, all.y = FALSE)
-                                                    s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013", "bias_mean", "bias_min", "bias_max", "n", "relbias_mean", "relbias_min", "relbias_max")]
-                                                    colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}), "Mean_Removal_Bias", "Min_Removal_Bias", "Max_Removal_Bias", "n_Removal_Bias", "Mean_Relative_Removal_Bias", "Min_Relative_Removal_Bias", "Max_Relative_Removal_Bias")
-                                                  } else {
-                                                    s <- s[, c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Count", "Crit_Count", "HAP_Count", "Met_Count", "NAME", "STANDARD", "UNITS", "DV_2004", "DV_2005", "DV_2006", "DV_2007", "DV_2008", "DV_2009", "DV_2010", "DV_2011", "DV_2012", "DV_2013")]
-                                                    colnames(s) <- c("State_Code", "County_Code", "Site_ID", "Latitude", "Longitude", "Street_Address", "Parameter_Count", "Criteria_Parameter_Count", "HAP_Parameter_Count", "Meteorology_Parameter_Count", "Parameter", "Standard", "Units", sapply(seq(2004,2013), function(i) {paste0("Design_Value_", i)}))
-                                                  }                                    
                                                   s$Parameter <- d$NAME[1]
                                                   s$Units <- d$UNITS[1]
                                                   s$Standard <- d$STANDARD[1]

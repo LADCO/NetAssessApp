@@ -15,6 +15,8 @@ source("R/cormatdb.R")
 load("data/tracts.rda")
 load("data/usborder.rda")
 
+
+
 options(stringsAsFactors = FALSE)
 
 db <- dbConnect(SQLite(), dbname = "data/netassess.sqlite")
@@ -146,4 +148,21 @@ earth.dist <- function (long1, lat1, long2, lat2){
   R = 6378.145
   d = R * c
   return(d)
+}
+
+needParams <- function(param, strict = FALSE, message = FALSE, 
+                       params = c("44201", "88101", "88502")) {
+  op <- message
+  if(!is.null(param)) {
+    if(strict) {
+      if(param %in% params) {
+        op <- NULL
+      }
+    } else {
+      if(param != "-1") {
+        op <- NULL
+      }
+    }
+  }
+  return(op)
 }

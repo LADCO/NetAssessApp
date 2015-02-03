@@ -426,15 +426,15 @@ netAssess.layerGroups.sites.on("selectionupdate visibilityupdate", function(even
     $("#sitesDataDownload").parents("tr").removeClass("disabled");
     if(['44201', '88101', '88502'].indexOf($("#paramOfInterest").select2("val")) != -1) {
       $("#correlationDataDownload").parents("tr").removeClass("disabled");
-      $("#removalBiasDataDownload").parents("tr").removeClass("disabled");
+      $("#rembiasDataDownload").parents("tr").removeClass("disabled");
     } else {
       $("#correlationDataDownload").parents("tr").addClass("disabled");
-      $("#removalBiasDataDownload").parents("tr").addClass("disabled");
+      $("#rembiasDataDownload").parents("tr").addClass("disabled");
     }
   } else {
     $("#sitesDataDownload").parents("tr").addClass("disabled");
     $("#correlationDataDownload").parents("tr").addClass("disabled");
-    $("#removalBiasDataDownload").parents("tr").addClass("disabled");
+    $("#rembiasDataDownload").parents("tr").addClass("disabled");
   }
 })
 
@@ -618,8 +618,12 @@ netAssess.updateBiasLayer = function(data) {
 }
 
 $("#resetAppButton").on("click", function() {
+  
   var r = confirm("Are you sure you want to reset the app?")
+  
   if(r == true) {
+    
+    $("#sitesDataDownload").trigger("click");
     $("#paramOfInterest").select2("val", -1);
     $("#paramOfInterest").trigger("change");
     netAssess.layerGroups.aoi.clearLayers();
@@ -638,7 +642,9 @@ $("#resetAppButton").on("click", function() {
     $("#areaServedClipping").select2("val", "border");
     $("#areaServedType").select2("val", "voronoi");
     netAssess.map.setBounds(netAssess.data.us_bounds);
+    
   }
+  
 })
 
 
