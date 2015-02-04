@@ -33,12 +33,19 @@ cormatData <- function(data) {
   
 }
   
-cormatChart <- function(cormat_data, parameter) {
+cormatChart <- function(cormat_data, parameter, pmType) {
   
   chart_label <- switch(as.character(parameter),
                         "44201" = "8-Hour Daily Max Ozone Correlation Matrix",
-                        "88101" = "Daily PM2.5 FRM/FEM (88101) Correlation Matrix",
+                        "88101" = "",
                         "88502" = "Daily PM2.5 Non-FEM (88502) Correlation Matrix")
+  
+  if(parameter == "88101") {
+    chart_label <- switch(as.character(pmType),
+                          "fem" = "Daily PM2.5 FEM Only (88101) Correlation Matrix",
+                          "frm" = "Daily PM2.5 FRM Only (88101) Correlation Matrix",
+                          "both" = "Daily PM2.5 FRM/FEM (88101) Correlation Matrix")
+  }
   
   makeMatrix <- function(df) {
     val <- colnames(df)[!colnames(df) %in% c("site1", "site2")]
@@ -82,7 +89,7 @@ cormatChart <- function(cormat_data, parameter) {
   subplot(plot(ellipse(1), axes = FALSE, type="l",xlab="",ylab="", col = "white"), x=x, y=y, size=c(0.1,0.1)) #Something is not working with the first ellipse - it is plotting in the wrong position
   
   for (i in corrlist) {
-    subplot(plot(ellipse(i), axes = FALSE, type="l",xlab="",ylab=""), x=x, y=y, size=c(.15,.15)) #Something is not working with the first ellipse - it is plotting in the wrong position
+    subplot(plot(ellipse(i), axes = FALSE, type="l",xlab="",ylab=""), x=x, y=y, size=c(.2,.2)) #Something is not working with the first ellipse - it is plotting in the wrong position
     text(x=x+.15, y = y, labels = as.character(i), cex=1.5)
     y=y+.15
   }  

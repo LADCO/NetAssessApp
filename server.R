@@ -607,7 +607,7 @@ shinyServer(function(input, output, session) {
         }
       } else {
         session$sendCustomMessage("showCormat", TRUE)
-        return(cormatChart(cormatTable(), isolate(input$paramOfInterest)))
+        return(cormatChart(cormatTable(), isolate(input$paramOfInterest), isolate(input$pmType)))
       }
     
     })
