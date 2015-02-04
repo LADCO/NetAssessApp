@@ -60,7 +60,7 @@
           <span class = "fa" style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -4px;">&rho;</span>
         </div>
         <div id = "rembiasButton" class = "menu-bar-item menu-bar-button action-button" title = "Calculate Removal Bias">
-          <i class = "fa fa-birthday-cake"></i>
+          <i class = "fa fa-minus-square"></i>
         </div>
         <div id = "aoiZoomButton" class = "menu-bar-item menu-bar-button" title = "Zoom to Area of Interest">
           <i class = "fa fa-binoculars"></i>
@@ -381,7 +381,12 @@
             <img src = "images/probLegend.png" />  
           </td>
         </tr>
-
+        <tr id = "corLegend" style = 'display: none'>
+          <td colspan = "4" style = "text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;">
+            Pearson Correlation
+            <img src = "images/corLegend.png" />  
+          </td>
+        </tr>
         <tr id = "biasLegend" style = "display: none">
           <td colspan = "4" style = 'text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;'>
             Removal Bias
@@ -463,6 +468,7 @@
     <div id = "selectedNewSites" class = "shiny-custom-anchor"></div>
     <div id = "clickedAreaServed" class = "shiny-custom-anchor"></div>
     <div id = "popupID" class = "shiny-custom-anchor"></div>
+    <div id = "cormapSite" class = "shiny-custom-anchor"></div>
     
 <!-- Persistent img for shiny to send the trend graphs to -->
     <div id = "trendGraph" class = "shiny-plot-output" style = "background: red; width: 100px; height: 100px; z-index: 100;"></div>

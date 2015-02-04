@@ -4,6 +4,7 @@ L.SiteGroup = L.FeatureGroup.extend({
     selectedSites: [],
     activeSites: [],
     aoiLayer: null,
+    correlations: false,
     visibilityTest: function(site) {return false;},
     styles: {unselected: {radius: 4, opacity: 0.67, fillOpacity: 0.67, fillColor: "#800000", color: "#000", weight: 1},
              selected: {radius: 5, opacity: 0.67, fillOpacity: 0.67, fillColor: "#ff4040", color: "#000", weight: 1}
@@ -245,12 +246,24 @@ L.SiteMarker = L.CircleMarker.extend({
     if(this.options.contextmenu == true) {
       this.options.contextmenuItems[0].text = "Deselect Monitor";
       this.options.contextmenuItems[0].callback = function() {this.deselect()};
+      if(this._parent.options.correlations == true) {
+        this.options.contextmenuItems[2] = {text: "Show Correlation", callback: this.correlate, context: this}
+      } else {
+        this.options.contextmenuItems[2] = null;
+      }
     }
     if(this.keyCheck(this._parent.options.selectedSites) == false) {
       this._parent.options.selectedSites = this._parent.options.selectedSites.concat(this.properties.key)
     }
     this.setMarkerStyle("selected");
     
+  },
+  correlate: function() {
+    this.options.contextmenuItems[2] = {text: "Hide Correlation", callback: this.decorrelate, context: this};
+    this._parent.fireEvent("correlate", {site: this});
+  },
+  decorrelate: function() {
+      this._parent.fireEvent("decorrelate", {site: this});
   },
   deselect: function() {
     this._deselect();
@@ -261,6 +274,7 @@ L.SiteMarker = L.CircleMarker.extend({
     if(this.options.contextmenu == true) {
       this.options.contextmenuItems[0].text = "Select Monitor";
       this.options.contextmenuItems[0].callback = function() {this.select()};
+      this.options.contextmenuItems[2] = null;
     }
     if(this.keyCheck(this._parent.options.selectedSites)) {
       for(var i = 0; i < this.properties.key.length; i++) {
@@ -281,6 +295,11 @@ L.SiteMarker = L.CircleMarker.extend({
     if(this.keyCheck(this._parent.options.visibleSites) == false) {
       this._parent.options.visibleSites = this._parent.options.visibleSites.concat(this.properties.key)
     }
+    if(this._parent.options.correlations == true && this.options.contextmenu == true && this.options.selected == true) {
+      this.options.contextmenuItems[2] = {text: "Show Correlation", callback: this.correlate, context: this}
+    } else {
+      this.options.contextmenuItems[2] = null;
+    }
     this._container.children[0].style.display = "block";
   },
   hide: function() {
@@ -296,6 +315,9 @@ L.SiteMarker = L.CircleMarker.extend({
           this._parent.options.visibleSites.splice(n, 1);
         }
       }
+    }
+    if(this.options.contextmenu == true) {
+      this.options.contextmenuItems[2] = null;
     }
     this._container.children[0].style.display = "none";
   },

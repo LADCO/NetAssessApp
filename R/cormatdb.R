@@ -16,18 +16,18 @@ cormatData <- function(data) {
       distance.km <- round(earth.dist(c1[2], c1[1], c2[2], c2[1]),0)
       results <- list()
       sub_data=dcast(sub_data,sub_data$Date~sub_data$Site_Key, fun.aggregate=mean, value.var = "Value")
-      results$site1 <- sites[i]
-      results$site2 <- sites[j]
+      results$key1 <- sites[i]
+      results$key2 <- sites[j]
       results$cor <- round(cor(sub_data[2],sub_data[3],use="pairwise.complete.obs",method="pearson"),3)
       results$com <- sum(complete.cases(sub_data))
-      results$dif <- mean((abs(sub_data[,2]-sub_data[,3]))/((sub_data[,2]+sub_data[,3])/2), na.rm = TRUE)
-      results$dis <- round(earth.dist(c1[2], c1[1], c2[2], c2[1]),0)
+      results$dif <- signif(mean((abs(sub_data[,2]-sub_data[,3]))/((sub_data[,2]+sub_data[,3])/2), na.rm = TRUE), 3)
+      results$dis <- round(earth.dist(c1[2], c1[1], c2[2], c2[1]), 0)
       results_table <- rbind(results_table, results)
     }
   }
 
-  results_table$site1 = sapply(results_table$site1, function(site) {site.info$id[site.info$Site_Key == site]})
-  results_table$site2 = sapply(results_table$site2, function(site) {site.info$id[site.info$Site_Key == site]})
+  results_table$site1 = sapply(results_table$key1, function(site) {site.info$id[site.info$Site_Key == site]})
+  results_table$site2 = sapply(results_table$key2, function(site) {site.info$id[site.info$Site_Key == site]})
   
   return(results_table)
   

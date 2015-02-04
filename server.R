@@ -557,12 +557,16 @@ shinyServer(function(input, output, session) {
     
     if(!is.null(r)) {
       
-      if(input$pmType == "frm") {
-        r <- r[r$Duration_Code == "7", ]
-      } else if(input$pmType == "fem") {
-        r <- r[r$Duration_Code == "X", ]
+      if(input$paramOfInterest == "88101") {
+      
+        if(input$pmType == "frm") {
+          r <- r[r$Duration_Code == "7", ]
+        } else if(input$pmType == "fem") {
+          r <- r[r$Duration_Code == "X", ]
+        }
+        
       }
-  
+      
       r <- r[r$Site_Key %in% activeSites(), ]
       
       if(nrow(r) > 0) {
@@ -602,9 +606,33 @@ shinyServer(function(input, output, session) {
       
   }, width = 1800, height = 1350)
 
+  observeEvent(input$cormapSite, {
+    
+    d <- cormatTable()
+    if(!is.null(cormatTable())) {
+      print(d)
+      if(!is.null(input$cormapSite)) {
+        d <- d[d$key1 %in% input$cormapSite | d$key2 %in% input$cormapSite, ]
+        if(nrow(d) > 0) {
+          d$site <- sapply(seq(nrow(d)), function(i) {
+            if(d$key1[i] %in% input$cormapSite) {
+              return(d$key2[i])
+            } else {
+              return(d$key1[i])
+            }
+          })
+          d <- d[, c("site", "cor", "com", "dif", "dis")]
+          session$sendCustomMessage("updateCorMap", d)
+        }
+      }
+    }
+    
+  })
+
   output$correlationDataDownload <- downloadHandler(filename = function() {paste0("netassess-correlation-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
                                                     content = function(file) {
                                                       df <- cormatTable()
+                                                      df <- df[, c("site1", "site2", "cor", "com", "dif", "dis")]
                                                       colnames(df) <- c("Site 1", "Site 2", "Correlation", "n", "Rel. Diff", "Distance (km)")  
                                                       write.csv(df, file, row.names = FALSE)
                                                     })

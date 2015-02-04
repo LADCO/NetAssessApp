@@ -44,8 +44,10 @@ netAssess.layerGroups.aoi = L.featureGroup(null);
 netAssess.layerGroups.rembias = L.featureGroup(null);
 netAssess.layerGroups.newSiteSelection = L.layerGroup();
 netAssess.layerGroups.areaServed = L.featureGroup(null);
+netAssess.layerGroups.cormap = L.featureGroup(null);
 netAssess.layerGroups.sites = L.siteGroup({
   aoiLayer: netAssess.layerGroups.aoi,
+  correlations: true,
   onEachSite: function(site) {
       po = "<span class = 'popup-text'><h4 class = 'header'>Site Information</h4>"
       po = po + "<center><table class = 'popup-table'><tr>"
@@ -253,6 +255,7 @@ L.control.layers(netAssess.basemaps,
    "Ozone Probability": netAssess.overlays.o3,
    "PM<sub>2.5</sub> Probability": netAssess.overlays.pm25,
    "Removal Bias": netAssess.layerGroups.rembias,
+   "Correlations": netAssess.layerGroups.cormap
   }, {position: 'topleft'}).addTo(netAssess.map);
 
 $.ajax({
@@ -280,7 +283,15 @@ $("#newSiteParameters").select2({width: "100%", placeholder: "Click to Select Pa
 $("#paramOfInterest").on("change", function(e) {
   netAssess.layerGroups.newSites.testVisibility();
   netAssess.layerGroups.rembias.clearLayers();
+  netAssess.layerGroups.cormap.clearLayers();
   netAssess.layerGroups.areaServed.clearLayers();
+  var val = $("#paramOfInterest").select2("val")
+  if(["44201", "88101", "88502"].indexOf(val) != -1) {
+    netAssess.layerGroups.sites.options.correlations = true;
+  } else {
+    netAssess.layerGroups.sites.options.correlations = false;
+  }
+  document.getElementById("cormapSite").updateAnchor(null);
 });
 
 $("#areaServedAgePlot, #areaServedRacePlot").on("click", function(event) {
@@ -299,6 +310,7 @@ $("#cormatButton").on("click", function(event) {
 $("#rembiasButton").on("click", function(event) {
   netAssess.errorChecking.rembias(event);
 })
+
 
 netAssess.errorChecking = {};
 
@@ -516,6 +528,9 @@ netAssess.map.on("overlayadd", function(e) {
   } else if(e.name == "Removal Bias") {
     $("#biasLegend").css("display", "table-row");
     netAssess.floaters.legend.checkBottom();
+  } else if(e.name == "Correlations") {
+    $("#corLegend").css("display", "table-row");
+    netAssess.floaters.legend.checkBottom();
   } else {
     e.layer.bringToBack();
   }
@@ -526,9 +541,87 @@ netAssess.map.on("overlayremove", function(e) {
     $("#probLegend").css("display", "none");
   } else if(e.name == "Removal Bias") {
     $("#biasLegend").css("display", "none");
+  } else if(e.name == "Correlations") {
+    $("#corLegend").css("display", "none");    
   }
 })
 
+netAssess.layerGroups.sites.on("correlate", function(event) {
+  document.getElementById("cormapSite").updateAnchor(event.site.properties.key);
+  netAssess.layerGroups.cormap.addTo(netAssess.map);
+})
+
+netAssess.layerGroups.sites.on("decorrelate", function(event) {
+  document.getElementById("cormapSite").updateAnchor(null);
+  netAssess.layerGroups.cormap.clearLayers();
+  netAssess.map.removeLayer(netAssess.layerGroups.cormap);
+})
+
+netAssess.updateCorLayer = function(data) {
+  var layer = netAssess.layerGroups.cormap,
+  style = {radius: 8, stroke: true, weight: 1, opacity: 1, color: "#000", fill: true, fillOpacity: 1},
+  param = $("#paramOfInterest").select2("val");
+  layer.clearLayers();
+  
+  var min = Math.min.apply(Math, data.cor);
+  var max = Math.max.apply(Math, data.cor);
+  
+  max = Math.max(Math.abs(min), Math.abs(max));
+  
+  function colorCalc(cor) {
+    var col;
+    if(cor > 0.95) {
+      col = "#E41A1C";
+    } else if(cor > 0.9) {
+      col = "#FF7F00";
+    } else if(cor > 0.8) {
+      col = "#FFFF33";
+    } else if(cor > 0.7) {
+      col = "#4DAF4A";
+    } else if(cor > 0.6) {
+      col = "#377EB8";
+    } else {
+      col = "#984EA3";
+    }
+    return col;
+  }
+  
+  netAssess.layerGroups.sites.eachLayer(function(site) {
+    
+    if(site.keyCheck(data.site)) {
+      
+      for(var i = 0; i < site.properties.key.length; i++) {
+        var n = data.site.indexOf(site.properties.key[i])
+        if(n != -1) {
+          break;
+        }
+      }
+      
+      style.fillColor = colorCalc(data.cor[n])
+      
+      var mark = L.circleMarker(site._latlng, style), po, id = ""
+
+      for(var i = 0; i < site.properties.site_id.length; i++) {
+        id = id + site.properties.site_id[i] + "<br />"
+      }
+                
+      po = "<span class = 'popup-text'><h4 class = 'header'>Correlation Information</h4>"
+      po = po + "<center><table class = 'popup-table bias'>"
+      po = po + "<tr><td>Site ID</td><td>" + id + "</td></tr>"
+      po = po + "<tr><td>Pearson Correlation</td><td>" + data.cor[n] + "</td></tr>"
+      po = po + "<tr><td>Relative Difference</td><td>" + data.dif[n] + "</td></tr>"
+      po = po + "<tr><td>Distance</td><td>" + data.dis[n] + " km</td></tr>"
+      po = po + "</table></span>"
+      
+      mark.bindPopup(po, {minWidth: 150})
+      
+      layer.addLayer(mark)
+      
+    }
+  })
+  
+  netAssess.loading.hide();  
+}
 
 netAssess.updateBiasLayer = function(data) {
   
@@ -636,8 +729,7 @@ $("#resetAppButton").on("click", function() {
     }
     netAssess.map.removeLayer(netAssess.overlays.o3);
     netAssess.map.removeLayer(netAssess.overlays.pm25);
-    netAssess.map.removeLayer(netAssess.layerGroups.rembiasO3);
-    netAssess.map.removeLayer(netAssess.layerGroups.rembiasPM);
+    netAssess.map.removeLayer(netAssess.layerGroups.rembias);
     $("#ozoneNAAQS").select2("val", "75ppb");
     $("#areaServedClipping").select2("val", "border");
     $("#areaServedType").select2("val", "voronoi");

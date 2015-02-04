@@ -71,6 +71,7 @@ Shiny.addCustomMessageHandler("updateAreaServed", function(data) {
           netAssess.layerGroups.sites.bringToFront();
           netAssess.layerGroups.newSites.bringToFront();
           netAssess.layerGroups.rembias.bringToFront();
+          netAssess.layerGroups.cormap.bringToFront();
 				}
 			})
 			.on("mouseout", function(e) {
@@ -99,6 +100,7 @@ Shiny.addCustomMessageHandler("updateAreaServed", function(data) {
     netAssess.layerGroups.sites.bringToFront();
     netAssess.layerGroups.newSites.bringToFront();
     netAssess.layerGroups.rembias.bringToFront();
+    netAssess.layerGroups.cormap.bringToFront();
     netAssess.loading.hide();
       
   }
@@ -124,4 +126,8 @@ Shiny.addCustomMessageHandler("loading", function(data) {
   } else {
     netAssess.loading.hide();
   }
+})
+
+Shiny.addCustomMessageHandler("updateCorMap", function(data) {
+  netAssess.updateCorLayer(data)
 })
