@@ -63,8 +63,26 @@
 			
 			<div class = "col-xs-9">
 				<h1 class = "page-header bs-color"><i class="fa fa-info-circle fa-2x"></i> About</h1>
-				<section id = "" class = "group">
-				
+				<p>The NetAssess app was developed by a <a href = "http://www.ladco.org/">LADCO</a> workgroup consisting of people from Indiana, Minnesota, and Michigan. It is an update of, and improvement to, the <a href = "http://www.epa.gov/ttnamti1/network-assessment.html">original Network Assessment tools</a> developed by Mike Rizzo for the 2010 5-year Network Assessment. This tool is open source and all source code is available on <a href = "https://github.com/LADCO/NetAssessApp">GitHub</a>. 
+				<section id = "software" class = "group">
+					<h3>Software</h3>
+					<p>All software used to develop the NetAssess App is <a href = "http://en.wikipedia.org/wiki/Free_and_open-source_software">free and open source</a>. All code for the app as well as this website describing it are available on <a href = "https://github.com/LADCO/NetAssessApp">GitHub</a>. 
+					<ul>
+						<li><a href = "http://www.r-project.org/">R</a> is the backbone of the NetAssess app. Most calculations and spatial statistics are done on the serverside inside R.</li>
+						<li><a href = "http://shiny.rstudio.com/">Shiny</a> is what makes the NetAssess app possible. It is an R package that makes it easy to create interactive websites using R on the server to handle processing of data.</li>
+						<li><a href = "http://leafletjs.com/">Leaflet</a> is a javascript library that makes making online interactive maps easier. It is the basis for all the map features within NetAssess. There are also many plugins that extend the capabilities of leaflet.
+							<ul>
+								<li><a href = "https://github.com/Leaflet/Leaflet.draw">Leaflet.draw</a> is used to draw and manipulate polygons on a Leaflet map. NetAssess uses it to allow the user to draw their own area of interest.</li>
+								<li><a href = "https://github.com/aratcliffe/Leaflet.contextmenu">Leaflet.contextmenu</a> is used by NetAssess to add custom right-click menus to the site markers, allowing the user to select/deselect or hide individual monitors.</li>
+								<li><a href = "https://github.com/turbo87/leaflet-sidebar/">leaflet-sidebar</a> is used to create the sidebars that contain additional options and information in the app.</li>
+								<li><a href = "https://github.com/CliffCloud/Leaflet.EasyButton">Leaflet.EasyButton</a> is used to create the buttons that control the sidebars.</li>
+								<li><a href = "https://github.com/Esri/esri-leaflet">esri-leaflet</a> provides the basemaps for NetAssess</li>
+							</ul>
+						<li><a href = "http://jquery.com/">jQuery</a> simplifies coding of several aspects of NetAssess and is a required component for Shiny.</li>
+						<li><a href = "http://select2.github.io/select2/">Select2</a> is a jQuery plugin that makes select boxes (dropdowns) more useful. It was used for the parameter of interest dropdown in the menubar and the predefined area of interest dropdown.</li>
+						<li><a href = "http://fortawesome.github.io/Font-Awesome/">Font Awesome</a> is an icon font that was used for several of the icons in the menu bar and elsewhere.</li>
+						<li><a href = "http://glyphicons.com/">Glyphicons</a> is another icon pack that was used for the draw area of interest buttons.</li>
+					</ul>
 				</section>
 				
 			</div>

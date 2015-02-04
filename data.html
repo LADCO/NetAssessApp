@@ -12,6 +12,15 @@
 	<link href="font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
 	<script src="holder/holder.js"></script>
+	
+	<style>
+		dt {
+			font-size: 1.2em;
+			margin-top: 10px;
+		}
+		
+	</style>
+	
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -63,8 +72,27 @@
 			
 			<div class = "col-xs-9">
 				<h1 class = "page-header bs-color"><i class="fa fa-file-text-o fa-2x"></i> Data</h1>
-				<section id = "" class = "group">
-				
+				<p>Below find links to the data the raw data that the NetAssess App uses. All of these files are available on <a href = "https://github.com/LADCO/NetAssessApp">NetAssess's GitHub page</a> and are included here as a convenience.</p> 
+				<section id = "data" class = "group">
+					<dl>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/data/netassess.sqlite">netassess.sqlite</a></dt>
+						<dd>An sqlite database that contains site and monitor records compiled from the "Site and Monitor Records" file available <a href = "http://www.epa.gov/ttn/airs/airsaqs/detaildata/downloadaqsdata.htm">here</a>. The file used in this version of NetAssess was dated 4/2/14. This database also contains daily concentration records for ozone and PM<sub>2.5</sub> and yearly design values for all criteria pollutants acquired through EPA's AQS system.</dd>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/data/tracts.rda">tracts.rda</a></dt>
+						<dd>An rdata file that consists of a data.frame containing demographic data and the centroid for each 2010 census tract. This data is used to compile the area served statistics.</dd>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/data/usborder.rda">usborder.rda</a></dt>
+						<dd>An rdata file that contains a spatialPolygons object. This object is an outline of the United States and is used to clip the area served polygons at the US border.</dd>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/www/data/sites.geojson">sites.geojson</a></dt>
+						<dd>A geojson file that contains basic information about each monitoring site in the network. This file is built programmatically from the netassess.sqlite database when the app is started.</dd>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/pm25_35.png">pm25_35.png</a></dt>
+						<dd>A png image depicting exceedence probability for PM<sub>2.5</sub> based on a threshold of 35 &mu;g/m<sup>3</sup>. Used as an overlay in the app.</dd>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/o3_75.png">o3_75.png</a></dt>
+						<dd>A png image depicting exceedence probability for Ozone based on a threshold of 0.075 ppm. Used as an overlay in the app.</dd>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/o3_70.png">o3_70.png</a></dt>
+						<dd>A png image depicting exceedence probability for Ozone based on a threshold of 0.070 ppm. Used as an overlay in the app.</dd>
+						<dt><a href = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/o3_65.png">o3_65.png</a></dt>
+						<dd>A png image depicting exceedence probability for Ozone based on a threshold of 0.065 ppm. Used as an overlay in the app.</dd>
+						<dt><a href = ""></a></dt>
+						<dd></dd>
 				</section>
 				
 			</div>

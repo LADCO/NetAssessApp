@@ -19,6 +19,36 @@
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 	
+	<style>
+	
+		#menubarHelp dt > div {
+			display: inline-block;
+			width: 40px;
+			height: 40px;
+			vertical-align: bottom;
+			background-color: #2C3E50;
+			width: 40px;
+			height: 40px;
+			line-height: 40px;
+			font-size: 24px;
+			color: white;
+			text-align: center;
+		}
+		
+		#menubarHelp dt {
+			color: #2C3E50;
+			font-size: 1.25em;
+			border-bottom: solid #2C3E50 2px;
+			margin-bottom: 5px;
+		}
+	
+		#menubarHelp dd {
+			padding-left: 45px;
+			margin-bottom: 15px;
+		}
+		
+	</style>
+	
   </head>
   <body>
 
@@ -63,8 +93,42 @@
 			
 			<div class = "col-xs-9">
 				<h1 class = "page-header bs-color"><i class="fa fa-question fa-2x"></i> Help</h1>
-				<section id = "" class = "group">
-				
+				<p>This page contains more detailed information about how to use the NetAssess app than can be found in the app itself. If you find something is missing or unclear please <a href = "contact.html">contact us</a> and let us know.</p>
+				<section id = "menubar" class = "group">
+					<h3>Menu Bar Buttons</h3>
+					<p>The menu bar is the primary way you access the functionality of the NetAssess app. It gives you access to most tools and is where you will go to download any data you wish to take from the app for further processing.
+					
+					<dl id = "menubarHelp">
+						
+						<dt><div><i class = "fa fa-crosshairs"></i></div> Set Area of Interest</dt>
+						<dd>Opens a dialog that allows you to define the area you want to examine. You can draw your own or select a state, CBSA, or CSA.</dd>
+					
+						<dt><div><i class = "fa fa-plus-circle"></i></div> Add New Site</dt>
+						<dd>Allows placement of new sites. Click the button, then click the location of the new site. A dialog will then appear that allows you to set information about the new site.</dd>
+					
+						<dt><div><img src = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/area_served.png" /></div> Calculate Area Served</dt>
+						<dd>Calculates the area closer to each monitor than any other monitor and adds those polygons to the map. You can click on the polygons to see additional information about the area.</dd>
+					
+						<dt><div><i class = "fa" style = "font-weight: bold; position: relative;">&rho;</i></div> View Correlation Matrix</dt>
+						<dd>Generates a correlation matrix that contains correlations, distance between monitors, and relative differences.</dd>
+					
+						<dt><div><i class = "fa fa-minus-square"></i></div> Calculate Removal Bias</dt>
+						<dd>Estimates the concentration at each monitors location based on surrounding monitors, then compares it to the actual concentrations at the monitor.</dd>
+						
+						<dt><div><i class = "fa fa-binoculars"></i></div> Zoom to Area of Interest</dt>
+						<dd>Zoom the map to your area of interest.</dd>
+						
+						<dt><div><img src = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/cont_us.png" /></div> Zoom to Continental US</dt>
+						<dd>Zoom out to view the entire Continental United States.</dd>
+						
+						<dt><div><i class = "fa fa-download"></i></div> Download Data</dt>
+						<dd>Open a dialog that allows you to download csv files of raw data about your area of interest.</dd>
+						
+						<dt><div><i class = "fa fa-undo"></i></div> Reset App</dt>
+						<dd>Reset the map to its original state.</dd>
+
+					</dl> 
+
 				</section>
 				
 			</div>
