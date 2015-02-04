@@ -80,7 +80,14 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 			<nav class = "col-xs-3 sbs-sidebar">
 				<ul id = "sidebar" class = "nav nav-stacked fixed">
 					<li><a href = "#areaserved">Area Served</a></li>
-					<li><a href = "#cormat">Correlation Matrices</a><li>
+					<li><a href = "#cormat">Correlation Matrices</a>
+						<ul class = "nav nav-stacked">
+							<li><a href = "#cormat_graphic">Graphic</a></li>
+							<li><a href = "#cormat_csv">Downloadable CSV File</a></li>
+							<li><a href = "#cormat_data">Data</a></li>
+							<li><a href = "#cormat_acknowledge">Acknowledgments</a>
+						</ul>
+					<li>
 					<li><a href = "#exprob">Exceedence Probabilities</a>
 						<ul class = "nav nav-stacked">
 							<li><a href = "#exprob_maps">Surface Probability Maps</a></li>
@@ -91,7 +98,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 							<li><a href = "#exprob_references">References</a></li>
 						</ul>
 					</li>
-					<li><a href = "#removebias">Removal of Bias</a></li>
+					<li><a href = "#removebias">Removal Bias</a></li>
 				</ul>
 			</nav>
 			
@@ -109,10 +116,29 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 				</section>
 				<section id = "cormat" class = "group">
 					<h2>Correlation Matrices</h2>
-					<p>This is where we will talk about the correlation matrices.</p>
-					<p>Proin viverra tellus sit amet magna porttitor scelerisque. In at diam augue. Nam non ex at neque finibus sodales vitae at lectus. Donec a mattis quam, pellentesque suscipit nibh. Aliquam sed malesuada nunc, ac auctor sapien. Vivamus viverra, leo eu pretium elementum, nisi diam pellentesque leo, ut imperdiet eros ante eu orci. Nunc efficitur sem porta sapien aliquam, a convallis quam pulvinar. Donec scelerisque neque sit amet massa mattis, ac pellentesque lacus ultricies. Etiam nec augue blandit, tincidunt nunc vitae, maximus neque. Cras ut tristique est. Curabitur placerat et metus sed sagittis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus mattis augue sit amet urna posuere, ut cursus odio efficitur. </p>
-					<p>Maecenas non rutrum neque, consequat condimentum ligula. Sed dignissim, tellus feugiat commodo pellentesque, nulla ligula porttitor odio, ac pulvinar arcu est ut nunc. Sed maximus maximus neque vel pulvinar. Vivamus porttitor vitae nibh sed sollicitudin. Mauris libero eros, dignissim et cursus vitae, maximus pellentesque enim. In sollicitudin est rhoncus, lobortis lacus quis, egestas neque. Sed sodales lacinia ultricies. Pellentesque volutpat libero ut massa laoreet congue. Integer consectetur semper diam. Curabitur est augue, imperdiet id libero eu, aliquet pretium massa. Suspendisse ullamcorper nulla in mi luctus, varius sollicitudin eros porta. Cras sed tempor ex, nec dictum turpis. Integer aliquam aliquet aliquam. Ut hendrerit rutrum libero sit amet vestibulum. Pellentesque purus mauris, mollis quis semper tempor, ultricies ut mauris. </p>
-					<p>Sed blandit non lorem ut efficitur. Nunc a mattis dui, non imperdiet ante. Donec sit amet sapien ac risus sagittis laoreet a eu ante. Aliquam erat volutpat. Etiam id venenatis mauris. Nulla eget congue magna. Aenean nec semper mi. Donec tellus nunc, elementum a pulvinar eu, volutpat eget mauris. </p>
+					<p>The Correlation Matrix tool calculates and displays the correlation, relative difference, and distance between pairs of sites within a user selected set of air monitoring sites. Within the NetAssess App the Correlation Matrix Tool generates a graphical display and a downloadable CSV file which summarize the results for each selected site pair.  The purpose of this tool is to provide a means of determining possible redundant sites that could be removed.  Possible redundant sites would exhibit fairly high correlations consistently across all of their pairings and would have low average relative difference despite the distance.  Usually, it is expected that correlation between sites will decrease as distance increases.  However, for a regional air pollutant such as ozone, sites in the same air shed can have very similar concentrations and be highly correlated.  More unique sites would exhibit the opposite characteristics.  They would not be very well correlated with other sites and their relative difference would be higher than other site to site pairs.</p>
+					<div id = "cormat_graphic" class = "subgroup">
+						<h3>Graphic</h3>
+						<p>The Correlation Matrix tool generates a graphical display that summarizes the correlation, relative difference and distance between pairs of monitoring sites. Within the graphical display, the shape of the ellipses represents the Pearson squared correlation between sites. Circles represent zero correlation and straight diagonal lines represent a perfect correlation. </p>
+						<img style = "display: block; text-align: center; width: 60%; margin: auto;" src = "img/cormat_graphic.png" />
+						<p>The correlation between two sites quantitatively describes the degree of relatedness between the measurements made at two sites.  That relatedness could be caused by various influences including a common source affecting both sites to pollutant transport caused meteorology.  The correlation, however, may indicate whether a pair of sites is related, but it does not indicate if one site consistently measures pollutant concentrations at levels substantially higher or lower than the other.  For this purpose, the color of the ellipses represents the average relative difference between sites where the daily relative difference is defined as:</p>
+						<img style = "display: block; text-align: center; margin: auto; padding-top: 20px; padding-bottom: 20px;"src = "img/cormat_reldif_eq.png" />
+						<p>where s1 and s2 represent the ozone concentrations at sites one and two in the pairing, abs is the absolute difference between the two sites and avg is the average of the two site concentrations.  The average relative difference between the two sites is an indicator of the overall measurement similarity between the two sites.  Site pairs with a lower average relative difference are more similar to each other than pairs with a larger difference.  Both the correlation and the relative difference between sites are influenced by the distance by which site pairs are separated.  Usually, sites with a larger distance between them will generally be more poorly correlated and have large differences in the corresponding pollutant concentrations.  The distance between site pairs in the correlation matrix graphic is displayed in kilometers in the middles of each ellipse.</p>
+					</div>
+					<div id = "cormat_csv" class = "subgroup">
+						<h3>Downloadable CSV File</h3>
+						<p>The accompanying CSV file provides information about the individual site pairings including the summary statistics for the Pearson squared correlation (r), the number of valid pairs used in the analysis, the average relative difference calculations, and the distance between the sites.</p>
+					</div>
+					<div id = "cormat_data" class = "subgroup">
+						<h3>Data</h3>
+						<p>The Correlation Matrix tool uses daily summary pollutant concentration data for ozone and fine particles collected between January 1, 2011 and December 31, 2013. Data was retrieved using the AQS AMP 435 Daily Summary Report. </p>
+						<p>For ozone, the correlation matrix tool calculates a Pearson Correlation (r) for all valid 8-hour average ozone concentration pairs (DURATION CODE=W, DAILY CRITERIA IND=Y).  In the AMP 435 Report, the daily maximum 8-hour ozone concentration is stored in the field labeled “MAX VALUE”. Individual monitoring sites are identified using the AQS Site ID, which is a combination of the STATE CODE, COUNTY CODE, and SITE ID fields (XX-XXX-XXXX). If a site has more than one monitor collecting ozone data, the daily maximum 8-hour ozone concentration is the average of all valid results for that site on that date.</p>
+						<p>For PM2.5, the correlation matrix tool calculates Pearson Correlations (r) for all valid 24-hour fine particle concentration pairs stored under AQS parameter codes 88101 (PM2.5 Local Conditions - FRM/FEM/ARM) or 88502 (Acceptable PM2.5 AQI & Speciation Mass). The correlation matrix tool allows users to calculate correlations between all monitors reporting data under parameter code 88101 or 88502. The tool does not allow users to calculate correlations across these parameter codes. For parameter code 88101, within the settings menu of the NetAssess app, users can select whether correlations should be calculated using data from FRM monitors only, FEM monitors only, or all available data stored under parameter code 88101 (FRM and FEM data).  Individual monitoring sites are identified using the AQS Site ID, which is a combination of the STATE CODE, COUNTY CODE, and SITE ID fields (XX-XXX-XXXX). If a site has more than one monitor collecting PM2.5 data, the daily average PM2.5 concentration is the average of all valid results for that site on that date.</p>
+					</div>
+					<div id = "cormat_acknowledge" class = "subgroup">
+						<h3>Acknowledgments</h3>
+						<p>The Correlation Matrix Tool included in the NetAssess App is a modification of the CorMat tool included in the <a href = "http://www.epa.gov/ttnamti1/network-assessment.html" target = "_blank">original Network Assessment Tools</a> developed by Mike Rizzo for the 2010 5-year Network Assessment. </p>
+					</div>
 				</section>
 				<section id = "exprob" class = "group">
 					<h2>Exceedence Probabilities</h2>
@@ -177,11 +203,8 @@ prob</code></pre>
 					</div>
 				</section>
 				<section id = "removebias" class = "group">
-					<h2>Removal of Bias</h2>
-					<p>This is where we will talk about the Removal of Bias tool.</p>
-					<p>Etiam a metus vel ligula finibus ultrices sit amet at justo. Aliquam gravida, magna eget lobortis suscipit, neque nibh laoreet diam, vitae sagittis lorem dui vel magna. Donec convallis gravida diam vel pulvinar. Etiam varius, mauris id semper egestas, mauris lorem eleifend justo, venenatis facilisis ipsum elit sit amet eros. Morbi ac libero vitae sem feugiat feugiat. Aenean eu eros ullamcorper, dignissim justo at, gravida massa. Aliquam dapibus pulvinar urna at commodo. Donec maximus vitae risus non accumsan. Suspendisse ut lectus condimentum, ullamcorper nunc sed, luctus odio. Integer et efficitur sapien. Suspendisse vestibulum luctus mauris, in vulputate orci aliquet non. Suspendisse tristique lacus erat, ut bibendum purus congue efficitur. </p>
-					<p>Sed elementum fermentum ipsum, a viverra eros cursus sit amet. Suspendisse eu sollicitudin est, eu euismod nisl. Mauris ac aliquet orci. Suspendisse eu orci a massa tincidunt faucibus ac nec neque. Vestibulum mauris ipsum, consequat sit amet semper at, sodales convallis elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur venenatis purus mauris, ut ultricies turpis pulvinar ut. Pellentesque vel lorem tempus, ultrices ipsum nec, euismod metus. Aliquam sollicitudin lacinia porttitor. Nunc vehicula, tellus quis tempor tincidunt, tellus metus lacinia nisi, id varius nisi ex id nisl. Duis malesuada vestibulum sem, nec porttitor urna lacinia et. Suspendisse accumsan vehicula est sed venenatis. </p>
-					<p>Cras risus urna, blandit vitae egestas eu, suscipit eget tellus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vestibulum sodales leo. Praesent turpis urna, lacinia eu bibendum nec, semper id nisi. Phasellus lacus leo, sodales consectetur nisl dapibus, aliquet condimentum sapien. Etiam neque turpis, congue quis tempor at, elementum interdum ipsum. Nunc imperdiet nunc in dui bibendum, non ultricies mauris tincidunt.</p>
+					<h2>Removal Bias</h2>
+					<p>The removal bias tool is meant to aid in determining redundant sites. The bias estimation uses the nearest neighbors to each site to estimate the concentration at the location of the site if the site had never existed. This is done using the Voronoi Neighborhood Averaging algorithm with inverse distance squared weighting. The squared distance allows for higher weighting on concentrations at sites located closer to the site being examined. The bias was calculated for each day at each site by taking the difference between the predicted value from the interpolation and the measured concentration. A positive average bias would mean that if the site being examined was removed, the neighboring sites would indicate that the estimated concentration would be larger than the measured concentration. Likewise, a negative average bias would suggest that the estimated concentration at the location of the site is smaller than the actual measured concentration.</p>
 				</section>
 			</div>
 			
