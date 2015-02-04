@@ -1,215 +1,347 @@
-* {
-  box-sizing: border-box;
-}
-
 body {
-	
-	margin: 0px;
-	font-family: Arial, sans-serif;
-
-}
-
-header {
-  
-  position: absolute;
-  top: 0px;
-	left: 0px;
-	width: 100%;
-	height: 50px;
-	line-height: 50px;
-	box-shadow: 0 3px 2px -2px rgba(0,0,0,0.4);
-  text-align: justify;
-  letter-spacing: 1px;
-  background: #2c3e50;
-  color: #fff;
-}
-
-.right-items {
-  display: inline-block;
-  line-height: 30px;
-  float: right;
-  height: 30px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  margin-right: 10px;
-}
-
-.right-items span:not(.onoffswitch-switch) {
-  display: inline-block;
-  height: 30px;
-  vertical-align: top;
-}
-
-.right-items > span {
-  margin-left: 10px;
-}
-
-.right-items .na-button {
-  width: 30px;
-  text-align: center;
-  background: white;
-  color: #2C3E50;
-  cursor: pointer;
-}
-
-.right-items .na-button-group .na-button {
-  width: 60px;
+  font-family: 'Open Sans', sans-serif;
+  padding: 0px;
   margin: 0px;
-  font-size: 12px;
-  color: #2C3E50;
-  border-right: solid 1px #2C3E50;
-}
-
-.right-items .na-button-group .na-button:first-child {
-  border-right: solid 1px #2C3E50;
-}
-
-.right-items .na-button-group .na-button.na-active {
-  font-weight: bold;
-  background: #DDD;
-}
-
-div.na-trigger{
-  width: 50px;
-  height: 50px;
-  line-height: 50px;
-  display: inline-block;
-  text-align: center;
-	box-shadow: 2px 0 3px -2px rgba(255,255,255,0.4);
-	font-size: 25px;
-}
-
-div.na-trigger a{
-	display: block;
-	cursor: pointer;
-	width: 50px;
-}
-
-div.na-trigger a:hover {
-  color: #CACED3;
-}
-
-span.na-main-title {
-  padding-left: 10px;
-  font-weight: bold;
-	font-size: 21px;
-}
-
-span.na-sub-title {
-	font-weight: normal;
-	font-size: 14px;
-	padding-left: 10px;
-}
-
-input.na-search {
-  vertical-align: top;
-  text-align: left;
-  border: none;
-  color: #6F6F6F;
-  height: 30px;
-  width: 150px;
-  font-size: 12px;
-  margin: 0px;
-}
-
-input.na-search:focus {
-  border: none;
-  box-shadow: none;
-  outline: none;
-}
-
-.map-icon {
-  
-  width: 7px !important;
-  height: 7px !important;
-  background-color: rgb(192, 0, 0);
-  border: solid 1px black;
-  border-radius: 10px;
-  box-shadow: 1px 1px 1px 1px rgba(128, 128, 128, 0.5);
-  opacity: 0.67;
-  
+  overflow: hidden;
+  background-color: rgba(208, 207, 212, 1);
 }
 
 #map {
-
   position: absolute;
-	top: 50px;
-	left: 0px;
-	width: 100%;
-	
+  left: 0px;
+  top: 40px;
+  z-index: 5;
 }
 
-.na-sidebar {
-	position: absolute;
-	padding-top: 49px;
-	left: 0px;
-	top: 0px;
-	width: 300px;
-	background-color: white;
-	box-shadow: 2px 2px 2px -2px rgba(0,0,0,0.4);
-	overflow: hidden;
+#menubar {
+  font-family: 'Roboto Condensed', sans-serif;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  line-height: 40px;
+  color: #FFFFFF;
+  background-color: #2C3E50;
+/*  box-shadow: 0px 3px 2px -1px rgba(44,62,80,0.5);*/
+  z-index: 6;
 }
 
-.na-open {
-	height: 100%;
-	transition: height 500ms;
-	-webkit-transition: height 500ms;
-	-moz-transition: height 500ms;
-	-o-transition: height 500ms;
+#appTitle {
+  display: inline-table;
+  line-height: 16px;
+  height: 40px;
+  border-collapse: collapse;
+  color: #FFFFFF;
+  padding-left: 10px;
 }
 
-.na-closed {
-	height: 0px;
-	transition: height 300ms;
-	-webkit-transition: height 300ms;
-	-moz-transition: height 300ms;
-	-o-transition: height 300ms;
+#appTitle .title {
+  font-size: 20px;
+  font-weight: bold;
+  padding-left: 10px;
+  vertical-align: bottom; 
 }
 
-.na-sidebar-group-heading {
-	width: 100%;
-	height: 40px;
-	line-height: 40px;
-	background-color: #F3F3F3;
-	background-image: radial-gradient(0, rgba(0,0,0,0.15), rgba(0,0,0,0));
-	border-top: 1px solid #CCC;
-	border-bottom: 1px solid #CCC;
+#appTitle .version {
+  font-size: 13px;
+  font-weight: normal;
+  text-align: left;
 }
 
-.na-sidebar-group-heading a {
-	display: block;
-	font-size: 17px;
-	color: #6F6F6F;
-	vertical-align: middle;
-	height: 100%;
-	width: 100%;
-	padding-left: 5px;
-	cursor: pointer;
+#appTitle .subtitle {
+  line-height: 11px;
+  font-size: 11px;  
+  padding-left: 10px;
+  vertical-align: top;
 }
 
-.na-sidebar-group-content {
-	display: block;
-	box-sizing: border-box;
-	overflow: hidden;
+#menuControls {
+  display: inline-block;
+  float: right;
+  padding-right: 10px;
+  height: 40px;
+  vertical-align: text-top;
 }
 
-.na-sidebar-group-content > * {
-	padding-left: 5px;
+.menu-bar-item {
+  display: inline-block;
+  height: 100%;
+  min-width: 40px;
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  background-color: #476481;
+  background: none;
+  overflow: hidden;
 }
 
-.na-sidebar-group-open {
-	max-height: 1080px;
-	transition: max-height 500ms;
-	-webkit-transition: max-height 500ms;
-	-moz-transition: max-height 500ms;
-	-o-transition: max-height 500ms;
+.menu-bar-item.menu-bar-button {
+  cursor: pointer;
+  line-height: 40px;
+  padding-top: 8px;
+  text-align: center;
+  font-size: 24px;
+  color: #FFF;
 }
 
-.na-sidebar-group-closed {
-	max-height: 0px;
-	transition: max-height 500ms;
-	-webkit-transition: max-height 500ms;
-	-moz-transition: max-height 500ms;
-	-o-transition: max-height 500ms;
+.menu-bar-item.menu-bar-button:hover {
+  background-color: #476481;  
 }
 
+.menu-bar-item > div {
+  padding-top: 6px;
+}
+
+.hidden-marker {
+  visibility: hidden;
+}
+
+.header {
+  color: #2c3e50;
+  font-weight: 700;
+	font-size: 1.1em;
+  line-height: 1.1em;
+	margin-bottom: 0px;
+	padding-bottom: 2px;
+	border-bottom: solid 1px rgba(44,62,80,0.75);
+	box-shadow: 0px 1px 1px -1px rgba(44,62,80,0.5);
+}
+
+/* Special Classes for Area Served */
+  
+/* Free Form area served buttons */
+  .draw-buttons {
+    width: 100%;
+    margin: auto;
+  	text-align: center;
+    padding-bottom: 20px;
+  }
+  
+  .draw-button {
+    width: 50px;
+  	height: 50px;
+  	text-align: center;
+  	vertical-align: middle;
+  	padding: 5px;
+  	margin: 0px;
+  }
+
+/* Predefined Area Selection Classes */
+  .area-select {
+    width: 100%;
+  	margin: auto;
+  	text-align: center;
+  }
+  
+  .area-select select {
+  	margin-top: 5px;
+  	width: 100%;
+  }	
+  
+/* Popup Classes */
+
+.popup-table {
+  width: 200px;
+  margin-top: 10px;
+  font-size: 12px;
+  border-collapse: collapse;
+}
+
+.popup-table td {
+  border-bottom: solid 1px lightgrey;
+  
+}
+
+.popup-table tr td:first-child {
+  width: 30%;
+  text-align: right;
+  font-weight: bold;
+  vertical-align: top;
+  padding-right: 5px;
+  border-right: solid 1px lightgrey;
+}
+
+.popup-table.bias tr td:first-child {
+  width: 60%;
+}
+
+.popup-table.bias tr td:last-child {
+  width: 40%;
+}
+
+.popup-table tr td:last-child {
+  width: 70%;
+  padding-left: 5px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.popup-trend {
+  margin-top: 5px;
+}
+
+.popup-trend > img {
+  width: 200px;
+  height: 100px;
+  cursor: pointer;
+  background: grey;
+}
+  
+div.loading {
+    z-index: 300;
+    position: absolute;
+    left: 48%;
+    top: 48%;
+    background-color: #EEE;
+    border: solid 1px #CCC;
+    border-radius: 3px; 
+    box-shadow: 3px 3px 3px #555;
+    padding: 10px;
+    font-size: 50px;
+    font-weight: bold;
+    color: #555;
+}
+  
+div.loading.hidden {
+  display: none;
+}
+
+#alert {
+  
+  position: absolute;
+  top: 50px;
+  left: 25%;
+  z-index: 1;
+  padding: 15px;
+  background-color: rgba(217,237,247, 0.6);
+  border: 1px solid #31708F;
+  border-radius: 4px;
+  width: 50%;
+  margin: auto;
+  color: #31708F;
+  
+}
+
+#alert-heading {
+  font-size: 1.2em;
+  padding-bottom: 5px;
+  padding-top: 0px;
+  font-weight: bold;
+}
+
+#alert-close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+}
+
+#alert:hover {
+  background-color: rgb(217,237,247);
+}
+
+#alert.alert-open {
+  z-index: 250 !important;
+}
+
+.area-info-text {
+  padding-top: 10px;
+  padding-left: 5px;
+}
+
+/* This fixes the problem of the image overlays disappearing when you zoom in 
+Found here: https://github.com/Leaflet/Leaflet/issues/2282 */
+.leaflet-container img.leaflet-image-layer {
+  max-width: none !important;
+}
+
+/* Fixes misaligned icons in easy buttons */
+.leaflet-bar a > i.fa {
+  line-height: 26px !important;
+}
+
+.shiny-download-link {
+  text-decoration: none;
+  color: #444;
+  text-align: left;
+}
+
+.shiny-download-link > i {
+  font-size: 20px;
+}
+
+.shiny-download-link:hover {
+  text-decoration: underline;
+  color: #111;
+}
+
+#downloadFloater table {
+  border-collapse: collapse;
+  width: 90%;
+}
+#downloadFloater td:first-child {
+  padding: 5px;
+  width: 30px;
+  vertical-align: bottom;
+  text-align: left;
+}
+#downloadFloater td:last-child {
+
+}
+#downloadFloater td {
+  border-bottom: solid black 1px;
+}
+
+tr.disabled {
+  background-color: #EEE;
+  color: #999;
+}
+
+tr.disabled a {
+  pointer-events: none;
+  color: #999;
+}
+
+.sidebar > h1 {
+  color: #2C3E50;
+  padding-bottom: 0px;
+  border-bottom: solid 2px rgba(44,62,80,0.75);
+	box-shadow: 0px 1px 1px -1px rgba(44,62,80,0.5);
+
+}
+
+.sidebar > h1 > i {
+  font-size: 1.5em;
+}
+
+#menubarHelp tr {
+  border-bottom: solid 2px rgba(44,62,80,0.75);
+  box-shadow: 0px 1px 1px -1px rgba(44,62,80,0.5);  
+}
+
+#menubarHelp td:last-child {
+  font-size: 12px;
+  padding-left: 10px;
+  padding-top: 10px;
+}
+
+#menubarHelp td:last-child > div {
+  text-align: justify;
+  padding-top: 5px;
+}
+
+#menubarHelp td:first-child > i, #menubarHelp td:first-child > div {
+  background-color: #2C3E50;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 24px;
+  color: white;
+  text-align: center;
+}
+
+#menubarHelp td:first-child img {
+  position: relative;
+  top: 8px;
+}

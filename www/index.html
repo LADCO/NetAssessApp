@@ -1,276 +1,492 @@
-<!DOCTYPE html>
-<html lang="en" class="no-js">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-		<title>NetAssess</title>
-		<meta name="description" content="A web application for assessing the US continuous air pollutant monitoring network" />
-		<meta name="keywords" content="" />
-		<meta name="author" content="Eric Bailey et al" />
-		<link rel="stylesheet" type="text/css" href="css/netassess.css" />
-		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/toggle.css" rel="stylesheet" type = "text/css" />
-	</head>
-	
-	<body>
-
-		<div id = "map"></div>
-	
-		<div id = "sidebar" class = "na-sidebar na-closed">
-			<div class = "na-inner-sidebar">
-				<div class = "na-sidebar-group">
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-rocket"></i> Area Served</a>
-					</div>
-					<div class = "na-sidebar-group-content na-sidebar-group-open">
-						<p>This is where content will go.</p>
-						<select>
-              <option value='POP2010'>2010 Population</option>
-              <option value='POP10_SQMI'>2010 Population Density</option>
-              <option value='POP2012'>2012 Population</option>
-              <option value='POP12_SQMI'>2012 Population Density</option>
-              <option value='WHITE'>White Population</option>
-              <option value='BLACK'>Black Population</option>
-              <option value='AMERI_ES'>American Eskimo Population</option>
-              <option value='ASIAN'>Asian Population</option>
-              <option value='HAWN_PI'>Hawaiian/Pacific Islander Population</option>
-              <option value='HISPANIC'>Hispanic Population</option>
-              <option value='OTHER'>"Other" Population</option>
-              <option value='MULT_RACE'>Multi-Race Population</option>
-              <option value='MALES'>Male Population</option>
-              <option value='FEMALES'>Female Population</option>
-              <option value='AGE_UNDER5'>Population Under Age 5</option>
-              <option value='AGE_5_9'>Population Age 5 to 9</option>
-              <option value='AGE_10_14'>Population Age 10 to 14</option>
-              <option value='AGE_15_19'>Population Age 15 to 19</option>
-              <option value='AGE_20_24'>Population Age 20 to 24</option>
-              <option value='AGE_25_34'>Population Age 25 to 34</option>
-              <option value='AGE_35_44'>Population Age 35 to 44</option>
-              <option value='AGE_45_54'>Population Age 45 to 54</option>
-              <option value='AGE_55_64'>Population Age 55 to 64</option>
-              <option value='AGE_65_74'>Population Age 65 to 74</option>
-              <option value='AGE_75_84'>Population Age 75 to 84</option>
-              <option value='AGE_85_UP'>Population Age 85 and Above</option>
-              <option value='MED_AGE'>Median Age</option>
-              <option value='MED_AGE_M'>Median Age - Males</option>
-              <option value='MED_AGE_F'>Median Age - Females</option>
-              <option value='HOUSEHOLDS'>Number of Households</option>
-              <option value='AVE_HH_SZ'>Average Household Size</option>
-              <option value='HSEHLD_1_M'>Single Male Households</option>
-              <option value='HSEHLD_1_F'>Single Female Households</option>
-              <option value='MARHH_CHD'>Married Households with Children</option>
-              <option value='MARHH_NO_C'>Married Households without Children</option>
-              <option value='MHH_CHILD'>Male Household with Children</option>
-              <option value='FHH_CHILD'>Female Household without Children</option>
-              <option value='FAMILIES'>Number of Families</option>
-              <option value='AVE_FAM_SZ'>Average Family Size</option>
-              <option value='HSE_UNITS'>Housing Units</option>
-              <option value='VACANT'>Vacant Housing</option>
-              <option value='OWNER_OCC'>Owner-Occupied Housing</option>
-              <option value='RENTER_OCC'>Renter-Occupied Housing</option>
-              <option value='SQMI'>Square Miles</option>
-						</select>
-					</div>
-				</div>
-				<div class = "na-sidebar-group">
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-paw"></i> Correlation Matrix</a>
-					</div>
-					<div class = "na-sidebar-group-content na-sidebar-group-closed">
-						<p>This is where content will go.</p>
-						<select>
-							<option>POP2010</option>
-							<option>POP2012</option>
-						</select>
-					</div>
-				</div>
-				<div class = "na-sidebar-group">
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-birthday-cake"></i> New Sites</a>
-					</div>
-					<div class = "na-sidebar-group-content na-sidebar-group-closed">
-						<p>This is where content will go.</p>
-						<select>
-							<option>POP2010</option>
-							<option>POP2012</option>
-						</select>
-					</div>
-				</div>
-				<div class = "na-sidebar-group">
-					<div class = "na-sidebar-group-heading">
-						<a><i class = "fa fa-fw fa-futbol-o"></i> Remove Bias</a>
-					</div>
-					<div class = "na-sidebar-group-content na-sidebar-group-closed">
-						<p>This is where content will go.</p>
-						<select>
-							<option>POP2010</option>
-							<option>POP2012</option>
-						</select>
-					</div>
-				</div>
-
-			</div>
-		</div>
+<html>
   
-    <header>
+  <head>
     
-      <div class = "na-trigger">
-        <a><i class = "fa fa-fw fa-bars"></i></a>
-      </div>
-      <span class = "na-main-title">NetAssess</span>
-			<span class = "na-sub-title">Ambient Air Monitoring Network Assessment Tool</span>
-      <span class = "right-items">
-        <span class = "na-button-group">
-          <span class = "na-button na-active">2011</span><span class = "na-button na-active">2012</span><span class = "na-button na-active">2013</span>
-        </span>
-        <span>
-          <div class="onoffswitch">
-            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
-            <label class="onoffswitch-label" for="myonoffswitch">
-              <span class="onoffswitch-inner"></span>
-              <span class="onoffswitch-switch"></span>
-            </label>
-          </div> 
-        </span>
-        <span class = "na-button" id = "na-zoom-out"><i class = "fa fa-fw fa-search-minus"></i></span>
-        <span>
-          <span class = "na-button" id = "na-zoom-in"><i class = "fa fa-search-plus fa-fw"></i></span><input type = "text" class = "na-header-element na-search" id = "na-search-input" value = "" placeholder = "Zoom to Feature"></input>
-        </span>
-      </span>
-      
-    </header>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>NetAssess</title>  
+    
+    <script type="application/shiny-singletons"></script>
+    
+    <script src="shared/jquery.js" type="text/javascript"></script>
+    <script src="shared/shiny.js" type="text/javascript"></script>
+    
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700|Roboto+Condensed:400,700' rel='stylesheet' type='text/css'>
+    
+    <link type = "text/css" rel = "stylesheet" href = "shared/shiny.css" />
+  	
+<!--    <link type = "text/css" rel = "stylesheet" href = "css/bootstrap.min.css" />
+    <link type = "text/css" rel = "stylesheet" href = "css/bootstrap-theme.min.css" /> -->
+		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.contextmenu.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/leaflet.draw.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/L.Control.Sidebar.css" />
+		<link type = "text/css" rel = "stylesheet" href = "css/font-awesome.min.css" />
+    <link type = "text/css" rel = "stylesheet" href = "css/select2.css" />
+    <link type = "text/css" rel = "stylesheet" href = "css/floaters.css" />
+    <link type = "text/css" rel = "stylesheet" href = "css/tour.css" />
+    
+    <link type = "text/css" rel = "stylesheet" href = "css/netassess.css" />
+    
+  </head>
   
-		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js"></script>
-    <script src="scripts/statebounds.js"></script>
-		<script>
-
-      $(".na-button-group .na-button").on("click", function(e) {
-        $(this).toggleClass("na-active");
-      })
-
-      $("#na-search-input").on("keypress", function(e) {
-        var key = e.which;
-        if(key == 13) {
-          var ss = this.value.toLowerCase();
-          if(ss != "") {
-            var ci = state_bounds.map(function(i) {return i.state}).indexOf(ss);
-            if(ci != -1) {
-              var bounds = state_bounds[ci];
-              
-              map.fitBounds([[bounds.south, bounds.west], [bounds.north, bounds.east]]);
-              map.setZoom(map.getZoom() + 1);
-            
-            }
-          }
-        }
-      })
-
-      var myIcon = L.divIcon({className: 'map-icon'});
-
-			function getColor(d) {
-			
-				return d > 750 ? "#800026":
-					   d > 90 ? "#E31A1C":
-					   d > 20 ? "#FD8D3C":
-									"#FED976";
-			}
-		
-			function style(feature) {
-				return {
-					fillColor: getColor(feature.properties.POP12_SQMI), 
-					weight: 1, 
-					color: "#AAA",
-					opacity: 1
-				}
-			}
-			function highlightFeature(e) {
-				var layer = e.target;
-
-				layer.setStyle({
-					weight: 5,
-					color: '#888',
-					dashArray: '',
-				});
-
-				if (!L.Browser.ie && !L.Browser.opera) {
-					layer.bringToFront();
-				}
-			}
-			
-			function resetHighlight(e) {
-				voronoi.resetStyle(e.target);
-			}
-			
-			function onEachFeature(feature, layer) {
-				layer.on({
-					mouseover: highlightFeature,
-					mouseout: resetHighlight
-				});
-			}
-			$(".na-trigger a").on("click", function(e) {
-				$("#sidebar").toggleClass("na-open").toggleClass("na-closed");
-			})
-
-      $("#na-zoom-out").on("click", function(e) {
-        map.fitBounds(us.bounds);
-      })
-
-			$(".na-sidebar-group-heading a").on("click", function(e) {
-				$(this).parent().siblings(".na-sidebar-group-content").toggleClass("na-sidebar-group-open").toggleClass("na-sidebar-group-closed");
-			})
-		
-			// Define bounds and center of continental us
-			var us = {bounds: L.latLngBounds([20, -150], [55, -50]),
-					  center: L.latLng([39.8333, -98.5833])
-					 }
-
-			function mapResize(el) {
-				document.getElementById(el).style.height = (window.innerHeight - 50) + "px"
-				document.getElementById(el).style.width = window.innerWidth + "px"
-			};
-
-			$(window).resize(function () { 
-				mapResize("map")
-			});
-
-			mapResize("map");
-
-			var map = L.map('map', {center: us.center, zoom: 5, maxBounds: us.bounds, 
-									maxZoom: 12, minZoom: 3, zoomControl: false})
-
-      L.esri.basemapLayer("Gray").addTo(map);
-      L.esri.basemapLayer("GrayLabels").addTo(map);
+  <body>
+  
+<!-- Top menubar that contains title, and most interaction controls-->
+    <div id = "menubar">
       
-			var voronoi;
-/**/
-      $.ajax({
-				dataType: "json",
-				url: "data/areatest.geojson",
-				success: function(data) {
-					voronoi = L.geoJson(data, {
-						style: style,
-						onEachFeature: onEachFeature
-					}).addTo(map);
-				}
-				}).error(function() {});
+      <table id = "appTitle">
+        <tr>
+          <td class = "title">NetAssess <span class = "version">v0.5b</span></td>
+        </tr>
+        <tr>
+          <td class = "subtitle">Ambient Air Monitoring Network Assessment Tool</td>
+        </tr>
+      </table>
+      
+      <div id = "menuControls">
+        <div class = "menu-bar-item">
+          <select id = "paramOfInterest"></select>
+        </div>
+        <div id = "aoiButton" class = "menu-bar-item menu-bar-button" title = "Set Area of Interest">
+          <i class = "fa fa-crosshairs"> </i>
+        </div>
+        <div id = "newSiteButton" class = "menu-bar-item menu-bar-button" title = "Add New Site">
+          <i class = "fa fa-plus-circle"></i>
+        </div>
+        <div id = "areaServedButton" class = "menu-bar-item menu-bar-button action-button" title = "Calculate Area Served">
+          <img src = "images/area_served.png" />
+        </div>
+        <div id = "cormatButton" class = "menu-bar-item menu-bar-button action-button" title = "View Correlation Matrix">
+          <span class = "fa" style = "font-family: serif; font-weight: bold; font-size: 24px; position: relative; top: -4px;">&rho;</span>
+        </div>
+        <div id = "rembiasButton" class = "menu-bar-item menu-bar-button action-button" title = "Calculate Removal Bias">
+          <i class = "fa fa-minus-square"></i>
+        </div>
+        <div id = "aoiZoomButton" class = "menu-bar-item menu-bar-button" title = "Zoom to Area of Interest">
+          <i class = "fa fa-binoculars"></i>
+        </div>
+        <div id = "fullExtentButton" class = "menu-bar-item menu-bar-button" title = "Zoom to Continental US">
+          <img src = "images/cont_us.png" />
+        </div>
+        <div id = "downloadDataButton" class = "menu-bar-item menu-bar-button action-button" title = "Download Data">
+          <i class = "fa fa-download"></i>
+        </div>
+        <div id = "resetAppButton" class = "menu-bar-item menu-bar-button" title = "Reset App">
+          <i class = "fa fa-undo"></i>
+        </div>
+      </div>
+      
+    </div>
+    
+<!-- SIDEBARS -->
 
-      $.ajax({
-        dataType: "json",
-        url: "data/monitors.geojson",
-        success: function(data) {
-          monitors = L.geoJson(data, {
-            pointToLayer: function(feature, latlon) {return new L.marker(latlon, {icon: myIcon}).addTo(map);},
-            onEachFeature: function(feature, layer) {
-              layer.bindPopup(feature.properties["o3.MONITOR_ID"]);
-            }
-          }).addTo(map);          
-        }
-      })
+  	<div id = "settings-sb" class = "sidebar">
+			<h1><i class="fa fa-cogs fa-fw"></i> Settings</h1>
+      <p>These setting allow you to customize how the NetAssess App works. Please see the Help file for additional information about how these setting will effect the NetAssess App.</p>
+      <p class = "header">Area Served</p>
+      <p>The area served tool allows you to compile information about the area surrounding monitoring locations.</p>
+      <table class = "options-table">
+        <tr>
+          <td><label for = "areaServedClipping">Clip Area Served Polygons on: </label></td>
+          <td>
+              <select id = "areaServedClipping">
+                <option value = "none">No Clipping</option>
+                <option value = "border" selected = selected>US Border (default)</option>
+                <option value = "aoi">Area of Interest</option>
+              </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label for = "areaServedType">Area Served Type: </label></td>
+          <td>
+              <select id = "areaServedType" disabled = disabled>
+                <option value = "voronoi" selected = selected>Voronoi Polygons</option>
+                <option value = "circles">Circles</option>
+              </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label for = "circleSize">Radius of Circles: </label></td> 
+          <td><input id = "circleSize" disable = disabled type = "text" size = 5 value = "50"/> km</td>
+        </tr>
+      </table>
+      <p class = "header">Exceedence Probability</p>
+      <p>Exceedence Probability is the probability that an area will exceed a given threshold at least one day in a year. That threshold for ozone can be adjusted below.</p>
+      <table class = "options-table">
+        <tr>
+          <td><label for = "ozoneNAAQS">Ozone Threshold: </label></td>
+          <td>
+            <select id = "ozoneNAAQS" title = "">
+              <option value = "65ppb">65 ppb</option>
+              <option value = "70ppb">70 ppb</option>
+              <option value = "75ppb" selected = selected>75 ppb</option>
+            </select>
+          </td>
+        </tr>
+      </table> 
+      <p class = "header">PM<sub>2.5</sub> Options</p>
+      <p>Parameter Code 88101 can contain both FRM and FEM data. Use this option to select which data to use for correlation matrices. <strong>Note:</strong> You will need to rerun your correlation matrix to see changes.</p>
+      <select id = "pmType">
+        <option value = "both">Use both FRM and FEM data</option>
+        <option value = "frm">Use only FRM data</option>
+        <option value = "fem">Use only FEM data</option>
+      </select>
+		</div>
+    
+    <div id = "help-sb" class = "sidebar">
+      <h1><i class="fa fa-question fa-fw"></i> Help</h1>
 
-		</script>
-	</body>
+      <p>The menu bar is the primary way you access the functionality of the NetAssess app. Below is an explanation of each button. For more extensive help see the <a href = "http://ladco.github.io/NetAssessApp/" target = "_blank">documentation site</a>.</p>
+      <p class = "header">Menu Bar Buttons</p>
+      <table id = "menubarHelp">
+        <tr>
+          <td><i class = "fa fa-crosshairs"></i></td>
+          <td><strong>Set Area of Interest</strong><div>Opens a dialog that allows you to define the area you want to examine. You can draw your own or select a state, CBSA, or CSA.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa fa-plus-circle"></i></td>
+          <td><strong>Add New Site</strong><div>Allows placement of new sites. Click the button, then click the location of the new site. A dialog will then appear that allows you to set information about the new site.</div></td>
+        </tr>
+        <tr>
+          <td><div><img src = "images/area_served.png" /></div></td>
+          <td><strong>Calculate Area Served</strong><div>Calculates the area closer to each monitor than any other monitor and adds those polygons to the map. You can click on the polygons to see additional information about the area.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa" style = "font-weight: bold; position: relative;">&rho;</i></td>
+          <td><strong>View Correlation Matrix</strong><div>Generates a correlation matrix that contains correlations, distance between monitors, and relative differences.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa fa-minus-square"></i></td>
+          <td><strong>Calculate Removal Bias</strong><div>Estimates the concentration at each monitors location based on surrounding monitors, then compares it to the actual concentrations at the monitor.</div></td>
+        </tr>     
+        <tr>
+          <td><i class = "fa fa-binoculars"></i></td>
+          <td><strong>Zoom to Area of Interest</strong><div>Zoom the map to your area of interest.</div></td>
+        </tr>     
+        <tr>
+          <td><div><img src = "images/cont_us.png" /></div></td>
+          <td><strong>Zoom to Continental US</strong><div>Zoom out to view the entire Continental United States.</div></td>
+        </tr>
+        <tr>
+          <td><i class = "fa fa-download"></i></td>
+          <td><strong>Download Data</strong><div>Open a dialog that allows you to download csv files of raw data about your area of interest.</div></td>
+        </tr>     
+        <tr>
+          <td><i class = "fa fa-undo"></i></td>
+          <td><strong>Reset App</strong><div>Reset the map to its original state.</div></td>
+        </tr>     
+        
+      </table>
+      <p class = "header">Tour</p>
+      <p>View an interactive tour of the app:</p>
+      <div style = "text-align: center"><button id = "openTour" style = 'text-align: center'>Open Tour</button></div>
+
+    </div>
+    
+    <div id = "about-sb" class = "sidebar">
+      <h1><i class="fa fa-info fa-fw"></i> About</h1>
+      The NetAssess app was developed by a <a href = "http://www.ladco.org/" target="_blank">LADCO</a> workgroup consisting of people from Indiana, Minnesota, and Michigan. It is an update of and improvement to the <a href = "http://www.epa.gov/ttnamti1/network-assessment.html" target="_blank">original Network Assessment tools</a> developed by Mike Rizzo for the 2010 5-year Network Assessment. This tool is open source and all source code is available on <a href = "https://github.com/LADCO/NetAssessApp" target="_blank">GitHub</a>.
+      <p class = "header">Credits</p>
+      <ul>
+        <li><strong>Eric Bailey</strong> - Web Application, Area Served, and New Sites</li>
+        <li><strong>Nathan Byers</strong> - Exceedence Probabilities and Removal Bias</li>
+        <li><strong>Cassie McMahon</strong> - Correlation Matrix</li>
+      </ul>
+      <p>Special thanks to Donna Kenski for facilitating the creation of this tool.</p>
+      <p class = "header">Software</p>
+      <p>Many different open source software solutions were used to create this application. Please contact <a href = "mailto:ebailey@idem.in.gov">Eric Bailey</a> if you have any questions about how any of this software was used.</p>
+      <ul>
+        <li><a href = "http://www.r-project.org/" target="_blank">R</a></li>
+        <li><a href = "http://shiny.rstudio.com" target="_blank">Shiny</a></li>
+        <li><a href = "http://leafletjs.com/" target="_blank">Leaflet</a></li>
+        <li>...</li>
+      </ul>
+    </div>    
+    
+<!-- TOUR -->
+
+    <div id = "tour" class = "tour" style = "display: none;">
+      <div class = "tour-body">
+        <div class = "header">Welcome to NetAssess!</div>
+        <div class = "content"></div>
+        <div class = "tourCookie">
+          <input type = "checkbox" id = "tourGone" />
+          <label for = "tourGone">Don't show again</label>
+        </div>
+        <button id = "tourNext">Next</button>
+        <div class = "navigation">
+          <a class = 'close icon'><i class = 'fa fa-close'></i></a>
+        </div>
+      </div>
+      <div class = "tour-arrow-border"></div>
+      <div class = "tour-arrow"></div>
+    </div>    
+    
+<!-- FLOATERS -->
+
+    <div id = "aoiFloater">
+      <p class = "header">Draw an Area of Interest</p>
+      <p>Use the buttons below to define your own area of interest:</p>
+      <div class = "draw-buttons">
+        <button id = "drawPolygonButton" class = "draw-button" title = "Draw a polygon"><img src = "images/glyphicons_096_vector_path_polygon.png" /></button>
+        <button id = "drawRectangleButton" class = "draw-button" title = "Draw a rectangle"><img src = "images/glyphicons_094_vector_path_square.png" /></button>
+        <button id = "cancelDrawButton" class = "draw-button" title = "Cancel drawing"><img src = "images/glyphicons_197_remove.png" /></button>
+      </div>
+      <div class = "header">Select Predefined Area</div>
+      <p>Select and area type with the radio buttons, then select a specific area from the dropdown menu:</p>
+      <div class = "area-select">
+  			<div id="areaSelect" class="control-group shiny-input-radiogroup">
+				  <label class="control-label" for="areaSelect"><strong>Area Type:</strong></label>
+				  <label class="radio inline" style = "display: none;">
+					<input type="radio" name="areaSelect" id="areaSelect0" value="None"/>
+					<span></span>
+				  </label>
+          <label class="radio inline">
+					<input type="radio" name="areaSelect" id="areaSelect1" value="State"/>
+					<span>State</span>
+				  </label>
+				  <label class="radio inline">
+					<input type="radio" name="areaSelect" id="areaSelect2" value="CBSA" />
+					<span>CBSA</span>
+				  </label>
+				  <label class="radio inline">
+					<input type="radio" name="areaSelect" id="areaSelect3" value="CSA" />
+					<span>CSA</span>
+				  </label>
+          <select id="areaSelectSelect"></select><button id = "areaSelectZoomButton" style = "height: 30px; width: 30px; margin-left: 10px;"><i class="fa fa-binoculars"></i></button>
+        </div>
+      </div>
+    </div>
+    
+    <div id = "newSiteFloater">
+      <table style = "margin-top: 15px;">
+        <tr>
+          <td><label for = "nsName">Site Name</label></td>
+          <td><input type = "text" name = "nsName" id = "nsName" /></td>
+        </tr>
+      </table>
+      <p class = "header">Location</p>
+      <table>
+        <tr>
+          <td><label for = "nsLat">Latitude</label></td>
+          <td><input type = "text" name = "nsLat" id = "nsLat" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsLng">Longitude</label></td>
+          <td><input type = "text" name = "nsLng" id = "nsLng" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsState">State</label></td>
+          <td><input type = "text" name = "nsState" id = "nsState" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsCounty">County</label></td>
+          <td><input type = "text" name = "nsCounty" id = "nsCounty" /></td>
+        </tr>
+        <tr>
+          <td><label for = "nsCensus">Census Tract</label></td>
+          <td><input type = "text" name = "nsCensus" id = "nsCensus" /></td>
+        </tr>
+      </table>
+      
+      <p class = "header" style = "margin-bottom: 10px;">Parameters</p>
+      
+      <select id = "newSiteParameters" multiple size = 4></select>
+      
+      <button style = "float: right; margin-top: 10px;" id = "newSiteAddButton">Add Site</button>
+      <button style = "float: right; margin-top: 10px;" id = "cancelSiteAddButton">Cancel</button>
+      
+    </div>
+        
+    <div id = "areaServedFloater">
+      <p class = "header">Monitor</p>
+      <div id = "areaServedMonitor" class = "shiny-html-output area-info-text"></div>
+      <p class = "header">Parameter</p>
+      <div id = "areaServedParameter" class = "shiny-html-output area-info-text"></div>
+      <p class = "header">Geography</p>
+      <div id = "areaServedArea" class = "shiny-html-output area-info-text"></div>
+      <p class = "header">Demographics</p>
+      <div id = "areaServedPopulation" class = "shiny-html-output area-info-text"></div>
+      <div id = "areaServedAgePlot" class = "shiny-plot-output" style = "width: 175px; height: 200px; text-align: center; display: inline-block; float: left"></div>
+      <div id = "areaServedRacePlot" class = "shiny-plot-output" style = "width: 175px; height: 200px; text-align: center; display: inline-block; float: right"></div>
+      <p class = "header">Exceedence Probability <span id = "areaServedThreshold">75ppb</span></p> 
+      <div id = "naaqsProb" class = "shiny-html-output area-info-text"></div>
+    </div>
+        
+    <div id = "cormatFloater">
+      <div id = "cormatChart" class = "shiny-plot-output" style = 'width: 100%; margin-top: 15px;'></div>
+      <p style = "font-size: 0.65em;">To save chart, right-click and select <i>Save Image as</i></p>
+    </div>
+    
+    <div id = "popupFloater">
+      <img id = "bigChart" style = 'width: 100%; margin-top: 15px;' />
+      <p style = "font-size: 0.65em;">To save chart, right-click and select <i>Save Image as</i></p>
+    </div>
+    
+    <div id = "legendFloater" style = "padding-bottom: 5px;">
+      <table style = "margin-top: 10px;">
+        <tr>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="4" cx = 12 cy = 12 fill-opacity="0.67" fill="#800000" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>Existing Site</td>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="5" cx = 12 cy = 12 fill-opacity="0.67" fill="#FF4040" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>Existing Site (selected)</td>
+        </tr>
+        <tr>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="4" cx = 12 cy = 12 fill-opacity="0.67" fill="#008000" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>New Site</td>
+          <td>
+            <svg width = "24" height = "24">
+              <g>
+                <circle r="5" cx = 12 cy = 12 fill-opacity="0.67" fill="#40FF40" stroke-width="1" stroke-opacity="0.67" stroke="#000" stroke-linecap="round" stroke-linejoin="round"></circle>
+              </g>
+            </svg>
+          </td>
+          <td>New Site (selected)</td>
+        </tr>
+        <tr>
+          <td>
+            <svg width = "24" height = "24">
+              <rect x = "5" y = "5" width = "16" height = "16" fill-opacity="0.2" fill="#0033ff" stroke-width="4" stroke-opacity="0.5" stroke="#0033ff" stroke-linecap="round" stroke-linejoin="round"></rect>
+            </svg>
+          </td>
+          <td>Area of Interest</td>
+          <td>
+            <svg width = "25" height = "25">
+              <rect x = "5" y = "5" width = "16" height = "16" fill-opacity="0.4" fill="#666" stroke-width="2" stroke-opacity="0.75" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3"></rect>
+            </svg>
+          </td>
+          <td>Area Served Polygon</td>
+        </tr>
+        <tr id = "probLegend" style = 'display: none'>
+          <td colspan = "4" style = "text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;">
+            Exceedence Probability
+            <img src = "images/probLegend.png" />  
+          </td>
+        </tr>
+        <tr id = "corLegend" style = 'display: none'>
+          <td colspan = "4" style = "text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;">
+            Pearson Correlation
+            <img src = "images/corLegend.png" />  
+          </td>
+        </tr>
+        <tr id = "biasLegend" style = "display: none">
+          <td colspan = "4" style = 'text-align: left; padding-top: 5px; padding-bottom: 5px; border-top: solid 1px black;'>
+            Removal Bias
+            <img src = "images/biasLegend.png" />
+            <!--
+              For some unknown reason, the gradient doesn't render when I upload to shinyapps. Workaround by screen capping the 
+              legend and using the image instead.
+            <svg xmlns="http://www.w3.org/2000/svg" width = "100%" height = 40 style = "font-size: 12px;">
+              <linearGradient x1="0%" y1="0%" x2="100%" y2="0%" id="biasgrad">
+                <stop stop-color="rgba(0, 0, 255, 0.5)" offset="0"/>
+                <stop stop-color="rgba(255, 255, 255, 0.5)" offset="0.5"/>
+                <stop stop-color="rgba(255, 0, 0, 0.5)" offset="1"/>
+              </linearGradient>
+              <rect width="100%" height="20" fill="url(#biasgrad)" style = "stroke: black; stroke-width: 1.5px; shape-rendering: crispEdges"/>
+              <text x = 0 y = 35 text-anchor = "start">Negative Bias</text>
+              <text x = "50%" y = 35 text-anchor = "middle">No Bias</text>
+              <text x = "100%" y = 35 text-anchor = "end">Positive Bias</text>
+            </svg>
+            -->
+          </td>
+        </tr>
+      </table>
+    </div>
+    
+    <div id = "downloadFloater">
+      <p style = "font-size: 0.8em; text-align: justify;">Click the icon next to the data type you want to download. Grayed out options are unavailable.</p>
+      <table border = 0 style = "margin: 10 auto;">
+        <tr class = "disabled" style = "border-top: solid black 1px;">
+          <td>
+            <a id = "sitesDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Site Data
+          </td>
+        </tr>
+        <tr class = "disabled">
+          <td>
+            <a id = "areaServedDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Area Served Data
+          </td>
+        </tr>
+        <tr class = "disabled">
+          <td>
+            <a id = "correlationDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Correlation Data
+          </td>
+        </tr>
+        <tr class = "disabled">
+          <td>
+            <a id = "rembiasDataDownload" class = "shiny-download-link" href = "" target="_blank"><i class = "fa fa-download"></i></a>
+          </td>
+          <td>
+            Removal Bias Data
+          </td>
+        </tr>
+      </table>
+    </div>
+        
+<!-- The div that leaflet uses to display the map -->
+    <div id = "map" class = "closed"></div>
+    
+    <div class = "loading"><i class = "fa fa-spinner fa-spin loading"></i></div>
+    <div id = "alert">
+      <div id = "alert-heading"></div>
+      <span id = "alert-body"></span>
+      <a id = 'alert-close'><i class = 'fa fa-close'></i></a>
+    </div>
+    
+<!-- Custom Input Anchors for shiny -->
+    <div id = "selectedSites" class = "shiny-custom-anchor"></div>
+    <div id = "visibleSites" class = "shiny-custom-anchor"></div>
+    <div id = "newSites" class = "shiny-custom-anchor"></div>
+    <div id = "areaOfInterest" class = "shiny-custom-anchor"></div>
+    <div id = "visibleNewSites" class = "shiny-custom-anchor"></div>
+    <div id = "selectedNewSites" class = "shiny-custom-anchor"></div>
+    <div id = "clickedAreaServed" class = "shiny-custom-anchor"></div>
+    <div id = "popupID" class = "shiny-custom-anchor"></div>
+    <div id = "cormapSite" class = "shiny-custom-anchor"></div>
+    
+<!-- Persistent img for shiny to send the trend graphs to -->
+    <div id = "trendGraph" class = "shiny-plot-output" style = "background: red; width: 100px; height: 100px; z-index: 100;"></div>
+    
+  </body>
+  
+  <script>var netAssess = {}</script>
+  <script src = "js/leaflet.js"></script>
+  <script src = "js/esri-leaflet.js"></script>
+  <script src = "js/leaflet.draw.js"></script>
+  <script src = "js/leaflet.contextmenu.js"></script>
+  <script src = "js/easy-button.js"></script>
+  <script src = "js/L.Control.Sidebar.js"></script>
+  <script src = "js/netassess-leaflet.js"></script>
+  <script src = "js/netassess-shiny.js"></script>
+  <script src = "js/floaters.js"></script>
+  <script src = "js/select2.min.js"></script>
+  <script src = "js/netassess.js"></script>
+  <script src = "js/tour.js"></script>
+  
 </html>
