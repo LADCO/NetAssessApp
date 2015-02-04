@@ -248,78 +248,86 @@ shinyServer(function(input, output, session) {
     input$areaServedButton
     
     ss <- isolate(selectedSites())
-
-    if(!is.null(ss) && nrow(ss) != 0) {
+    
+    # Update this variable to reflect the probability columns present in the tracts dataset
+    probability.columns <- c("ozone_prob_75", "ozone_prob_70", "ozone_prob_65", "pm_prob_35")
+    prob.bin <- function(values) {
       
-      sn <- isolate(selectedNeighbors())
-
-      # Update this variable to reflect the probability columns present in the tracts dataset
-      probability.columns <- c("ozone_prob_75", "ozone_prob_70", "ozone_prob_65", "pm_prob_35")
-      prob.bin <- function(values) {
-        
-        value = max(values, na.rm = TRUE)
-        
-        if(value < 0.25) {
-          x <- "<25%"
-        } else if(value <= 0.5) {
-          x <- "25%-50%"
-        } else if(value <= 0.7) {
-          x <- "50%-70%"
-        } else if(value <= 0.8) {
-          x <- "70%-80%"
-        } else if(value <= 0.9) {
-          x <- "80%-90%"
-        } else if(value <= 1) {
-          x <- ">90%"
-        } else {
-          x <- "NA"
-        }
-        
-        return(x)
-        
+      value = max(values, na.rm = TRUE)
+      
+      if(value < 0.25) {
+        x <- "<25%"
+      } else if(value <= 0.5) {
+        x <- "25%-50%"
+      } else if(value <= 0.7) {
+        x <- "50%-70%"
+      } else if(value <= 0.8) {
+        x <- "70%-80%"
+      } else if(value <= 0.9) {
+        x <- "80%-90%"
+      } else if(value <= 1) {
+        x <- ">90%"
+      } else {
+        x <- "NA"
       }
       
+      return(x)
+      
+    }
+        
+    if(input$areaServedType == "voronoi") {
+  
       if(!is.null(ss) && nrow(ss) != 0) {
-        if(nrow(ss) <= 400 & nrow(sn) >= 2) {
-         if(input$areaServedClipping == "none") {
-           v <- voronoi(sn$Key, sn$Latitude, sn$Longitude)
-         } else {
-           if(input$areaServedClipping == "border") {
-             b <- usborder
+        
+        sn <- isolate(selectedNeighbors())
+          
+        if(!is.null(ss) && nrow(ss) != 0) {
+          if(nrow(ss) <= 400 & nrow(sn) >= 2) {
+           if(input$areaServedClipping == "none") {
+             v <- voronoi(sn$Key, sn$Latitude, sn$Longitude)
            } else {
-             b <- areaOfInterest()
+             if(input$areaServedClipping == "border") {
+               b <- usborder
+             } else {
+               b <- areaOfInterest()
+             }
+             v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
            }
-           v <- voronoi(sn$Key, sn$Latitude, sn$Longitude, b)
-         }
-
-          v <- subset(v, id %in% ss$Key)
-          
-          ov <- over(tracts, v)
-          t <- cbind(as.data.frame(tracts), ov)
-          t <- t[!is.na(t$id), ]
-          d <- aggregate(t[, sapply(seq(ncol(t)), function(i) {is.integer(t[, i])})], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
-          d2 <- aggregate(t[, probability.columns], by = list(as.character(t$id)), FUN = prob.bin)
-          proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
-          area <- areaPolygons(v, CRS("+init=epsg:2163")) 
-          
-          v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
-          v@data <- merge(v@data, d2, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
-          v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
+  
+            v <- subset(v, id %in% ss$Key)
+            
+            ov <- over(tracts, v)
+            t <- cbind(as.data.frame(tracts), ov)
+            t <- t[!is.na(t$id), ]
+            d <- aggregate(t[, sapply(seq(ncol(t)), function(i) {is.integer(t[, i])})], by = list(as.character(t$id)), FUN = sum, na.rm = TRUE)
+            d2 <- aggregate(t[, probability.columns], by = list(as.character(t$id)), FUN = prob.bin)
+            proj4string(v) <- CRS("+proj=longlat +ellps=WGS84")
+            area <- areaPolygons(v, CRS("+init=epsg:2163")) 
+            
+            v@data <- merge(v@data, d, by.x="id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
+            v@data <- merge(v@data, d2, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = FALSE)
+            v@data <- merge(v@data, area, by = "id", all.x = TRUE, all.y = FALSE)
+          } else {
+            v <- NULL
+          }
         } else {
           v <- NULL
         }
-      } else {
-        v <- NULL
+  
+        return(v)
+        
       }
-
-      return(v)
+      
+    } else {
+      
+      ## This is where circular area served code will go.
       
     }
   
   })
 
   observe({
-
+    
     if(!is.null(polygons())) {
       polygons <- polygons()
       v <- lapply(seq(nrow(polygons)), function(i) {
@@ -610,7 +618,6 @@ shinyServer(function(input, output, session) {
     
     d <- cormatTable()
     if(!is.null(cormatTable())) {
-      print(d)
       if(!is.null(input$cormapSite)) {
         d <- d[d$key1 %in% input$cormapSite | d$key2 %in% input$cormapSite, ]
         if(nrow(d) > 0) {

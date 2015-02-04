@@ -99,7 +99,7 @@
         <tr>
           <td><label for = "areaServedType">Area Served Type: </label></td>
           <td>
-              <select id = "areaServedType" disabled>
+              <select id = "areaServedType" disabled = disabled>
                 <option value = "voronoi" selected = selected>Voronoi Polygons</option>
                 <option value = "circles">Circles</option>
               </select>
@@ -107,7 +107,7 @@
         </tr>
         <tr>
           <td><label for = "circleSize">Radius of Circles: </label></td> 
-          <td><input id = "circleSize" disabled type = "text" size = 5 value = "50"/> km</td>
+          <td><input id = "circleSize" disable = disabled type = "text" size = 5 value = "50"/> km</td>
         </tr>
       </table>
       <p class = "header">Exceedence Probability</p>
@@ -156,7 +156,7 @@
           <td><strong>View Correlation Matrix</strong><div>Generates a correlation matrix that contains correlations, distance between monitors, and relative differences.</div></td>
         </tr>
         <tr>
-          <td><i class = "fa fa-birthday-cake"></i></td>
+          <td><i class = "fa fa-minus-square"></i></td>
           <td><strong>Calculate Removal Bias</strong><div>Estimates the concentration at each monitors location based on surrounding monitors, then compares it to the actual concentrations at the monitor.</div></td>
         </tr>     
         <tr>

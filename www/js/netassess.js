@@ -294,6 +294,14 @@ $("#paramOfInterest").on("change", function(e) {
   document.getElementById("cormapSite").updateAnchor(null);
 });
 
+$("#areaServedType").on("change", function(e) {
+  if($("#areaServedType").val() == "voronoi") {
+    $("#circleSize").attr("disabled", "disabled")
+  } else {
+    $("#circleSize").attr("disabled", false)
+  }
+})
+
 $("#areaServedAgePlot, #areaServedRacePlot").on("click", function(event) {
     $("#bigChart").attr("src", $(this).find("img").attr("src"))
     netAssess.floaters.popup.open();
