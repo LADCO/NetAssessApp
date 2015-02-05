@@ -1,5 +1,9 @@
 body { padding-top: 50px; }
 
+html {
+	overflow-y: scroll;
+}
+
 .bs-bg-color {
 	background-color: #2C3E50;
 }
@@ -97,6 +101,9 @@ code {
 
 }
 
+.container .group p {
+	text-align: justify;
+}
 
 /* all links */
 .sbs-sidebar .nav>li>a {

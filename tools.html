@@ -68,13 +68,17 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 			<li><a href="about.html">About</a><li>
 			<li><a href="contact.html">Contact</a></li>
 		  </ul>
+		  <form class = "navbar-form navbar-right" action = "https://ebailey78.shinyapps.io/NetAssessApp/">
+			<button type = "submint" class = "btn btn-primary">Go to the App!</button>
+		  </form>
 		</div><!-- /.navbar-collapse -->
 	  </div><!-- /.container-fluid -->
 	</nav>
 
 	<div class = "container">
 		<div class = "row">
-		
+				
+						
 			<!-- Sidebar navigation -->
 		
 			<nav class = "col-xs-3 sbs-sidebar">
@@ -100,8 +104,8 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 					</li>
 					<li><a href = "#removebias">Removal Bias</a></li>
 				</ul>
-			</nav>
-			
+			</nav>	
+				
 			<!-- Main Content -->
 			
 			<div class = "col-xs-9">
@@ -207,9 +211,8 @@ prob</code></pre>
 					<p>The removal bias tool is meant to aid in determining redundant sites. The bias estimation uses the nearest neighbors to each site to estimate the concentration at the location of the site if the site had never existed. This is done using the Voronoi Neighborhood Averaging algorithm with inverse distance squared weighting. The squared distance allows for higher weighting on concentrations at sites located closer to the site being examined. The bias was calculated for each day at each site by taking the difference between the predicted value from the interpolation and the measured concentration. A positive average bias would mean that if the site being examined was removed, the neighboring sites would indicate that the estimated concentration would be larger than the measured concentration. Likewise, a negative average bias would suggest that the estimated concentration at the location of the site is smaller than the actual measured concentration.</p>
 				</section>
 			</div>
-			
+
 		</div>	
-		
 	</div>
 	<footer>
 		<p>
