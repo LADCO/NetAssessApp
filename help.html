@@ -21,6 +21,18 @@
 	
 	<style>
 	
+		#faq dt {
+			color: #2C3E50;
+			font-size: 1.25em;
+			border-bottom: solid #2C3E50 2px;
+			margin-bottom: 5px;
+		}
+		
+		#faq dd {
+			padding-left: 15px;
+			margin-bottom: 15px;
+		}
+	
 		#menubarHelp dt > div {
 			display: inline-block;
 			width: 40px;
@@ -104,16 +116,37 @@
 					<dl id = "menubarHelp">
 						
 						<dt><div><i class = "fa fa-crosshairs"></i></div> Set Area of Interest</dt>
-						<dd>Opens a dialog that allows you to define the area you want to examine. You can draw your own or select a state, CBSA, or CSA.</dd>
+						<dd>
+							<p>Opens a dialog that allows you to define the area you want to examine. This will usually be the second thing you do, after selecting a parameter of interest from the dropdown to its left. The dialog that opens lets gives you several options of how to define the area of interest:</p>
+							<ul>
+								<li>You can define a many-sided polygon by clicking the button with the pentagon. Then each place you click on the map will become a corner of your area of interest polygon.</li>
+								<li>You can define a rectangle by clicking the button with the square, then click and drag on the map to define opposite corners of your area of interest rectangle.</li>
+								<li>You can select a predefined area of interest by selecting either State, CBSA, or CSA from the buttons at the bottom of the dialog. After that, the drop down will update and you can select the specific area to examine.</li>
+							</ul>
+							<p>After you have defined your area of interest any visible monitors in that area become selected. You can now close or minimize the Area of Interest dialog. Bear in mind that some tools are restricted in the number of sites they can process so you may have to go back and select a smaller area of interest. A light blue box will appear on the screen when you attempt to run a tool with too many sites selected.</p>
+						</dd>
 					
 						<dt><div><i class = "fa fa-plus-circle"></i></div> Add New Site</dt>
-						<dd>Allows placement of new sites. Click the button, then click the location of the new site. A dialog will then appear that allows you to set information about the new site.</dd>
+						<dd>
+							<p>Allows placement of new sites. Clicking this button will cause a crosshair to follow your cursor when you are over the map. Move the cursor to where you want the new site to be located then click. The app will then use the coordinates to look up the state, county, and census tract of that location. This feature uses an external FCC REST service and may take a few seconds to complete. After it has found that information it will open a dialog. In this dialog you can give the site a name and assign parameters to be monitored.</p>
+							<p>After a new site has been added it will be treated like any other existing site when calculating area served statistics.</p>
+						</dd>
 					
 						<dt><div><img src = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/area_served.png" /></div> Calculate Area Served</dt>
-						<dd>Calculates the area closer to each monitor than any other monitor and adds those polygons to the map. You can click on the polygons to see additional information about the area.</dd>
+						<dd>
+							<p>Calculates the area closer to each monitor than any other monitor and adds those polygons to the map. Clicking on these polygons will open the Area Served Information window which contains geographic and demographic information, as well as exceedence probabilities when available. Clicking on the graphs will cause a new window to open with a larger version of that graph.</p>
+						</dd>
 					
 						<dt><div><i class = "fa" style = "font-weight: bold; position: relative;">&rho;</i></div> View Correlation Matrix</dt>
-						<dd>Generates a correlation matrix that contains correlations, distance between monitors, and relative differences.</dd>
+						<dd>
+							<p>Opens a new window in the app and displays a correlation matrix for selected monitors. This correlation matrix contains three pieces of information:</p>
+							<ul>
+								<li>Pearson correlation is represented by the eccentricity (flatness) of the ellipse. The flatter the ellipse, the higher the correlation. </li>
+								<li>Average relative difference is represented by the color of the ellipse. The scale can be found in the upper right of the graph.</li>
+								<li>Distance between monitors is displayed in the center of the ellipse, in kilometers.</li>
+							</ul>
+							<p>You can download the correlation matrix by right-clicking on it as selecting <i>Save image as</i>.</p>
+						</dd>
 					
 						<dt><div><i class = "fa fa-minus-square"></i></div> Calculate Removal Bias</dt>
 						<dd>Estimates the concentration at each monitors location based on surrounding monitors, then compares it to the actual concentrations at the monitor.</dd>
@@ -133,7 +166,20 @@
 					</dl> 
 
 				</section>
-				
+				<section id = "faq" class = "group">
+					<h3>FAQ</h3>
+					<dl id = "faq">
+						<dt>What is Removal Bias?</dt>
+						<dd>
+							<p>Removal bias is an estimate of the bias that the monitor network would have if a monitor was removed. A positive bias means that, on average, the surrounding monitors produce a higher interpolated estimate at the monitor location. A negative bias means that the interpolated estimate is lower (on average). A very small value means that there would be negligible bias if the monitor was removed.</p>
+						</dd>
+						<dt>What is Exceedance Probability?</dt>
+						<dd>
+							<p>Exceedance probability maps indicate the probability that an area will exceed a certain threshold at least one day in a year. The maps are not intended to provide probability estimates for points or areas, but should be used for a spatial comparison of extreme values.</p>
+						</dd>
+					
+					</dl>
+				</section>
 			</div>
 			
 		</div>	
