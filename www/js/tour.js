@@ -15,7 +15,7 @@ netAssess.tour.makeSlide = function(options) {
   
 }
 
-netAssess.tour.makeSlide({text: "<p>This tool is meant to assist with 5-year Network Assessments as required by <a href = 'http://www.ecfr.gov/cgi-bin/text-idx?SID=1c02841c6e1ad0e7e8ecaa87954ac180&node=se40.6.58_110&rgn=div8' target='_blank'>40 CFR &#0167;58.10(d)</a>.</p><p>You can start by running through this quick tour, or close this box with the 'x' in the top right corner and jump right in to the tool. You can also refer to the <a href = 'http://ladco.github.io/NetAssessApp/' target='_blank'>Guidance Document</a> for more detailed information about the App.</p>"})
+netAssess.tour.makeSlide({text: "<p>This tool is meant to assist with 5-year Network Assessments as required by <a href = 'http://www.ecfr.gov/cgi-bin/text-idx?SID=1c02841c6e1ad0e7e8ecaa87954ac180&node=se40.6.58_110&rgn=div8' target='_blank'>40 CFR &#0167;58.10(d)</a>.</p><p>You can start by running through this quick tour, or close this box with the 'x' in the top right corner and jump right in to the tool. You can also refer to the <a href = 'http://ladco.github.io/NetAssessApp/' target='_blank'>NetAssess Documentation Site</a> for more detailed information about the App.</p>"})
                              
 netAssess.tour.makeSlide({title: "Menu Bar",
                           text: "<p>Above is the menu bar. The menu bar is how you will access most of the functionality of the tool. Each icon above is a button that gives you access to a tool or function of the NetAssess App.</p>",
@@ -24,7 +24,7 @@ netAssess.tour.makeSlide({title: "Menu Bar",
                           })
                                                   
 netAssess.tour.makeSlide({title: "Layers",
-                          text: "<p>This is the Layers control. Use the Layers control to switch between different base maps and to turn different tool layers on and off.",
+                          text: "<p>This is the Layers control. Use the Layers control to switch between different base maps and to turn different tool layers on and off.</p><p>Basemaps are the background map. Right now, the grey basemap is displayed, there is also a streets basemap, and satellite basemap from which to choose. The grey basemap is best for viewing output from the NetAssess Tools.</p><p>Tool layers give you the ability to hide the output of tools when you are done with them and bring it back later if you need to.</p>",
                           target: ".leaflet-control-layers-toggle",
                           position: "right"
                           })
@@ -157,7 +157,7 @@ netAssess.tour.makeSlide({title: "Exceedance Probabilities",
 })
                           
 netAssess.tour.makeSlide({title: "Removal Bias",
-                          text: "The removal bias tool finds the nearest neighbors to each selected monitor and then uses the concentrations at that those sites to interpolate the concentration at the monitoring site using and inverse distance weighted average. It then compares that interpolation to the actual concentrations measured at the site. If there is little difference (low bias) that may indicate that the monitor is redundant and could be removed. This tool is only available for: <ul><li><b>44201 - OZONE</b></li><li><b>88101 - PM2.5 - LOCAL CONDITIONS</b></li><li><b>88502 - ACCEPTABLE PM2.5 AQI & SPECIATION MASS</b></li></ul>.",
+                          text: "The removal bias tool finds the nearest neighbors to each selected monitor and then uses the concentrations at that those sites to interpolate the concentration at the monitoring site using an inverse distance weighted average. It then compares that interpolation to the actual concentrations measured at the site. If there is little difference (low bias) that may indicate that the monitor is redundant and could be removed. This tool is only available for: <ul><li><b>44201 - OZONE</b></li><li><b>88101 - PM2.5 - LOCAL CONDITIONS</b></li><li><b>88502 - ACCEPTABLE PM2.5 AQI & SPECIATION MASS</b></li></ul>.",
                           target: "#rembiasButton",
                           position: "below",
                           runbefore: function() {
@@ -181,7 +181,7 @@ netAssess.tour.makeSlide({title: "Navigation",
                           })
                           
 netAssess.tour.makeSlide({title: "Download Data",
-                          text: "All data calculated by the NetAssess app is available for download as csv files. Clicking this button will open a dialog where you can chose the data you want to download.",
+                          text: "All data calculated by the NetAssess app is available for download as csv files. Clicking this button will open a dialog where you can choose the data you want to download.",
                           target: "#downloadDataButton",
                           position: "below",
                           runafter: netAssess.floaters.download.open
@@ -202,7 +202,7 @@ netAssess.tour.makeSlide({title: "Reset App",
 						  })
 
 netAssess.tour.makeSlide({title: "Settings",
-                          text: "There are several options you can set that will change aspects of how the NetAssess App will function. You can access these options in the Setting sidebar.",
+                          text: "There are several options you can set that will change aspects of how the NetAssess App will function. You can access these options in the Settings sidebar.",
                           runbefore: function() {netAssess.sidebars.settings.show()}
                           })
 
