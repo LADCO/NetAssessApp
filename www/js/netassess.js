@@ -344,13 +344,13 @@ netAssess.errorChecking.basics = function(siteMax, siteMin) {
   
 	if(activeSites == 0) {
 		active = false;
-		body = body + "<li>No monitors selected</li>";
+		body = body + "<li>No sites selected</li>";
 	} else if(activeSites < siteMin && siteMin != 1) {
 		active = false;
-		body = body + "<li>Too few monitors selected</li>";
+		body = body + "<li>Too few sites selected. Please select at least " + siteMin + " sites.</li>";
 	} else if(activeSites > siteMax) {
 		active = false;
-		body = body + "<li>Too many monitors selected</li>";
+		body = body + "<li>Too many sites selected. Please select no more than " + siteMax + " sites.</li>";
 	}
     
   return {active: active, body: body};
@@ -396,7 +396,7 @@ netAssess.errorChecking.rembias = function(event) {
 
 netAssess.errorChecking.cormat = function(event) {
 
-  var bc = netAssess.errorChecking.basics(30, 1);
+  var bc = netAssess.errorChecking.basics(25, 2);
   var param = $("#paramOfInterest").select2("val");
   var vp = ["44201", "88101", "88502"];
   if(vp.indexOf(param) == -1) {
@@ -760,6 +760,16 @@ netAssess.resetApp = function() {
   for(var i = 0; i < k.length; i++) {
     if(k[i] != "legend") netAssess.floaters[k[i]].close()
   }
+  
+  // Unselect all sites
+  netAssess.layerGroups.sites.eachLayer(function(site) {
+    
+    site.deselect();
+    
+  })
+  
+  // Clear all New Sites
+  netAssess.layerGroups.newSites.clearLayers();
   
   // Reset Settings
   $("#ozoneNAAQS").val("75ppb");
