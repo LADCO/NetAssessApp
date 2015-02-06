@@ -83,7 +83,7 @@
   	<div id = "settings-sb" class = "sidebar">
 			<h1><i class="fa fa-cogs fa-fw"></i> Settings</h1>
       <p>These setting allow you to customize how the NetAssess App works. Please see the Help file for additional information about how these setting will effect the NetAssess App.</p>
-      <p class = "header">Area Served</p>
+      <p class = "header" id = "areaServedSettings">Area Served</p>
       <p>The area served tool allows you to compile information about the area surrounding monitoring locations.</p>
       <table class = "options-table">
         <tr>
@@ -110,8 +110,8 @@
           <td><input id = "circleSize" disable = disabled type = "text" size = 5 value = "50"/> km</td>
         </tr>
       </table>
-      <p class = "header">Exceedence Probability</p>
-      <p>Exceedence Probability is the probability that an area will exceed a given threshold at least one day in a year. That threshold for ozone can be adjusted below.</p>
+      <p class = "header" id = "exceedanceProbabilitySettings">Exceedance Probability</p>
+      <p>Exceedance Probability is the probability that an area will exceed a given threshold at least one day in a year. That threshold for ozone can be adjusted below.</p>
       <table class = "options-table">
         <tr>
           <td><label for = "ozoneNAAQS">Ozone Threshold: </label></td>
@@ -124,7 +124,7 @@
           </td>
         </tr>
       </table> 
-      <p class = "header">PM<sub>2.5</sub> Options</p>
+      <p class = "header" id = "pm25Settings">PM<sub>2.5</sub> Options</p>
       <p>Parameter Code 88101 can contain both FRM and FEM data. Use this option to select which data to use for correlation matrices. <strong>Note:</strong> You will need to rerun your correlation matrix to see changes.</p>
       <select id = "pmType">
         <option value = "both">Use both FRM and FEM data</option>

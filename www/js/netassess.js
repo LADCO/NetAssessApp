@@ -365,6 +365,7 @@ netAssess.errorChecking.areaServed = function(event) {
     netAssess.loading.show();
     netAssess.floaters.areaServed.close();
     netAssess.floaters.popup.close();
+    netAssess.map.addLayer(netAssess.layerGroups.areaServed)
   } else {
     event.stopImmediatePropagation();
   	bc.body = bc.body + "</ul>";
@@ -724,30 +725,52 @@ $("#resetAppButton").on("click", function() {
   
   if(r == true) {
     
-    $("#sitesDataDownload").trigger("click");
-    $("#paramOfInterest").select2("val", -1);
-    $("#paramOfInterest").trigger("change");
-    netAssess.layerGroups.aoi.clearLayers();
-    netAssess.layerGroups.areaServed.clearLayers();
-    $("#areaSelect0").click();    
-    $("#alert").removeClass("alert-open")
-    var k = Object.keys(netAssess.floaters);
-    for(var i = 0; i < k.length; i++) {
-      if(k[i] != "legend") netAssess.floaters[k[i]].close()
-    }
-    netAssess.map.removeLayer(netAssess.overlays.o3);
-    netAssess.map.removeLayer(netAssess.overlays.pm25);
-    netAssess.map.removeLayer(netAssess.layerGroups.rembias);
-    $("#ozoneNAAQS").select2("val", "75ppb");
-    $("#areaServedClipping").select2("val", "border");
-    $("#areaServedType").select2("val", "voronoi");
-    netAssess.map.setBounds(netAssess.data.us_bounds);
+    netAssess.resetApp();
     
   }
   
 })
 
-
+netAssess.resetApp = function() {
+  
+  // Reset Parameter Of Interest
+  $("#paramOfInterest").select2("val", -1);
+  $("#paramOfInterest").trigger("change");
+  
+  // Reset Area of Interest
+  $("#areaSelect0").click();    
+  
+  // Clear all Tool Layers
+  netAssess.layerGroups.aoi.clearLayers();
+  netAssess.layerGroups.areaServed.clearLayers();
+  netAssess.layerGroups.rembias.clearLayers();
+  netAssess.layerGroups.cormap.clearLayers();
+  
+  // Reset visible layers
+  netAssess.map.removeLayer(netAssess.overlays.o3);
+  netAssess.map.removeLayer(netAssess.overlays.pm25);
+  netAssess.map.removeLayer(netAssess.layerGroups.rembias);
+  netAssess.map.removeLayer(netAssess.layerGroups.cormap);
+  netAssess.map.removeLayer(netAssess.layerGroups.aoi);
+  netAssess.map.addLayer(netAssess.layerGroups.areaServed);
+  
+  // Close all Floaters except the legend
+  $("#alert").removeClass("alert-open")
+  var k = Object.keys(netAssess.floaters);
+  for(var i = 0; i < k.length; i++) {
+    if(k[i] != "legend") netAssess.floaters[k[i]].close()
+  }
+  
+  // Reset Settings
+  $("#ozoneNAAQS").val("75ppb");
+  $("#areaServedClipping").val("border");
+  $("#areaServedType").val("voronoi");
+  $("#pmType").val("both");
+  
+  // Zoom to continental US
+  netAssess.zoomOut() 
+  
+}
 
 
 
