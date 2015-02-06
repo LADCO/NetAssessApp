@@ -139,7 +139,13 @@
 					
 						<dt><div><i class = "fa" style = "font-weight: bold; position: relative;">&rho;</i></div> View Correlation Matrix</dt>
 						<dd>
-							<p>Opens a new window in the app and displays a correlation matrix for selected monitors. This correlation matrix contains three pieces of information:</p>
+							<p>Opens a new window in the app and displays a correlation matrix for selected monitors. This tool only works with the following parameters:</p>
+							<ul>
+								<li>44201 - Ozone</li>
+								<li>88101 - PM2.5 Local Conditions</li>
+								<li>88502 - Acceptable PM2.5 AQI & Speciation Mass</li>
+							</ul>
+							<p>The correlation matrix contains three pieces of information:</p>
 							<ul>
 								<li>Pearson correlation is represented by the eccentricity (flatness) of the ellipse. The flatter the ellipse, the higher the correlation. </li>
 								<li>Average relative difference is represented by the color of the ellipse. The scale can be found in the upper right of the graph.</li>
@@ -147,21 +153,44 @@
 							</ul>
 							<p>You can download the correlation matrix by right-clicking on it as selecting <i>Save image as</i>.</p>
 						</dd>
-					
 						<dt><div><i class = "fa fa-minus-square"></i></div> Calculate Removal Bias</dt>
-						<dd>Estimates the concentration at each monitors location based on surrounding monitors, then compares it to the actual concentrations at the monitor.</dd>
+						<dd>
+							<p>Estimates the concentration at each monitor's location based on surrounding monitors using an inverse distance-weighted mean, then compares it to the actual concentrations at the monitor. This tool only works with the following parameters:</p>
+							<ul>
+								<li>44201 - Ozone</li>
+								<li>88101 - PM2.5 Local Conditions</li>
+								<li>88502 - Acceptable PM2.5 AQI & Speciation Mass</li>
+							</ul>
+							<p>After you click the button new, larger circles will appear over your selected sites. The color of the circles represent the removal bias at that location. Shades of red represent positive removal bias, while shades of blue represent negative removal bias. The darker the shade, the more removal bias at that location. Refer to the legend for an explanation of the color scale.</p>
+							<p>Clicking a circle will open a popup that has detailed removal bias information for that location. This information includes:</p>
+							<ul>
+								<li>the minimum and maximum daily removal bias at the site,</li>
+								<li>the mean removal bias for all available days,</li>
+								<li>the actual date range for available data,</li>
+								<li>and the number of monitors included in calculation.</li>
+							</ul>
+							<p>In addition, the popup also contains <i>relative removal bias</i> information describes the removal bias relative to concentrations encountered at the site.</p>
+						</dd>
 						
 						<dt><div><i class = "fa fa-binoculars"></i></div> Zoom to Area of Interest</dt>
-						<dd>Zoom the map to your area of interest.</dd>
+						<dd>
+							<p>Zoom the map to your area of interest.</p>
+						</dd>
 						
 						<dt><div><img src = "https://github.com/LADCO/NetAssessApp/raw/master/www/images/cont_us.png" /></div> Zoom to Continental US</dt>
-						<dd>Zoom out to view the entire Continental United States.</dd>
+						<dd>
+							<p>Zoom out to view the entire Continental United States.</p>
+						</dd>
 						
 						<dt><div><i class = "fa fa-download"></i></div> Download Data</dt>
-						<dd>Open a dialog that allows you to download csv files of raw data about your area of interest.</dd>
+						<dd>
+							<p>Open a dialog that allows you to download csv files of raw data about your area of interest.</p>
+						</dd>
 						
 						<dt><div><i class = "fa fa-undo"></i></div> Reset App</dt>
-						<dd>Reset the map to its original state.</dd>
+						<dd>
+							<p>Reset the map to its original state. This will erase all calculations and remove any sites added to the tool.</p>
+						</dd>
 
 					</dl> 
 
@@ -169,6 +198,10 @@
 				<section id = "faq" class = "group">
 					<h3>FAQ</h3>
 					<dl id = "faq">
+						<dt>The entire screen has greyed out and now the tool isn't responsive, what should I do?</dt>
+						<dd>
+							<p>This indicates that the NetAssess App has lost communication with the server. This can happen if the App hasn't communicated with the server in a while, or if something has broken. Try reloading the app. If it happens again, send <a href = "mailto:ebailey@idem.in.gov">Eric Bailey</a> an email describing what you were doing when the screen greyed out.</p>
+						</dd>
 						<dt>What is Removal Bias?</dt>
 						<dd>
 							<p>Removal bias is an estimate of the bias that the monitor network would have if a monitor was removed. A positive bias means that, on average, the surrounding monitors produce a higher interpolated estimate at the monitor location. A negative bias means that the interpolated estimate is lower (on average). A very small value means that there would be negligible bias if the monitor was removed.</p>
