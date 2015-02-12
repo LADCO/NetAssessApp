@@ -538,7 +538,7 @@ shinyServer(function(input, output, session) {
     
     param <- input$paramOfInterest
     sn <- selectedNeighbors()
-    
+
     validParams <- c("44201", "88101", "88502")
     
     op <- NULL
@@ -649,99 +649,105 @@ shinyServer(function(input, output, session) {
     
     r <- readings()
     op <- NULL
-    
+
     if(!is.null(r)) {
-      
+
       sN <- isolate({selectedNeighbors()})
       sN <- sN[sN$Key %in% r$Site_Key, ]
       
-      sites.deldir <- deldir(sN$Longitude, sN$Latitude)
-      combos <- sites.deldir$delsgs
+      if(sum(activeSites() %in% sN$Key) > 0) {
       
-      combos$dist <- mapply(FUN = earth.dist, long1 = combos[, 1],
-                            lat1 = combos[, 2], long2 = combos[, 3],
-                            lat2 = combos[, 4])
-      
-      combos$ind1 <- sN$Key[combos$ind1]
-      combos$ind2 <- sN$Key[combos$ind2]
-      
-      d <<- list(sN, sites.deldir, combos, activeSites = activeSites(), data)
-      
-      rb <- lapply(activeSites(), function(site) {
+        sites.deldir <- deldir(sN$Longitude, sN$Latitude)
+        combos <- sites.deldir$delsgs
         
-        site.data <- r[r$Site_Key == site, c("Date", "Value")]
+        combos$dist <- mapply(FUN = earth.dist, long1 = combos[, 1],
+                              lat1 = combos[, 2], long2 = combos[, 3],
+                              lat2 = combos[, 4])
         
-        if(nrow(site.data) > 0) {
+        combos$ind1 <- sN$Key[combos$ind1]
+        combos$ind2 <- sN$Key[combos$ind2]
+            
+        rb <- lapply(activeSites(), function(site) {
           
-          start.date <- min(site.data$Date)
-          end.date <- max(site.data$Date)
+          site.data <- r[r$Site_Key == site, c("Date", "Value")]
           
-          neighbors <- combos[combos$ind1 == site | combos$ind2 == site, ]
-          neighbors$Site_Key <- apply(neighbors, 1, function(r) {if(r['ind1'] == site) {return(r['ind2'])} else {return(r['ind1'])}})
-          neighbors <- neighbors[, c("Site_Key", "dist")]
-          neigh.data <- r[r$Site_Key %in% neighbors$Site_Key, c("Site_Key", "Date", "Value")]
-          neigh.data <- merge(neigh.data, neighbors, by = "Site_Key", all = TRUE)
-          neigh.data <- neigh.data[neigh.data$Date %in% site.data$Date, ] 
+          if(nrow(site.data) > 0) {
+            
+            start.date <- min(site.data$Date)
+            end.date <- max(site.data$Date)
+            
+            neighbors <- combos[combos$ind1 == site | combos$ind2 == site, ]
+            neighbors$Site_Key <- apply(neighbors, 1, function(r) {if(r['ind1'] == site) {return(r['ind2'])} else {return(r['ind1'])}})
+            neighbors <- neighbors[, c("Site_Key", "dist")]
+            neigh.data <- r[r$Site_Key %in% neighbors$Site_Key, c("Site_Key", "Date", "Value")]
+            neigh.data <- merge(neigh.data, neighbors, by = "Site_Key", all = TRUE)
+            neigh.data <- neigh.data[neigh.data$Date %in% site.data$Date, ] 
+            
+            values <- as.matrix(dcast(neigh.data, Date~Site_Key, value.var = "Value", fun.aggregate = mean))
+            rownames(values) <- values[,1]
+            values <- values[, -1]
+            weights <- dcast(neigh.data, Date~Site_Key, value.var = "dist", fun.aggregate = mean)
+            rownames(weights) <- weights[,1]
+            weights <- weights[, -1]
+            weights <- 1/(weights^2)
+            values[is.na(values)] = 0
+            weights[is.na(weights)] = 0
+            
+            # multiply the values and weights matrices and calculate inner product using 
+            # a vector of ones to get the sums for each row 
+            summed <- (values * weights) %*% rep(1, dim(values)[2])
+            
+            # calculate the sum of each row in the 
+            denom <- weights %*% rep(1, dim(values)[2])
+            
+            # if the denom vector has zeros, remove that index from denom and summed
+            rn <- rownames(summed)
+            summed <- summed[denom != 0]
+            denom <- denom[denom != 0]
+            
+            # calculate inverse distance squared weighted average for each day
+            weighted.avg <- summed / denom
+            weighted.avg <- data.frame(Date = rn, Est = weighted.avg)
+            
+            # get the daily values for the monitor of interest as a vector
+            daily <- merge(site.data, weighted.avg, by ="Date")
+            
+            # calculate difference between each interpolated value and the actual
+            # value for the monitor
+            daily$diff <- daily$Est - daily$Value 
+            x <- daily$Value != 0
+            relDiff <- round(100 * (daily$diff[x]/daily$Value[x]))
+            daily$diff <- signif(daily$diff, 3)
+            
+            data.frame(Key = site, bias_mean = round(mean(daily$diff), 4), bias_min = min(daily$diff),
+                       bias_max = max(daily$diff), bias_sd = sd(daily$diff), bias_n = nrow(neighbors),
+                       relbias_mean = round(mean(relDiff)), relbias_min = min(relDiff),
+                       relbias_max = max(relDiff), start_date = start.date, end_date = end.date)
+            
+          }
           
-          values <- as.matrix(dcast(neigh.data, Date~Site_Key, value.var = "Value", fun.aggregate = mean))
-          rownames(values) <- values[,1]
-          values <- values[, -1]
-          weights <- dcast(neigh.data, Date~Site_Key, value.var = "dist", fun.aggregate = mean)
-          rownames(weights) <- weights[,1]
-          weights <- weights[, -1]
-          weights <- 1/(weights^2)
-          values[is.na(values)] = 0
-          weights[is.na(weights)] = 0
-          
-          # multiply the values and weights matrices and calculate inner product using 
-          # a vector of ones to get the sums for each row 
-          summed <- (values * weights) %*% rep(1, dim(values)[2])
-          
-          # calculate the sum of each row in the 
-          denom <- weights %*% rep(1, dim(values)[2])
-          
-          # if the denom vector has zeros, remove that index from denom and summed
-          rn <- rownames(summed)
-          summed <- summed[denom != 0]
-          denom <- denom[denom != 0]
-          
-          # calculate inverse distance squared weighted average for each day
-          weighted.avg <- summed / denom
-          weighted.avg <- data.frame(Date = rn, Est = weighted.avg)
-          
-          # get the daily values for the monitor of interest as a vector
-          daily <- merge(site.data, weighted.avg, by ="Date")
-          
-          # calculate difference between each interpolated value and the actual
-          # value for the monitor
-          daily$diff <- daily$Est - daily$Value 
-          x <- daily$Value != 0
-          relDiff <- round(100 * (daily$diff[x]/daily$Value[x]))
-          daily$diff <- signif(daily$diff, 3)
-          
-          data.frame(Key = site, bias_mean = round(mean(daily$diff), 4), bias_min = min(daily$diff),
-                     bias_max = max(daily$diff), bias_sd = sd(daily$diff), bias_n = nrow(neighbors),
-                     relbias_mean = round(mean(relDiff)), relbias_min = min(relDiff),
-                     relbias_max = max(relDiff), start_date = start.date, end_date = end.date)
-          
+        })
+        
+        s <- do.call(rbind, rb)
+        
+        if(nrow(s) == 0) {
+          s <- NULL
+        } else {
+          siteIDs <- unique(r[, c("Site_Key", "State_Code", "County_Code", "Site_ID")])
+          siteIDs$id <- sprintf("%02i-%03i-%04i", siteIDs$State_Code, siteIDs$County_Code, siteIDs$Site_ID)
+          siteIDs <- siteIDs[, c("Site_Key", "id")]
+          s <- merge(s, siteIDs, by.x = "Key", by.y = "Site_Key", all.x = TRUE, all.y = FALSE)
         }
+  
+        op <- s
         
-      })
+      } 
       
-      s <- do.call(rbind, rb)
+    }
       
-      if(nrow(s) == 0) {
-        s <- NULL
-      } else {
-        siteIDs <- unique(r[, c("Site_Key", "State_Code", "County_Code", "Site_ID")])
-        siteIDs$id <- sprintf("%02i-%03i-%04i", siteIDs$State_Code, siteIDs$County_Code, siteIDs$Site_ID)
-        siteIDs <- siteIDs[, c("Site_Key", "id")]
-        s <- merge(s, siteIDs, by.x = "Key", by.y = "Site_Key", all.x = TRUE, all.y = FALSE)
-      }
-
-      op <- s
-      
-    } 
+    if(is.null(op)) {
+      session$sendCustomMessage("showAlert", list(header = "Insufficient Data", body = "No daily readings could be found for sites within your area of interest. Please expand your area of interest, or select a different parameter.")) 
+    }
     
     return(op)
     
@@ -750,7 +756,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$rembiasButton, {
     
     validate(need(rembiasTable(), FALSE))
-    
+
     isolate({
     
       if(!is.null(rembiasTable())) {
@@ -841,5 +847,9 @@ shinyServer(function(input, output, session) {
                                                      d$area <- unlist(d$area)
                                                      write.csv(d, file = file)                             
                                                    })
+
+observe({
+  input$mPTCPO * 2
+})
 
 })

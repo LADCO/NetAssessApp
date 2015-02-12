@@ -1,3 +1,20 @@
+
+$(document).ready(function() {
+
+  var ua = window.navigator.userAgent;
+  var msie = ua.indexOf("MSIE ");
+  
+  if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {    // If Internet Explorer, return version number
+    netAssess.showAlert("Internet Explorer Detected", "Unfortunately, NetAssess does not work with Internet Explorer. For best performance use a modern version of <a href = 'www.google.com/chrome/'>Chrome</a> or <a href = 'https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.")
+  } else {
+    setTimeout(netAssess.iCH, 1*60*1000)
+  }
+  
+  return false;
+  
+})
+
+
 netAssess.resizeMap = function() {
 	document.getElementById("map").style.width = window.innerWidth + "px";
 	document.getElementById("map").style.height = (window.innerHeight - 40) + "px";
@@ -797,11 +814,19 @@ netAssess.ee = function() {
 netAssess.map.on("baselayerchange", netAssess.ee)
 netAssess.ee()
 
-
-
-
-
-
+// This is something I devised to keep the server at shinyapps.io from disconnecting due to inactivity.
+netAssess.iCH = function() {
+  
+  var a = document.getElementById("mPTCPO");
+  
+  var v = $(a).data("anchorData") || 0;
+  v = v + 1;
+  
+  a.updateAnchor(v);
+  
+  setTimeout(netAssess.iCH, 5*60*1000)
+  
+}
 
 
 $("#areaSelect0").click();
