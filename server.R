@@ -840,16 +840,22 @@ shinyServer(function(input, output, session) {
                                                 
                                               })
 
-
   output$areaServedDataDownload <- downloadHandler(filename = function() {paste0("netassess-areaserved-", input$paramOfInterest, "-", Sys.Date(), ".csv")},
                                                    content = function(file) {
                                                      d <- polygons()@data
                                                      d$area <- unlist(d$area)
-                                                     write.csv(d, file = file)                             
+                                                     n <- dbGetQuery(db, paste0("SELECT State_Code, County_Code, Site_ID, Key FROM sites WHERE sites.Key IN ('", paste0(d$id, collapse = "', '"), "')"))
+                                                     d <- merge(n, d, by.x = "Key", by.y = "id", all = TRUE)
+                                                     d <- d[, c("State_Code", "County_Code", "Site_ID", "pnt_x", "pnt_y", "total", "male", "m_0_4", "m_5_9", "m_10_14", "m_15_19", "m_20_24", "m_25_29", "m_30_34", "m_35_39", "m_40_44", "m_45_49", "m_50_54", "m_55_59", "m_60_64", "m_65_69", "m_70_74", "m_75_79", "m_80_84", "m_85_125", "female", "f_0_4", "f_5_9", "f_10_14", "f_15_19", "f_20_24", "f_25_29", "f_30_34", "f_35_39", "f_40_44", "f_45_49", "f_50_54", "f_55_59", "f_60_64", "f_65_69", "f_70_74", "f_75_79", "f_80_84", "f_85_125", "white", "black", "native", "asian", "islander", "other", "multiple", "ozone_prob_75", "ozone_prob_70", "ozone_prob_65", "pm_prob_35", "area")]
+                                                     d$State_Code <- sprintf("%02i", d$State_Code)
+                                                     d$County_Code <- sprintf("%03i", d$County_Code)
+                                                     d$Site_Id <- sprintf("%04i", d$Site_ID)
+                                                     colnames(d) <- c("State Code", "County Code", "Site ID", "Longitude", "Latitude", "Total Population", "Total Male Population", "Males Age 0 to 4", "Males Age 5 to 9", "Males Age 10 to 14", "Males Age 15 to 19", "Males Age 20 to 24", "Males Age 25 to 29", "Males Age 30 to 34", "Males Age 35 to 39", "Males Age 40 to 44", "Males Age 45 to 49", "Males Age 50 to 54", "Males Age 55 to 59", "Males Age 60 to 64", "Males Age 65 to 69", "Males Age 70 to 74", "Males Age 75 to 79", "Males Age 80 to 84", "Males Age 85 and Over", "Total Female Population", "Females Age 0 to 4", "Females Age 5 to 9", "Females Age 10 to 14", "Females Age 15 to 19", "Females Age 20 to 24", "Females Age 25 to 29", "Females Age 30 to 34", "Females Age 35 to 39", "Females Age 40 to 44", "Females Age 45 to 49", "Females Age 50 to 54", "Females Age 55 to 59", "Females Age 60 to 64", "Females Age 65 to 69", "Females Age 70 to 74", "Females Age 75 to 79", "Females Age 80 to 84", "Females Age 85 and Over", "White", "Black", "Native American", "Asian", "Pacific Islander", "Other Race", "Multiple Races", "Ozone Probability of Exceeding 75ppb", "Ozone Probability of Exceeding 70ppb", "Ozone Probability of Exceeding 65ppb", "PM2.5 Probability of Exceeding 35ug/m3", "Area in Square Kilometers")
+                                                     write.csv(d, file = file, row.names = FALSE)                             
                                                    })
 
-observe({
-  input$mPTCPO * 2
-})
+  observe({
+    input$mPTCPO * 2
+  })
 
 })
