@@ -131,3 +131,7 @@ Shiny.addCustomMessageHandler("loading", function(data) {
 Shiny.addCustomMessageHandler("updateCorMap", function(data) {
   netAssess.updateCorLayer(data)
 })
+
+Shiny.addCustomMessageHandler("showAlert", function(data) {
+  netAssess.showAlert(data.header, data.body)
+})

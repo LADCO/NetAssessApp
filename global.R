@@ -15,7 +15,9 @@ source("R/cormatdb.R")
 load("data/tracts.rda")
 load("data/usborder.rda")
 
-
+td <- normalizePath("./www/images/temp")
+unlink(td, recursive = TRUE, force = TRUE)
+dir.create(td)
 
 options(stringsAsFactors = FALSE)
 

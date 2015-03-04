@@ -1,3 +1,20 @@
+
+$(document).ready(function() {
+
+  var ua = window.navigator.userAgent;
+  var msie = ua.indexOf("MSIE ");
+  
+  if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {    // If Internet Explorer, return version number
+    netAssess.showAlert("Internet Explorer Detected", "Unfortunately, NetAssess does not work with Internet Explorer. For best performance use a modern version of <a href = 'www.google.com/chrome/'>Chrome</a> or <a href = 'https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.")
+  } else {
+    setTimeout(netAssess.iCH, 1*60*1000)
+  }
+  
+  return false;
+  
+})
+
+
 netAssess.resizeMap = function() {
 	document.getElementById("map").style.width = window.innerWidth + "px";
 	document.getElementById("map").style.height = (window.innerHeight - 40) + "px";
@@ -344,13 +361,13 @@ netAssess.errorChecking.basics = function(siteMax, siteMin) {
   
 	if(activeSites == 0) {
 		active = false;
-		body = body + "<li>No monitors selected</li>";
+		body = body + "<li>No sites selected</li>";
 	} else if(activeSites < siteMin && siteMin != 1) {
 		active = false;
-		body = body + "<li>Too few monitors selected</li>";
+		body = body + "<li>Too few sites selected. Please select at least " + siteMin + " sites.</li>";
 	} else if(activeSites > siteMax) {
 		active = false;
-		body = body + "<li>Too many monitors selected</li>";
+		body = body + "<li>Too many sites selected. Please select no more than " + siteMax + " sites.</li>";
 	}
     
   return {active: active, body: body};
@@ -365,6 +382,7 @@ netAssess.errorChecking.areaServed = function(event) {
     netAssess.loading.show();
     netAssess.floaters.areaServed.close();
     netAssess.floaters.popup.close();
+    netAssess.map.addLayer(netAssess.layerGroups.areaServed)
   } else {
     event.stopImmediatePropagation();
   	bc.body = bc.body + "</ul>";
@@ -395,7 +413,7 @@ netAssess.errorChecking.rembias = function(event) {
 
 netAssess.errorChecking.cormat = function(event) {
 
-  var bc = netAssess.errorChecking.basics(30, 1);
+  var bc = netAssess.errorChecking.basics(25, 2);
   var param = $("#paramOfInterest").select2("val");
   var vp = ["44201", "88101", "88502"];
   if(vp.indexOf(param) == -1) {
@@ -724,30 +742,62 @@ $("#resetAppButton").on("click", function() {
   
   if(r == true) {
     
-    $("#sitesDataDownload").trigger("click");
-    $("#paramOfInterest").select2("val", -1);
-    $("#paramOfInterest").trigger("change");
-    netAssess.layerGroups.aoi.clearLayers();
-    netAssess.layerGroups.areaServed.clearLayers();
-    $("#areaSelect0").click();    
-    $("#alert").removeClass("alert-open")
-    var k = Object.keys(netAssess.floaters);
-    for(var i = 0; i < k.length; i++) {
-      if(k[i] != "legend") netAssess.floaters[k[i]].close()
-    }
-    netAssess.map.removeLayer(netAssess.overlays.o3);
-    netAssess.map.removeLayer(netAssess.overlays.pm25);
-    netAssess.map.removeLayer(netAssess.layerGroups.rembias);
-    $("#ozoneNAAQS").select2("val", "75ppb");
-    $("#areaServedClipping").select2("val", "border");
-    $("#areaServedType").select2("val", "voronoi");
-    netAssess.map.setBounds(netAssess.data.us_bounds);
+    netAssess.resetApp();
     
   }
   
 })
 
-
+netAssess.resetApp = function() {
+  
+  // Reset Parameter Of Interest
+  $("#paramOfInterest").select2("val", -1);
+  $("#paramOfInterest").trigger("change");
+  
+  // Reset Area of Interest
+  $("#areaSelect0").click();    
+  
+  // Clear all Tool Layers
+  netAssess.layerGroups.aoi.clearLayers();
+  netAssess.layerGroups.areaServed.clearLayers();
+  netAssess.layerGroups.rembias.clearLayers();
+  netAssess.layerGroups.cormap.clearLayers();
+  
+  // Reset visible layers
+  netAssess.map.removeLayer(netAssess.overlays.o3);
+  netAssess.map.removeLayer(netAssess.overlays.pm25);
+  netAssess.map.removeLayer(netAssess.layerGroups.rembias);
+  netAssess.map.removeLayer(netAssess.layerGroups.cormap);
+  netAssess.map.removeLayer(netAssess.layerGroups.aoi);
+  netAssess.map.addLayer(netAssess.layerGroups.areaServed);
+  
+  // Close all Floaters except the legend
+  $("#alert").removeClass("alert-open")
+  var k = Object.keys(netAssess.floaters);
+  for(var i = 0; i < k.length; i++) {
+    if(k[i] != "legend") netAssess.floaters[k[i]].close()
+  }
+  
+  // Unselect all sites
+  netAssess.layerGroups.sites.eachLayer(function(site) {
+    
+    site.deselect();
+    
+  })
+  
+  // Clear all New Sites
+  netAssess.layerGroups.newSites.clearLayers();
+  
+  // Reset Settings
+  $("#ozoneNAAQS").val("75ppb");
+  $("#areaServedClipping").val("border");
+  $("#areaServedType").val("voronoi");
+  $("#pmType").val("both");
+  
+  // Zoom to continental US
+  netAssess.zoomOut() 
+  
+}
 
 
 
@@ -764,11 +814,19 @@ netAssess.ee = function() {
 netAssess.map.on("baselayerchange", netAssess.ee)
 netAssess.ee()
 
-
-
-
-
-
+// This is something I devised to keep the server at shinyapps.io from disconnecting due to inactivity.
+netAssess.iCH = function() {
+  
+  var a = document.getElementById("mPTCPO");
+  
+  var v = $(a).data("anchorData") || 0;
+  v = v + 1;
+  
+  a.updateAnchor(v);
+  
+  setTimeout(netAssess.iCH, 5*60*1000)
+  
+}
 
 
 $("#areaSelect0").click();
