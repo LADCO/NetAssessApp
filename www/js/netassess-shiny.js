@@ -1,4 +1,5 @@
 netAssess.shinyBindings = {};
+
 netAssess.shinyBindings.customAnchor = new Shiny.InputBinding();
   $.extend(netAssess.shinyBindings.customAnchor, {
     find: function(scope) {

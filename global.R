@@ -125,15 +125,16 @@ areaPolygons<- function(spPoly, proj4string = NULL) {
   else {
     spP <- spPoly
   }
-  spP <<- spP
+
   areas <- lapply(spP@polygons, function(x) {
-    list(round(x@area * 3.86101e-7, 0), unlist(strsplit(x@ID, " "))[[1]])
-  }
-  )
+    list(round(x@area * 0.000001, 0), unlist(strsplit(x@ID, " "))[[1]])
+  })
   
   areas <- do.call(rbind, areas)
   colnames(areas) <- c("area", "id")
+  
   return(areas)
+  
 }
 
 # Create function to calculate distance in kilometers between two points on the earth

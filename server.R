@@ -711,7 +711,7 @@ shinyServer(function(input, output, session) {
             
             # get the daily values for the monitor of interest as a vector
             daily <- merge(site.data, weighted.avg, by ="Date")
-            
+
             # calculate difference between each interpolated value and the actual
             # value for the monitor
             daily$diff <- daily$Est - daily$Value 
