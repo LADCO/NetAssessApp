@@ -1,0 +1,17 @@
+{
+    "contents" : "rm(list=ls())\nlibrary(shiny)\nlibrary(shinyBS)\n\nt = data.frame(rnorm(10))\ncolnames(t)=\"Parameter\"\napp=(list(\n  ui= (fluidPage(\n        tags$head(tags$script('C:/Users/hazem hasan1/Documents/test/R test/script.js')),\n        verbatimTextOutput(outputId = \"btnClicked\"),\n        dataTableOutput(outputId = \"testT\"),\n        hr(),\n        actionButton(inputId = \"testAc\", label = \"View Data\"),\n        hr(),\n        ########\n        bsModal(id=\"tm\", title = h3(\"title of my page\", style=\"color:green;\"), trigger = \"testAc\", ... =fluidPage(dataTableOutput(outputId = \"testTable\")\n                                                                               )\n                \n                )\n#         bsModal(id = \"modalWin\", title = \"operation Steps\", trigger = \"testAc\", size = \"large\",\n#                 dataTableOutput(outputId = \"testTable\"), \n#                 actionButton(inputId = \"testBtn\", label = \"Next (X input)\", icon = icon(name=\"glyphicon glyphicon-arrow-right\", lib = \"glyphicon\"))\n#                 )\n      )\n    ),\n  server=function(input,output){\n    output$btnClicked=renderPrint({\n      if(input$testAc){\n        return(\"true\")\n      }else{\n        return(\"false\")\n      }\n    }) \n    output$testTable = renderDataTable(t)\n    output$testT = renderDataTable(t)\n  }\n  )\n)\n\nrunApp(app, launch.browser = TRUE)",
+    "created" : 1429020442754.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "1749446278",
+    "id" : "9189B2C4",
+    "lastKnownWriteTime" : 19140693559672948,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

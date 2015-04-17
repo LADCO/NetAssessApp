@@ -1,0 +1,17 @@
+{
+    "contents" : "site_key <- dbGetQuery(db, \"SELECT Key FROM sites WHERE State_Code = '33' AND County_Code = '015' AND Site_ID = '0014'\")\n\nmonitor_key <- dbGetQuery(db, paste0(\"SELECT Key FROM monitors WHERE Site_Key = \", key, \" AND Parameter = '44201'\"))\n\nreadings <- dbGetQuery(db, paste0(\"SELECT * from readings WHERE Key = '\", monitor_key, \"'\"))\n",
+    "created" : 1428939080200.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "1458612874",
+    "id" : "21CAE27E",
+    "lastKnownWriteTime" : 27303570963497028,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
